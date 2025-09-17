@@ -5,10 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>بوابة المنصة | معهد الدراسات الإدارية والفنية</title>
 
-  <!-- خطوط سريعة وخفيفة -->
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
-
-  <!-- CSS الأساسي والفاتح فقط -->
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/index.css" />
 </head>
@@ -27,10 +24,23 @@
     <hr class="hairline" />
   </header>
 
-  <!-- المحتوى الرئيسي -->
-  <main class="container main-grid">
-    <!-- بطاقة: تسجيل الدخول -->
-    <section class="card">
+  <!-- المحتوى -->
+  <main class="container main-area">
+    <!-- شريط التبويبات -->
+    <div class="tabs" role="tablist" aria-label="التنقل بين أقسام البوابة">
+      <button class="tab is-active" role="tab" aria-selected="true" aria-controls="panel-login" id="tab-login">
+        تسجيل الدخول
+      </button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="panel-register" id="tab-register">
+        التسجيل كمعلّم
+      </button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="panel-results" id="tab-results">
+        نتائج الطلاب
+      </button>
+    </div>
+
+    <!-- لوحة: تسجيل الدخول -->
+    <section class="tab-panel card" id="panel-login" role="tabpanel" aria-labelledby="tab-login">
       <h2 class="card-title">تسجيل الدخول</h2>
       <form id="loginForm" class="form-grid" novalidate>
         <div class="form-field">
@@ -57,22 +67,29 @@
       </form>
     </section>
 
-    <!-- بطاقة: تسجيل معلّم جديد -->
-    <section class="card">
+    <!-- لوحة: التسجيل كمعلّم -->
+    <section class="tab-panel card is-hidden" id="panel-register" role="tabpanel" aria-labelledby="tab-register" hidden>
       <h2 class="card-title">معلّم جديد؟</h2>
       <p class="card-desc">
         سجّل بياناتك وسيتم تفعيل الحساب من الإدارة. ستتلقى إشعارًا فور الموافقة.
       </p>
-      <button id="goRegisterBtn" class="btn btn-ghost">التسجيل كمعلّم</button>
+      <!-- لو حابب نخلي التسجيل داخل نفس الصفحة لاحقًا نضيف الفورم هنا -->
+      <button id="goRegisterBtn" class="btn btn-ghost">بدء التسجيل</button>
+      <div class="msg info" style="margin-top:12px">
+        سيتم نقلك إلى صفحة التسجيل المخصّصة لإدخال بياناتك.
+      </div>
     </section>
 
-    <!-- بطاقة: نتائج الطلاب -->
-    <section class="card">
+    <!-- لوحة: نتائج الطلاب -->
+    <section class="tab-panel card is-hidden" id="panel-results" role="tabpanel" aria-labelledby="tab-results" hidden>
       <h2 class="card-title">نتائج الطلاب</h2>
       <p class="card-desc">
         أدخل رقم الجلوس لعرض النتيجة ومتابعة المستوى الدراسي. لا تحتاج إلى إنشاء حساب.
       </p>
       <button id="goResultsBtn" class="btn btn-outline">عرض النتائج</button>
+      <div class="msg info" style="margin-top:12px">
+        سيتم نقلك إلى صفحة النتائج لإدخال رقم الجلوس.
+      </div>
     </section>
   </main>
 
@@ -84,7 +101,7 @@
     </div>
   </footer>
 
-  <!-- ملفات الجافاسكربت (Modules) -->
+  <!-- JS -->
   <script type="module" src="js/index.js"></script>
 </body>
 </html>
