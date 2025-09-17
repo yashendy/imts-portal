@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>لوحة الطالب | معهد الدراسات الإدارية والفنية</title>
+  <link rel="stylesheet" href="css/student.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="brand">
+      <img src="assets/logo.png" alt="شعار المعهد" class="logo"/>
+      <div>
+        <h1>معهد الدراسات الإدارية والفنية</h1>
+        <p class="muted">بوابة متابعة النتائج الشهرية</p>
+      </div>
+    </div>
+    <div class="seat-search">
+      <form id="seatForm">
+        <input type="text" id="seatInput" placeholder="أدخل رقم الجلوس (٧ أرقام)" maxlength="7" inputmode="numeric" />
+        <button type="submit">عرض</button>
+      </form>
+      <button id="printBtn" class="secondary">طباعة</button>
+      <div class="export-group">
+        <button id="exportCsvBtn" class="secondary">تصدير CSV</button>
+        <button id="exportPdfBtn" class="secondary">تصدير PDF</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- بطاقة بيانات الطالب -->
+    <section class="card" id="studentInfo">
+      <div class="row">
+        <div><strong>الاسم:</strong> <span id="s_name">-</span></div>
+        <div><strong>الصف/الشعبة:</strong> <span id="s_class">-</span></div>
+      </div>
+      <div class="row">
+        <div><strong>رقم الجلوس:</strong> <span id="s_seat">-</span></div>
+        <div><strong>العام الدراسي:</strong> <span id="s_year">-</span></div>
+      </div>
+      <div id="guardianNote" class="note is-hidden">الطالب يحتاج دعمًا من ولي الأمر.</div>
+    </section>
+
+    <!-- أشهر الدراسة Tabs -->
+    <section class="card" id="monthsCard">
+      <h2>النتائج الشهرية</h2>
+      <div id="monthsTabs" class="tabs"></div>
+      <div id="monthsPanels"></div>
+    </section>
+
+    <!-- المساعد الذكي لولي الأمر -->
+    <section class="card" id="coachCard">
+      <div class="coach-head">
+        <h2>مساعد وليّ الأمر</h2>
+        <div class="coach-toggles">
+          <!-- قابلية توسيع لاحقًا لتفعيل نموذج سحابي -->
+          <label class="toggle">
+            <input type="checkbox" id="cloudToggle" disabled />
+            <span>الذكاء السحابي (قريبًا)</span>
+          </label>
+        </div>
+      </div>
+
+      <div id="coachSummary" class="coach-summary muted">
+        سيتم توليد ملخص ذكي بعد تحميل النتائج…
+      </div>
+
+      <div class="coach-ask">
+        <div class="chips">
+          <button class="chip" data-q="اشرح تقدير هذا الشهر وكيف أرفع المستوى؟">اشرح التقدير</button>
+          <button class="chip" data-q="خطة أسبوعية مختصرة لتحسين الواجبات والمشاركة.">خطة أسبوعية</button>
+          <button class="chip" data-q="نصائح لتحسين السلوك داخل الفصل وخارجه.">تحسين السلوك</button>
+        </div>
+        <form id="coachForm" class="coach-form" autocomplete="off">
+          <input type="text" id="coachQ" placeholder="اسأل عن مستوى ابنك… (مثال: كيف نعالج ضعف الاختبار؟)"/>
+          <button type="submit" class="ask-btn">إرسال</button>
+        </form>
+        <div id="coachAnswer" class="coach-answer"></div>
+      </div>
+    </section>
+
+    <div id="statusArea" class="status muted"></div>
+  </main>
+
+  <script type="module" src="js/student.js"></script>
+</body>
+</html>
