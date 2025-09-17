@@ -1,136 +1,100 @@
-// js/index.js
 import { auth, db } from "./firebase.js";
 import {
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+  signOut
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
 import {
-  doc, getDoc
+  doc, setDoc, getDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-/* عناصر التبويبات */
-const tabs = Array.from(document.querySelectorAll(".tab"));
+// 🔹 إدارة التبويبات
+const tabs = document.querySelectorAll(".tab");
 const panels = {
-  login:    document.getElementById("panel-login"),
+  login: document.getElementById("panel-login"),
   register: document.getElementById("panel-register"),
-  results:  document.getElementById("panel-results"),
+  admin: document.getElementById("panel-admin"),
+  results: document.getElementById("panel-results")
 };
 
-function activateTab(name){
-  // تفعيل زر التبويب
-  tabs.forEach(btn=>{
-    const isActive = btn.id === `tab-${name}`;
-    btn.classList.toggle("is-active", isActive);
-    btn.setAttribute("aria-selected", isActive ? "true" : "false");
-    btn.setAttribute("tabindex", isActive ? "0" : "-1");
+function activateTab(name) {
+  tabs.forEach(tab => {
+    const isActive = tab.id === `tab-${name}`;
+    tab.classList.toggle("is-active", isActive);
   });
 
-  // إظهار/إخفاء اللوحات
-  Object.entries(panels).forEach(([key, el])=>{
-    const show = key === name;
-    el.classList.toggle("is-hidden", !show);
-    el.hidden = !show;
+  Object.keys(panels).forEach(key => {
+    panels[key].classList.toggle("is-hidden", key !== name);
   });
-
-  // تحديث العنوان (اختياري)
-  // document.title = `بوابة المنصة | ${name === 'login' ? 'تسجيل الدخول' : name === 'register' ? 'التسجيل' : 'نتائج الطلاب'}`
 }
 
-// تفعيل بالنقر
-tabs.forEach(btn=>{
-  btn.addEventListener("click", ()=>{
-    const name = btn.id.replace("tab-", "");
+tabs.forEach(tab => {
+  tab.addEventListener("click", () => {
+    const name = tab.id.replace("tab-", "");
     activateTab(name);
-    history.replaceState(null, "", `#${name}`);
   });
 });
 
-// دعم الروابط #hash
-window.addEventListener("DOMContentLoaded", ()=>{
-  const hash = (location.hash || "#login").replace("#","");
-  const allowed = ["login","register","results"];
-  activateTab(allowed.includes(hash) ? hash : "login");
-});
-
-/* عناصر نموذج الدخول */
-const loginForm      = document.getElementById("loginForm");
-const emailInput     = document.getElementById("loginEmail");
-const passInput      = document.getElementById("loginPassword");
-const loginBtn       = document.getElementById("loginBtn");
-const loginMsg       = document.getElementById("loginMsg");
-const goRegisterBtn  = document.getElementById("goRegisterBtn");
-const goResultsBtn   = document.getElementById("goResultsBtn");
-const rememberMe     = document.getElementById("rememberMe");
-
-goRegisterBtn?.addEventListener("click", () => {
-  window.location.href = "teacher-register.html";
-});
-
-goResultsBtn?.addEventListener("click", () => {
-  window.location.href = "results.html";
-});
-
-function showMsg(type, text) {
-  loginMsg.className = "msg " + (type || "info");
-  loginMsg.textContent = text || "";
-}
-function setLoading(isLoading) {
-  loginBtn.disabled = isLoading;
-  loginBtn.textContent = isLoading ? "جاري المعالجة..." : "دخول";
-}
+// 🔹 تسجيل الدخول
+const loginForm = document.getElementById("loginForm");
+const loginMsg = document.getElementById("loginMsg");
 
 loginForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
-  showMsg("info", "");
-  const email = emailInput.value.trim();
-  const pass  = passInput.value.trim();
+  const email = loginForm.loginEmail.value.trim();
+  const password = loginForm.loginPassword.value.trim();
 
-  if (!email || !pass) {
-    showMsg("err", "من فضلك أدخل البريد الإلكتروني وكلمة المرور.");
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    const snap = await getDoc(doc(db, "users", cred.user.uid));
+    if (snap.exists()) {
+      const role = snap.data().role;
+      if (role === "admin") window.location.href = "admin.html";
+      else if (role === "teacher") window.location.href = "teacher.html";
+      else loginMsg.textContent = "لا تملك صلاحية الدخول.";
+    } else {
+      loginMsg.textContent = "الحساب غير مرفق ببيانات.";
+    }
+  } catch (err) {
+    loginMsg.textContent = "خطأ في تسجيل الدخول.";
+  }
+});
+
+// 🔹 تسجيل كأدمن (pending)
+const adminForm = document.getElementById("adminRegisterForm");
+const adminMsg = document.getElementById("adminRegisterMsg");
+
+adminForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const fullName = adminForm.adminFullName.value.trim();
+  const email = adminForm.adminEmail.value.trim();
+  const phone = adminForm.adminPhone.value.trim();
+  const pass1 = adminForm.adminPassword.value;
+  const pass2 = adminForm.adminPassword2.value;
+
+  if (pass1 !== pass2) {
+    adminMsg.textContent = "كلمتا المرور غير متطابقتين.";
     return;
   }
 
   try {
-    setLoading(true);
-
-    // تسجيل الدخول
-    const cred = await signInWithEmailAndPassword(auth, email, pass);
-
-    // قراءة بيانات الدور
-    const userRef = doc(db, "users", cred.user.uid);
-    const snap    = await getDoc(userRef);
-
-    if (!snap.exists()) {
-      showMsg("err", "لا توجد بيانات مرفقة بحسابك. راجع الإدارة.");
-      setLoading(false);
-      return;
-    }
-
-    const u = snap.data();
-
-    if (u.status === "pending" || u.isActive === false) {
-      showMsg("info", "حسابك قيد المراجعة من الإدارة. سيتم إشعارك عند التفعيل.");
-      setLoading(false);
-      return;
-    }
-
-    if (u.role === "admin") {
-      showMsg("ok", "مرحبًا بك! تحويل إلى لوحة الإدارة...");
-      window.location.href = "admin.html";
-    } else if (u.role === "teacher") {
-      showMsg("ok", "مرحبًا بك! تحويل إلى لوحة المعلم...");
-      window.location.href = "teacher.html";
-    } else {
-      showMsg("err", "لا تملك صلاحية الدخول. راجع الإدارة.");
-    }
-
+    const cred = await createUserWithEmailAndPassword(auth, email, pass1);
+    await updateProfile(cred.user, { displayName: fullName });
+    await setDoc(doc(db, "users", cred.user.uid), {
+      uid: cred.user.uid,
+      fullName,
+      email,
+      phone,
+      role: "admin",
+      status: "pending",
+      isActive: false,
+      createdAt: serverTimestamp()
+    });
+    await signOut(auth);
+    adminMsg.textContent = "تم إرسال طلب التسجيل. في انتظار موافقة الإدارة.";
+    adminForm.reset();
   } catch (err) {
-    let message = "تعذر تسجيل الدخول. تأكد من البيانات.";
-    if (err.code === "auth/invalid-email")        message = "البريد الإلكتروني غير صالح.";
-    if (err.code === "auth/user-not-found")       message = "المستخدم غير موجود.";
-    if (err.code === "auth/wrong-password")       message = "كلمة المرور غير صحيحة.";
-    if (err.code === "auth/too-many-requests")    message = "محاولات كثيرة. حاول لاحقًا.";
-    showMsg("err", message);
-  } finally {
-    setLoading(false);
+    adminMsg.textContent = "تعذر التسجيل: " + err.message;
   }
 });
