@@ -1,32 +1,78 @@
-/* تخصيصات index + التبويبات */
-.main-area{
-  padding: 26px 0 36px;
+body {
+  font-family: "Tahoma", sans-serif;
+  background: #f9f9f9;
+  color: #333;
+  margin: 0;
+  padding: 0;
 }
 
-/* شريط التبويبات */
-.tabs{
-  display: flex; gap: 8px; flex-wrap: wrap;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 6px;
-  box-shadow: var(--shadow);
-  margin-bottom: 14px;
+.header {
+  text-align: center;
+  padding: 20px;
+  background: #e6f0ff;
 }
 
-.tab{
-  appearance: none; border: 1px solid var(--border);
-  background: #fff; color: var(--muted);
-  border-radius: 12px; padding: 10px 14px; cursor: pointer;
-  font-weight: 600; transition: .15s ease;
-}
-.tab:hover{ box-shadow: var(--shadow); }
-.tab.is-active{
-  color: var(--brand);
-  border-color: var(--brand);
-  background: var(--brand-ghost);
+.logo {
+  max-height: 80px;
 }
 
-/* لوحات التبويبات */
-.tab-panel{ margin-top: 8px; }
-.is-hidden{ display: none !important; }
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px;
+}
+
+.tab {
+  padding: 10px 20px;
+  background: #f1f5ff;
+  border: 1px solid #d0d7e3;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.tab.is-active {
+  background: #cfe0ff;
+  font-weight: bold;
+}
+
+.tab-panel {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.05);
+}
+
+.tab-panel.is-hidden {
+  display: none;
+}
+
+form {
+  display: grid;
+  gap: 10px;
+}
+
+input, button {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+button {
+  background: #4a90e2;
+  color: white;
+  cursor: pointer;
+  border: none;
+}
+
+button:hover {
+  background: #357ab8;
+}
+
+.msg {
+  margin-top: 10px;
+  font-size: 14px;
+}
