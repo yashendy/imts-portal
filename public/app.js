@@ -1,8 +1,8 @@
-// Import the functions you need from the SDKs
+// استدعاء Firebase SDK
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 
-// إعدادات مشروعك
+// بيانات مشروعك من Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyAk3r0OSq3NwvBjHpsNlGYb-dJWUmA9Azc",
   authDomain: "imts-portal.firebaseapp.com",
@@ -17,4 +17,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 
-console.log("✅ Firebase تم تهيئته بنجاح", app);
+console.log("✅ Firebase تم تهيئته بنجاح");
+
+// ⏳ مؤقتًا: مجرد تجربة زر البحث
+document.getElementById("searchBtn").addEventListener("click", () => {
+  const seatNumber = document.getElementById("seatNumber").value;
+  document.getElementById("result").innerText = `رقم الجلوس المدخل: ${seatNumber}`;
+});
