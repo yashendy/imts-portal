@@ -29,6 +29,8 @@ body {
   border: 1px solid #d0d7e3;
   cursor: pointer;
   border-radius: 6px;
+  color: #000;
+
 }
 
 .tab.is-active {
@@ -43,6 +45,8 @@ body {
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 0 8px rgba(0,0,0,0.05);
+  color: #000;
+
 }
 
 .tab-panel.is-hidden {
