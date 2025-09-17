@@ -1,35 +1,317 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>بوابة نتائج الطلاب - معهد الدراسات الإدارية والفنية</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>تسجيل المعلّمين | معهد الدراسات الإدارية والفنية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --brand:#0d47a1;      /* الأزرق الرئيسي */
+      --brand-700:#0b3c8b;
+      --muted:#6b7280;
+      --success:#0f9d58;
+      --danger:#d93025;
+      --bg:#f7f8fa;
+      --card:#ffffff;
+      --border:#e5e7eb;
+      --radius:16px;
+      --shadow:0 10px 30px rgba(0,0,0,.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:"Cairo",system-ui,-apple-system,Segoe UI,Roboto;
+      background:var(--bg); color:#111827;
+    }
+    header{
+      background:var(--brand); color:#fff; padding:28px 16px;
+      text-align:center; box-shadow:0 2px 10px rgba(0,0,0,.08);
+    }
+    header h1{margin:.25rem 0;font-size:clamp(22px,3vw,32px);font-weight:800}
+    header p{margin:0;opacity:.9}
+
+    .wrap{
+      max-width:980px;margin:36px auto;padding:0 16px;
+      display:grid;grid-template-columns:1fr;gap:20px;
+    }
+    .card{
+      background:var(--card); border:1px solid var(--border);
+      border-radius:var(--radius); box-shadow:var(--shadow); padding:22px;
+    }
+    .card h2{margin:0 0 14px;font-size:20px}
+    .hint{color:var(--muted);font-size:.95rem}
+
+    form .grid{
+      display:grid; gap:14px;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 720px){
+      form .grid-2{ grid-template-columns:1fr 1fr; }
+      form .grid-3{ grid-template-columns:1fr 1fr 1fr; }
+    }
+    label{display:block;font-weight:600;margin-bottom:6px}
+    input, select, textarea{
+      width:100%; padding:12px 14px; border:1px solid var(--border);
+      border-radius:10px; background:#fff; font-size:16px;
+      outline:none; transition:border-color .15s ease;
+    }
+    input:focus, select:focus, textarea:focus{border-color:var(--brand)}
+    .row{display:flex;align-items:center;gap:10px}
+    .row input[type="checkbox"]{width:18px;height:18px}
+    .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px}
+    button{
+      appearance:none; border:0; cursor:pointer;
+      padding:12px 18px; border-radius:10px; font-weight:700;
+      background:var(--brand); color:#fff;
+      transition:transform .06s ease, background .2s ease;
+    }
+    button:hover{background:var(--brand-700)}
+    button:active{transform:translateY(1px)}
+    .btn-secondary{background:#e5e7eb;color:#111827}
+    .msg{
+      display:none; border-radius:10px; padding:12px 14px; font-weight:600;
+      border:1px solid var(--border); background:#fff;
+    }
+    .msg.show{display:block}
+    .msg.success{border-color:#b7e3cd;background:#e9f7ef;color:var(--success)}
+    .msg.error{border-color:#f3b7b2;background:#fdecea;color:var(--danger)}
+    footer{
+      margin:36px 0 18px; text-align:center; color:var(--muted)
+    }
+    .brand-badge{
+      display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap
+    }
+    .brand-badge small{opacity:.9}
+  </style>
 </head>
 <body>
+
   <header>
-    <h1>بوابة نتائج الطلاب</h1>
+    <h1>بوابة تسجيل المعلّمين</h1>
     <p>معهد الدراسات الإدارية والفنية</p>
   </header>
 
-  <main>
-    <section id="search">
-      <label for="seatNumber">أدخل رقم الجلوس:</label>
-      <input type="text" id="seatNumber" maxlength="7" placeholder="مثال: 2512016">
-      <button id="searchBtn">عرض النتيجة</button>
+  <main class="wrap">
+    <section class="card">
+      <h2>تسجيل معلّم جديد</h2>
+      <p class="hint">بعد إتمام التسجيل سيتم تحويل حسابك لحالة <b>بانتظار التفعيل</b>، وسيقوم مسؤول النظام بمراجعته وتفعيله.</p>
+
+      <div id="alert" class="msg" aria-live="polite"></div>
+
+      <form id="teacherRegisterForm" autocomplete="on" novalidate>
+        <div class="grid grid-2">
+          <div>
+            <label for="fullName">الاسم الكامل</label>
+            <input type="text" id="fullName" name="fullName" required minlength="4" placeholder="اكتب الاسم الثلاثي" />
+          </div>
+          <div>
+            <label for="email">البريد الإلكتروني</label>
+            <input type="email" id="email" name="email" required placeholder="example@email.com" />
+          </div>
+        </div>
+
+        <div class="grid grid-2">
+          <div>
+            <label for="phone">رقم الهاتف (اختياري)</label>
+            <input type="tel" id="phone" name="phone" inputmode="tel" placeholder="مثال: 9665xxxxxxxx" />
+          </div>
+          <div>
+            <label for="nationalId">الرقم المدني / القومي (اختياري)</label>
+            <input type="text" id="nationalId" name="nationalId" placeholder="إن وجد" />
+          </div>
+        </div>
+
+        <div class="grid grid-3">
+          <div>
+            <label for="stage">المرحلة</label>
+            <select id="stage" name="stage" required>
+              <option value="">اختر</option>
+              <option value="Primary">ابتدائية</option>
+              <option value="Preparatory">إعدادية</option>
+              <option value="Secondary">ثانوية</option>
+            </select>
+          </div>
+          <div>
+            <label for="track">المسار</label>
+            <select id="track" name="track" required>
+              <option value="">اختر</option>
+              <option value="Arabic">عربي</option>
+              <option value="Languages">لغات</option>
+            </select>
+          </div>
+          <div>
+            <label for="mainSubject">المادة الأساسية</label>
+            <input type="text" id="mainSubject" name="mainSubject" placeholder="مثال: اللغة العربية" required />
+          </div>
+        </div>
+
+        <div class="grid">
+          <div>
+            <label for="classes">الفصول التي تدرّسها (اختياري)</label>
+            <input type="text" id="classes" name="classes" placeholder="اكتب أكواد الفصول مفصولة بفواصل، مثال: P1A-2025,P1B-2025" />
+          </div>
+        </div>
+
+        <div class="grid grid-2">
+          <div>
+            <label for="password">كلمة المرور</label>
+            <input type="password" id="password" name="password" required minlength="6" placeholder="••••••" />
+          </div>
+          <div>
+            <label for="confirmPassword">تأكيد كلمة المرور</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6" placeholder="••••••" />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:8px">
+          <input type="checkbox" id="agree" required />
+          <label for="agree" style="margin:0">أقرّ أنّ جميع البيانات صحيحة وأوافق على سياسة الخصوصية.</label>
+        </div>
+
+        <div class="actions">
+          <button type="submit" id="btnSubmit">إنشاء حساب المعلّم</button>
+          <button type="reset" class="btn-secondary">تفريغ الحقول</button>
+        </div>
+      </form>
     </section>
 
-    <section id="result">
-      <!-- النتيجة هتظهر هنا -->
+    <section class="card">
+      <h2>ماذا يحدث بعد التسجيل؟</h2>
+      <ul class="hint" style="margin:0;padding-right:18px;line-height:1.9">
+        <li>سيظهر حسابك في لوحة تحكّم الإدارة بحالة <b>بانتظار التفعيل</b>.</li>
+        <li>بعد موافقة الإدارة سيتم تفعيل حسابك تلقائيًا وستتمكّن من الدخول لصفحة المعلّم.</li>
+        <li>في حال وجود خطأ بالبيانات، قد يتم رفض الطلب وسيصلك إشعار عبر البريد.</li>
+      </ul>
     </section>
   </main>
 
   <footer>
-    <p>© 2025 معهد الدراسات الإدارية والفنية</p>
+    <div class="brand-badge">
+      <small>© 2025 معهد الدراسات الإدارية والفنية</small>
+    </div>
   </footer>
 
-  <!-- ربط ملف JS -->
-  <script type="module" src="app.js"></script>
+  <!-- Firebase + المنطق -->
+  <script type="module">
+    // ===== Firebase SDKs (v10 modular) =====
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
+    // --- إعدادات مشروعك (كما زوّدتني بها) ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyAk3r0OSq3NwvBjHpsNlGYb-dJWUmA9Azc",
+      authDomain: "imts-portal.firebaseapp.com",
+      projectId: "imts-portal",
+      storageBucket: "imts-portal.firebasestorage.app",
+      messagingSenderId: "819773792022",
+      appId: "1:819773792022:web:58d92078d752959b5dba37",
+      measurementId: "G-P9JK5KMDWL"
+    };
+
+    // --- التهيئة ---
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
+
+    // عناصر الواجهة
+    const form       = document.getElementById("teacherRegisterForm");
+    const alertBox   = document.getElementById("alert");
+    const btnSubmit  = document.getElementById("btnSubmit");
+
+    function showMsg(type, text){
+      alertBox.className = "msg show " + (type === "error" ? "error" : "success");
+      alertBox.textContent = text;
+      alertBox.focus?.();
+    }
+    function clearMsg(){ alertBox.className="msg"; alertBox.textContent=""; }
+
+    // تحققات بسيطة
+    function validateData(d){
+      if(!d.fullName || d.fullName.trim().length < 4) return "الاسم الكامل مطلوب (على الأقل 4 أحرف).";
+      if(!d.email) return "البريد الإلكتروني مطلوب.";
+      if(!d.mainSubject) return "اسم المادة الأساسية مطلوب.";
+      if(!d.stage) return "المرحلة مطلوبة.";
+      if(!d.track) return "المسار مطلوب.";
+      if(!d.password || d.password.length < 6) return "كلمة المرور يجب أن تكون 6 أحرف على الأقل.";
+      if(d.password !== d.confirmPassword) return "كلمتا المرور غير متطابقتين.";
+      if(!d.agree) return "يجب الموافقة على سياسة الخصوصية.";
+      return "";
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearMsg();
+
+      // جلب القيم
+      const data = {
+        fullName: form.fullName.value.trim(),
+        email: form.email.value.trim().toLowerCase(),
+        phone: form.phone.value.trim(),
+        nationalId: form.nationalId.value.trim(),
+        stage: form.stage.value,
+        track: form.track.value,
+        mainSubject: form.mainSubject.value.trim(),
+        classes: form.classes.value.split(",").map(s => s.trim()).filter(Boolean),
+        password: form.password.value,
+        confirmPassword: form.confirmPassword.value,
+        agree: form.agree.checked
+      };
+
+      // تحققات
+      const v = validateData(data);
+      if(v){ showMsg("error", v); return; }
+
+      // تعطيل الزر أثناء الإرسال
+      btnSubmit.disabled = true; btnSubmit.textContent = "جاري الإنشاء...";
+
+      try{
+        // 1) إنشاء المستخدم في Auth
+        const cred = await createUserWithEmailAndPassword(auth, data.email, data.password);
+
+        // 2) إنشاء مستند المستخدم في Firestore
+        const userRef = doc(db, "users", cred.user.uid);
+        await setDoc(userRef, {
+          uid: cred.user.uid,
+          email: data.email,
+          fullName: data.fullName,
+          phone: data.phone || null,
+          nationalId: data.nationalId || null,
+          role: "teacher",           // الدور المُستهدف
+          status: "pending",         // في انتظار التفعيل
+          isActive: false,           // غير مُفعل حتى موافقة الإدارة
+          stage: data.stage,
+          track: data.track,
+          mainSubject: data.mainSubject,
+          classes: data.classes,     // أكواد الفصول المقترحة
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+
+        // 3) (اختياري) إرسال تفعيل بريد إلكتروني
+        try{ await sendEmailVerification(cred.user); }catch{}
+
+        // 4) عرض رسالة نجاح وتسجيل خروج
+        showMsg("success", "تم إنشاء الحساب بنجاح. حسابك الآن بانتظار التفعيل من الإدارة. يمكنك متابعة بريدك، وسيتم إشعارك عند التفعيل.");
+        form.reset();
+
+        // تسجيل خروج احترازي
+        await signOut(auth);
+
+      }catch(err){
+        console.error(err);
+        // رسائل أخطاء ودّية
+        let message = "حدث خطأ غير متوقع، حاول لاحقًا.";
+        if(err.code === "auth/email-already-in-use") message = "هذا البريد مسجّل بالفعل.";
+        if(err.code === "auth/invalid-email") message = "صيغة البريد الإلكتروني غير صحيحة.";
+        if(err.code === "auth/weak-password") message = "كلمة المرور ضعيفة (6 أحرف على الأقل).";
+        showMsg("error", message);
+      }finally{
+        btnSubmit.disabled = false; btnSubmit.textContent = "إنشاء حساب المعلّم";
+      }
+    });
+  </script>
 </body>
 </html>
-
