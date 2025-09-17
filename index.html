@@ -1,70 +1,117 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>لتدريس المنهج المصري | معهد الدراسات الإدارية والفنية</title>
-  <link rel="stylesheet" href="css/index.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>منصة معد الدراسات الإدارية والفنية|لتدريس المنهج المصري</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="icon" href="./assets/logo.png" />
 </head>
 <body>
   <header class="header">
-    <img src="assets/logo.png" alt="شعار المعهد" class="logo" />
-    <h1>معهد الدراسات الإدارية والفنية</h1>
+    <img src="./assets/logo.png" alt="logo" class="logo" />
+    <div class="title">
+      <h1>معهد الدراسات الإدارية والفنية</h1>
+      <p>بوابة المنصة</p>
+    </div>
   </header>
 
-  <!-- التبويبات -->
-  <div class="tabs">
-    <button class="tab is-active" id="tab-login">تسجيل الدخول</button>
-    <button class="tab" id="tab-register">تسجيل كمعلم</button>
-    <button class="tab" id="tab-admin">تسجيل كأدمن</button>
-    <button class="tab" id="tab-results">نتائج الطلاب</button>
-  </div>
-
-  <!-- لوحات التبويبات -->
-  <main>
-    <!-- تسجيل الدخول -->
-    <section class="tab-panel" id="panel-login">
-      <h2>تسجيل الدخول</h2>
-      <form id="loginForm">
-        <input type="email" id="loginEmail" placeholder="البريد الإلكتروني" required />
-        <input type="password" id="loginPassword" placeholder="كلمة المرور" required />
-        <button id="loginBtn" type="submit">دخول</button>
-        <div id="loginMsg" class="msg"></div>
-      </form>
-    </section>
-
-    <!-- تسجيل كمعلم -->
-    <section class="tab-panel is-hidden" id="panel-register">
-      <h2>التسجيل كمعلم</h2>
-      <p>سيتم مراجعة بياناتك من قبل الإدارة قبل التفعيل.</p>
-      <button id="goRegisterBtn">بدء التسجيل</button>
-    </section>
-
-    <!-- تسجيل كأدمن -->
-    <section class="tab-panel is-hidden" id="panel-admin">
-      <h2>التسجيل كأدمن</h2>
-      <form id="adminRegisterForm">
-        <input type="text" id="adminFullName" placeholder="الاسم الكامل" required />
-        <input type="email" id="adminEmail" placeholder="البريد الإلكتروني" required />
-        <input type="tel" id="adminPhone" placeholder="رقم الهاتف (اختياري)" />
-        <input type="password" id="adminPassword" placeholder="كلمة المرور" required />
-        <input type="password" id="adminPassword2" placeholder="تأكيد كلمة المرور" required />
-        <button id="adminRegisterBtn" type="submit">إرسال طلب التسجيل</button>
-        <div id="adminRegisterMsg" class="msg"></div>
-      </form>
-    </section>
+  <main class="container">
+    <!-- تبويبات -->
+    <div class="tabs">
+      <button data-tab="tab-student" class="tab active">نتائج الطلاب</button>
+      <button data-tab="tab-teacher" class="tab">تسجيل معلّم</button>
+      <button data-tab="tab-admin" class="tab">تسجيل أدمن</button>
+      <button data-tab="tab-login" class="tab">تسجيل الدخول</button>
+    </div>
 
     <!-- نتائج الطلاب -->
-    <section class="tab-panel is-hidden" id="panel-results">
-      <h2>الاستعلام عن النتيجة</h2>
-      <form id="resultsForm">
-        <input type="text" id="seatNumber" placeholder="أدخل رقم الجلوس" required />
-        <button type="submit">عرض النتيجة</button>
-        <div id="resultsMsg" class="msg"></div>
-      </form>
+    <section id="tab-student" class="tab-panel active">
+      <div class="card">
+        <label class="label">رقم الجلوس</label>
+        <div class="row">
+          <input id="seatInput" class="input" placeholder="أدخل رقم الجلوس" />
+          <button id="goStudent" class="btn">عرض النتيجة</button>
+        </div>
+        <p class="hint">سيتم فتح صفحة عرض الطالب لرقم الجلوس المدخل</p>
+      </div>
+    </section>
+
+    <!-- تسجيل معلّم -->
+    <section id="tab-teacher" class="tab-panel">
+      <div class="card">
+        <h3>تسجيل معلّم جديد</h3>
+        <div class="grid-2">
+          <div>
+            <label class="label">الاسم الكامل</label>
+            <input id="t-name" class="input" placeholder="الاسم" />
+          </div>
+          <div>
+            <label class="label">البريد</label>
+            <input id="t-email" class="input" placeholder="email@example.com" />
+          </div>
+          <div>
+            <label class="label">كلمة المرور</label>
+            <input id="t-pass" class="input" type="password" />
+          </div>
+          <div>
+            <label class="label">التخصص (اختياري)</label>
+            <input id="t-major" class="input" />
+          </div>
+        </div>
+        <button id="t-register" class="btn">تسجيل</button>
+        <p id="t-status" class="status"></p>
+      </div>
+    </section>
+
+    <!-- تسجيل أدمن -->
+    <section id="tab-admin" class="tab-panel">
+      <div class="card">
+        <h3>طلب إنشاء حساب أدمن</h3>
+        <div class="grid-2">
+          <div>
+            <label class="label">الاسم الكامل</label>
+            <input id="a-name" class="input" />
+          </div>
+          <div>
+            <label class="label">البريد</label>
+            <input id="a-email" class="input" placeholder="email@example.com" />
+          </div>
+          <div>
+            <label class="label">كلمة المرور</label>
+            <input id="a-pass" class="input" type="password" />
+          </div>
+          <div>
+            <label class="label">رمز التحقق (يعطى داخلياً)</label>
+            <input id="a-code" class="input" placeholder="رمز داخلي" />
+          </div>
+        </div>
+        <button id="a-register" class="btn">إرسال الطلب</button>
+        <p id="a-status" class="status"></p>
+      </div>
+    </section>
+
+    <!-- تسجيل الدخول -->
+    <section id="tab-login" class="tab-panel">
+      <div class="card">
+        <h3>تسجيل الدخول</h3>
+        <div class="grid-2">
+          <div>
+            <label class="label">البريد</label>
+            <input id="l-email" class="input" placeholder="email@example.com" />
+          </div>
+          <div>
+            <label class="label">كلمة المرور</label>
+            <input id="l-pass" class="input" type="password" />
+          </div>
+        </div>
+        <button id="l-login" class="btn">دخول</button>
+        <p id="l-status" class="status"></p>
+      </div>
     </section>
   </main>
 
-  <script type="module" src="js/index.js"></script>
+  <!-- Firebase + App -->
+  <script type="module" src="./js/app.js"></script>
 </body>
 </html>
