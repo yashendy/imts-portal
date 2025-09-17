@@ -1,0 +1,3 @@
+/* تخصيصات بسيطة لواجهة index */
+main .card .btn{ min-width: 160px; }
+main .card .btn + .msg{ margin-top: 10px; }
