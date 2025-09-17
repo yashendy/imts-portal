@@ -7,7 +7,51 @@ import {
   doc, getDoc
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-// عناصر DOM
+/* عناصر التبويبات */
+const tabs = Array.from(document.querySelectorAll(".tab"));
+const panels = {
+  login:    document.getElementById("panel-login"),
+  register: document.getElementById("panel-register"),
+  results:  document.getElementById("panel-results"),
+};
+
+function activateTab(name){
+  // تفعيل زر التبويب
+  tabs.forEach(btn=>{
+    const isActive = btn.id === `tab-${name}`;
+    btn.classList.toggle("is-active", isActive);
+    btn.setAttribute("aria-selected", isActive ? "true" : "false");
+    btn.setAttribute("tabindex", isActive ? "0" : "-1");
+  });
+
+  // إظهار/إخفاء اللوحات
+  Object.entries(panels).forEach(([key, el])=>{
+    const show = key === name;
+    el.classList.toggle("is-hidden", !show);
+    el.hidden = !show;
+  });
+
+  // تحديث العنوان (اختياري)
+  // document.title = `بوابة المنصة | ${name === 'login' ? 'تسجيل الدخول' : name === 'register' ? 'التسجيل' : 'نتائج الطلاب'}`
+}
+
+// تفعيل بالنقر
+tabs.forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const name = btn.id.replace("tab-", "");
+    activateTab(name);
+    history.replaceState(null, "", `#${name}`);
+  });
+});
+
+// دعم الروابط #hash
+window.addEventListener("DOMContentLoaded", ()=>{
+  const hash = (location.hash || "#login").replace("#","");
+  const allowed = ["login","register","results"];
+  activateTab(allowed.includes(hash) ? hash : "login");
+});
+
+/* عناصر نموذج الدخول */
 const loginForm      = document.getElementById("loginForm");
 const emailInput     = document.getElementById("loginEmail");
 const passInput      = document.getElementById("loginPassword");
@@ -17,7 +61,6 @@ const goRegisterBtn  = document.getElementById("goRegisterBtn");
 const goResultsBtn   = document.getElementById("goResultsBtn");
 const rememberMe     = document.getElementById("rememberMe");
 
-// تنقّل للأزرار الثابتة
 goRegisterBtn?.addEventListener("click", () => {
   window.location.href = "teacher-register.html";
 });
@@ -26,12 +69,10 @@ goResultsBtn?.addEventListener("click", () => {
   window.location.href = "results.html";
 });
 
-// وظائف صغيرة للمساعدة
 function showMsg(type, text) {
   loginMsg.className = "msg " + (type || "info");
   loginMsg.textContent = text || "";
 }
-
 function setLoading(isLoading) {
   loginBtn.disabled = isLoading;
   loginBtn.textContent = isLoading ? "جاري المعالجة..." : "دخول";
@@ -54,7 +95,7 @@ loginForm?.addEventListener("submit", async (e) => {
     // تسجيل الدخول
     const cred = await signInWithEmailAndPassword(auth, email, pass);
 
-    // جلب مستند المستخدم لمعرفة الدور والحالة
+    // قراءة بيانات الدور
     const userRef = doc(db, "users", cred.user.uid);
     const snap    = await getDoc(userRef);
 
@@ -66,14 +107,12 @@ loginForm?.addEventListener("submit", async (e) => {
 
     const u = snap.data();
 
-    // التحقق من الحالة
     if (u.status === "pending" || u.isActive === false) {
       showMsg("info", "حسابك قيد المراجعة من الإدارة. سيتم إشعارك عند التفعيل.");
       setLoading(false);
       return;
     }
 
-    // التوجيه حسب الدور
     if (u.role === "admin") {
       showMsg("ok", "مرحبًا بك! تحويل إلى لوحة الإدارة...");
       window.location.href = "admin.html";
@@ -85,7 +124,6 @@ loginForm?.addEventListener("submit", async (e) => {
     }
 
   } catch (err) {
-    // معالجة أخطاء Auth الشائعة برسائل عربية لطيفة
     let message = "تعذر تسجيل الدخول. تأكد من البيانات.";
     if (err.code === "auth/invalid-email")        message = "البريد الإلكتروني غير صالح.";
     if (err.code === "auth/user-not-found")       message = "المستخدم غير موجود.";
