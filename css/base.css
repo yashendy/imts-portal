@@ -1,0 +1,124 @@
+:root{
+  --bg: #FAFBFF;             /* خلفية عامة ناعمة جدًا */
+  --surface: #FFFFFF;        /* خلفيات البطاقات */
+  --border: #E5E7EB;         /* حدود فاتحة جدًا */
+  --text: #0F172A;           /* نص أساسي (غامق لكن على خلفية بيضاء) */
+  --muted: #64748B;          /* نصوص ثانوية */
+  --brand: #4F8BFF;          /* أزرق فاتح للروابط والحدود */
+  --brand-ghost: #EDF2FF;    /* تدرج فاتح للزر الشفاف */
+  --success: #22C55E;        /* أخضر */
+  --error: #EF4444;          /* أحمر */
+  --radius: 16px;
+  --shadow: 0 8px 24px rgba(15, 23, 42, 0.06);  /* ظل خفيف جدًا */
+  --hairline: 1px solid var(--border);
+  --font: "Tajawal", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+*{ box-sizing: border-box; }
+html,body{ height: 100%; }
+
+body{
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  line-height: 1.6;
+}
+
+.container{
+  width: min(1100px, 92%);
+  margin-inline: auto;
+}
+
+.hairline{ border: none; border-top: var(--hairline); }
+
+.site-header .header-inner{
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 0;
+  background: var(--surface);
+}
+
+.brand{ display: flex; align-items: center; gap: 14px; }
+.logo{ width: 48px; height: 48px; object-fit: contain; }
+.brand-title{ margin: 0; font-weight: 700; font-size: 1.15rem; }
+.brand-sub{ margin: 2px 0 0; color: var(--muted); font-size: .95rem; }
+
+.site-footer{ padding: 8px 0 28px; background: var(--surface); }
+.site-footer .muted{ color: var(--muted); margin: 12px 0 0; text-align: center; }
+
+/* بطاقات عامة */
+.card{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px 20px;
+}
+
+.card-title{
+  margin: 0 0 10px;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.card-desc{ margin: 6px 0 14px; color: var(--muted); }
+
+/* أزرار */
+.btn{
+  appearance: none; border: 1px solid transparent;
+  background: var(--surface); color: var(--text);
+  border-radius: 12px; padding: 10px 14px; cursor: pointer;
+  transition: .2s ease; font-weight: 600;
+}
+
+.btn-outline{
+  border-color: var(--brand); color: var(--brand);
+  background: #fff;
+}
+.btn-outline:hover{ transform: translateY(-1px); box-shadow: var(--shadow); }
+
+.btn-ghost{
+  border-color: var(--border); color: var(--brand);
+  background: var(--brand-ghost);
+}
+.btn-ghost:hover{ filter: brightness(0.98); }
+
+/* روابط */
+.link{ color: var(--brand); text-decoration: none; }
+.link:hover{ text-decoration: underline; }
+.link.subtle{ color: var(--muted); }
+.link.subtle:hover{ color: var(--brand); }
+
+/* حقول */
+.form-grid{ display: grid; gap: 12px; }
+.form-field label{ display: block; margin-bottom: 6px; font-weight: 600; }
+.form-field input{
+  width: 100%; padding: 12px 14px;
+  border: 1px solid var(--border); border-radius: 12px;
+  background: #fff; color: var(--text);
+  outline: none; transition: .15s;
+}
+.form-field input:focus{ border-color: var(--brand); box-shadow: 0 0 0 3px rgba(79,139,255,.12); }
+
+.form-inline{
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+
+/* رسائل */
+.msg{
+  margin-top: 8px; padding: 10px 12px; border-radius: 12px;
+  border: 1px solid var(--border); background: #fff; color: var(--muted);
+}
+.msg.ok{ border-color: rgba(34,197,94,.35); color: #166534; }
+.msg.err{ border-color: rgba(239,68,68,.35); color: #7F1D1D; }
+.msg.info{ border-color: var(--border); color: var(--muted); }
+
+/* شبكة البطاقات */
+.main-grid{
+  display: grid; gap: 18px; padding: 26px 0 36px;
+  grid-template-columns: repeat(3, 1fr);
+}
+@media (max-width: 980px){
+  .main-grid{ grid-template-columns: 1fr; }
+}
