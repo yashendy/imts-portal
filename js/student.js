@@ -1,312 +1,253 @@
-import { db } from "./firebase.js";
+// js/student.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
 import {
-  collection, query, where, getDocs
+  getFirestore, doc, getDoc, collection, query, where, getDocs
 } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
 
-import { generateLocalAdvice, answerQuestionLocally } from "./coach.js";
-import { exportAsCSV, exportAsPDF } from "./exporter.js";
+// === Firebase Config ===
+const firebaseConfig = {
+  apiKey: "AIzaSyAk3r0OSq3NwvBjHpsNlGYb-dJWUmA9Azc",
+  authDomain: "imts-portal.firebaseapp.com",
+  projectId: "imts-portal",
+  storageBucket: "imts-portal.firebasestorage.app",
+  messagingSenderId: "819773792022",
+  appId: "1:819773792022:web:58d92078d752959b5dba37",
+  measurementId: "G-P9JK5KMDWL"
+};
 
-/* DOM */
-const seatForm   = document.getElementById("seatForm");
-const seatInput  = document.getElementById("seatInput");
-const printBtn   = document.getElementById("printBtn");
-const exportCsvBtn = document.getElementById("exportCsvBtn");
-const exportPdfBtn = document.getElementById("exportPdfBtn");
-const statusArea = document.getElementById("statusArea");
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
 
-const sName  = document.getElementById("s_name");
-const sClass = document.getElementById("s_class");
-const sSeat  = document.getElementById("s_seat");
-const sYear  = document.getElementById("s_year");
-const guardianNote = document.getElementById("guardianNote");
+// عناصر DOM
+const seatInput = document.getElementById('seat7');
+const showBtn   = document.getElementById('showBtn');
+const printBtn  = document.getElementById('printBtn');
+const csvBtn    = document.getElementById('csvBtn');
+const pdfBtn    = document.getElementById('pdfBtn');
 
-const monthsTabs   = document.getElementById("monthsTabs");
-const monthsPanels = document.getElementById("monthsPanels");
+const sName = document.getElementById('sName');
+const sClass= document.getElementById('sClass');
+const sSeat = document.getElementById('sSeat');
+const sYear = document.getElementById('sYear');
 
-/* Coach DOM */
-const coachSummary = document.getElementById("coachSummary");
-const coachForm    = document.getElementById("coachForm");
-const coachQ       = document.getElementById("coachQ");
-const coachAnswer  = document.getElementById("coachAnswer");
-document.querySelectorAll(".chip").forEach(ch => {
-  ch.addEventListener("click", ()=> {
-    coachQ.value = ch.dataset.q || "";
-    coachForm.requestSubmit();
-  });
-});
+const monthsContainer = document.getElementById('monthsContainer');
+const totalEl   = document.getElementById('total');
+const percentEl = document.getElementById('percent');
+const bandEl    = document.getElementById('band');
+const showNumericEl = document.getElementById('showNumeric');
+const displayValueEl = document.getElementById('displayValue');
 
-/* Helpers */
-const MONTHS_ORDER = ["سبتمبر","أكتوبر","نوفمبر","ديسمبر","يناير","فبراير","مارس","أبريل","مايو"];
-function byOrder(a,b){ return MONTHS_ORDER.indexOf(a) - MONTHS_ORDER.indexOf(b); }
-function setStatus(msg){ statusArea.textContent = msg || ""; }
+const aiEnable = document.getElementById('aiEnable');
+const aiArea   = document.getElementById('aiArea');
+const toneEnc  = document.getElementById('toneEnc');
+const toneCare = document.getElementById('toneCare');
+const toneFirm = document.getElementById('toneFirm');
 
-/* تقدير */
-function computeBand({total, testAbsent=false, testScore=null}){
-  if (testAbsent || testScore === 0) return { band:"غياب", class:"bad", hideNumeric:false, appreciation:false };
-  if (total >= 39.5) return { band:"ممتاز مع الشكر", class:"excellent", hideNumeric:false, appreciation:true };
-  if (total >= 35)   return { band:"جيد جدًا", class:"good", hideNumeric:false, appreciation:false };
-  if (total >= 30)   return { band:"جيد", class:"warn", hideNumeric:false, appreciation:false };
-  return { band:"بحاجة لدعم", class:"bad", hideNumeric:true, appreciation:false };
+// قراءة seat من URL
+const params = new URLSearchParams(location.search);
+if(params.get('seat')) seatInput.value = params.get('seat');
+
+// جلب السنة الفعالة
+async function getActiveYear(){
+  const conf = await getDoc(doc(db,'config','public'));
+  if(conf.exists() && conf.data().activeYear) return conf.data().activeYear;
+  // fallback
+  return '2025-2026';
 }
 
-/* بيانات عامة محفوظة للاستخدام في التصدير والمساعد */
-let studentInfo = { fullName:"-", classLabel:"-", seat7:"-", yearId:"-" };
-let monthsData  = []; // [{ month, subjects, total, bandObj }]
+// تحميل بيانات الطالب
+async function loadStudent(seat7){
+  const yearId = await getActiveYear();
 
-/* تعبئة بيانات الطالب */
-function fillStudentInfo({fullName, classLabel, seat7, yearId}){
-  studentInfo = { fullName: fullName || "-", classLabel: classLabel || "-", seat7: seat7 || "-", yearId: yearId || "-" };
-  sName.textContent  = studentInfo.fullName;
-  sClass.textContent = studentInfo.classLabel;
-  sSeat.textContent  = studentInfo.seat7;
-  sYear.textContent  = studentInfo.yearId;
-}
+  // 1) ابحث عن رقم الجلوس
+  const q1 = query(collection(db,'seatNumbers'),
+      where('yearId','==',yearId),
+      where('seat7','==',seat7));
+  const snap1 = await getDocs(q1);
+  if(snap1.empty){
+    setStatus('لم يتم العثور على رقم الجلوس.');
+    return;
+  }
+  const seatDoc = snap1.docs[0].data();
 
-/* رسم شهر */
-function renderMonthPanel(month, subjects){
-  const panel = document.createElement("div");
-  panel.className = "card";
-  panel.dataset.month = month;
+  // 2) عرض بيانات أساسية
+  sName.textContent = seatDoc.studentId || '—';
+  sClass.textContent= `${seatDoc.grade || ''} / ${seatDoc.section || ''}`.trim();
+  sSeat.textContent = seatDoc.seat7 || seat7;
+  sYear.textContent = yearId;
 
-  let total = 0, anyAbs = false, testZero = false;
-  const rows = subjects.map((subj)=>{
-    const name = subj.name || subj.subjectName || "-";
-    const c = subj.components || {};
-    const test = c.test || {}, hw = c.homework || {}, part = c.participation || {}, beh = c.behavior || {};
-    const t = Number(test.score ?? 0), h = Number(hw.score ?? 0), p = Number(part.score ?? 0), b = Number(beh.score ?? 0);
-    const rowTotal = t+h+p+b;
-    total += rowTotal;
-    if (test.absent) anyAbs = true;
-    if (t === 0) testZero = true;
-    return `
-      <tr>
-        <td>${name}</td>
-        <td>${test.absent ? "غ" : t}</td>
-        <td>${hw.absent ? "غ" : h}</td>
-        <td>${part.absent ? "غ" : p}</td>
-        <td>${beh.absent ? "غ" : b}</td>
-        <td>${rowTotal}</td>
-      </tr>
-    `;
-  }).join("");
-
-  const bandObj = computeBand({ total, testAbsent:anyAbs, testScore:testZero?0:null });
-  const badgeCls = `badge ${bandObj.class}`;
-  const totalDisplay = bandObj.hideNumeric ? `<span class="muted">—</span>` : `<strong>${total}</strong>`;
-  const guardianVisible = bandObj.band === "بحاجة لدعم";
-
-  panel.innerHTML = `
-    <div class="row" style="justify-content:space-between; align-items:center;">
-      <h3 style="margin:0">نتيجة شهر: ${month}</h3>
-      <span class="${badgeCls}">${bandObj.band}</span>
-    </div>
-    <div class="row" style="gap:10px; align-items:center;">
-      <div><strong>إجمالي الشهر (من 40):</strong> ${totalDisplay}</div>
-      ${bandObj.appreciation ? `<span class="badge excellent">شهادة تقدير</span>` : ``}
-    </div>
-    ${guardianVisible ? `<div class="note">الطالب يحتاج دعمًا من ولي الأمر.</div>` : ``}
-    <div style="overflow:auto; margin-top:8px">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>المادة</th>
-            <th>الاختبار (10)</th>
-            <th>الواجبات (10)</th>
-            <th>المشاركة (10)</th>
-            <th>السلوك (10)</th>
-            <th>الإجمالي (40)</th>
-          </tr>
-        </thead>
-        <tbody>${rows || `<tr><td colspan="6">لا توجد مواد</td></tr>`}</tbody>
-      </table>
-    </div>
-  `;
-
-  if (guardianVisible) guardianNote.classList.remove("is-hidden");
-
-  // خزّن للاحصاء/التصدير/المساعد
-  monthsData.push({ month, subjects, total, bandObj });
-  return panel;
-}
-
-function renderMonthTab(month, active=false){
-  const btn = document.createElement("button");
-  btn.className = "tab-btn" + (active ? " active" : "");
-  btn.textContent = month;
-  btn.dataset.month = month;
-  btn.addEventListener("click", ()=> activateMonth(month));
-  return btn;
-}
-
-function activateMonth(month){
-  document.querySelectorAll(".tab-btn").forEach(b=>{
-    b.classList.toggle("active", b.dataset.month === month);
-  });
-  monthsPanels.querySelectorAll(".card").forEach(p=>{
-    p.style.display = (p.dataset.month === month) ? "block" : "none";
-  });
-}
-
-/* استعلام seatNumbers */
-async function findSeatDoc(seat7){
-  const q = query(
-    collection(db,"seatNumbers"),
-    where("seat7","==",seat7),
-    where("status","==","active")
+  // 3) ابحث عن نتائج الطالب
+  // نفترض تخزين النتائج بالهيكل:
+  // collection: studentResults
+  // doc id: seat7-yearId  (أو any id يحوي { seat7, yearId, subjects, overall, ... })
+  const q2 = query(collection(db,'studentResults'),
+    where('yearId','==',yearId),
+    where('seat7','==',seat7)
   );
-  const snap = await getDocs(q);
-  if (snap.empty) return null;
-  const d = snap.docs[0].data();
-  return { id: snap.docs[0].id, ...d };
-}
-
-/* جلب النتائج من مسارات محتملة */
-async function tryCollection(coll, conditions){
-  let ref = collection(db, coll);
-  for (const [f,op,val] of conditions){
-    ref = query(ref, where(f,op,val));
-  }
-  const s = await getDocs(ref);
-  if (s.empty) return [];
-  return s.docs.map(d => ({ id:d.id, ...d.data() }));
-}
-async function trySubcollection(path){
-  try{
-    const s = await getDocs(collection(db, path));
-    if (s.empty) return [];
-    return s.docs.map(d => ({ id:d.id, ...d.data() }));
-  }catch{ return []; }
-}
-async function fetchResults(studentId, yearId, seat7){
-  // 1) studentResults (studentId + yearId)
-  let r = await tryCollection("studentResults", [["studentId","==",studentId],["yearId","==",yearId]]);
-  if (r.length) return r;
-  // 2) studentResults (seat7 + yearId)
-  r = await tryCollection("studentResults", [["seat7","==",seat7],["yearId","==",yearId]]);
-  if (r.length) return r;
-  // 3) results (studentId + yearId)
-  r = await tryCollection("results", [["studentId","==",studentId],["yearId","==",yearId]]);
-  if (r.length) return r;
-  // 4) students/{id}/results/{yearId}/months
-  r = await trySubcollection(`students/${studentId}/results/${yearId}/months`);
-  return r;
-}
-
-/* تحويل نتائج خام → مجموعات شهور موحّدة */
-function normalizeResultsDocs(docs){
-  const groups = {};
-  docs.forEach(d=>{
-    const month = d.month || d.title || d.id || "غير محدد";
-    const subjects = d.subjects || d.items || [];
-    if (!groups[month]) groups[month] = [];
-    groups[month].push(...subjects);
-  });
-  return groups;
-}
-
-/* رسم النتائج وإعداد المساعد/التصدير */
-function renderResultsByMonths(docs){
-  // إعادة الضبط
-  monthsTabs.innerHTML = "";
-  monthsPanels.innerHTML = "";
-  guardianNote.classList.add("is-hidden");
-  monthsData = [];
-
-  const groups = normalizeResultsDocs(docs);
-  const months = Object.keys(groups).sort(byOrder);
-
-  if (!months.length){
-    setStatus("لا توجد نتائج لهذا الطالب.", "info");
+  const snap2 = await getDocs(q2);
+  if(snap2.empty){
+    setStatus('لا توجد نتائج بعد لهذا الطالب.');
+    renderResults({subjects:[], overall:null});
     return;
   }
+  const result = snap2.docs[0].data();
 
-  months.forEach((m, i)=>{
-    const btn = renderMonthTab(m, i===0);
-    monthsTabs.appendChild(btn);
+  renderResults(result);
+  setStatus('');
+}
 
-    const panel = renderMonthPanel(m, groups[m]);
-    panel.style.display = (i===0) ? "block" : "none";
-    monthsPanels.appendChild(panel);
+function setStatus(msg){
+  // يمكنك وضع مكان مخصص للرسائل إن رغبت
+  console.log('[status]', msg);
+}
+
+// رسم النتائج
+function renderResults(data){
+  monthsContainer.innerHTML='';
+  const subjects = data.subjects || []; // مصفوفة مواد، وكل مادة فيها components: test/homework/participation/behavior
+
+  // نبني جدول مبسّط شهريًا (إذا عندك months داخل الدوكمنت عدّل هنا)
+  // هنا نفترض subjects[] يحمل computed (rawTotal/rounded/band/showNumeric/displayValue)
+  // + components لكل مادة (score/max/absent)
+  subjects.forEach(sub=>{
+    const box = document.createElement('div');
+    box.className='card';
+    box.innerHTML = `
+      <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+        <div><b>المادة:</b> ${sub.name || '-'}</div>
+        <div><b>الكود:</b> ${sub.code || '-'}</div>
+      </div>
+      <div style="margin-top:6px">
+        <div>اختبار: ${componentText(sub.components?.test)}</div>
+        <div>واجبات: ${componentText(sub.components?.homework)}</div>
+        <div>مشاركة: ${componentText(sub.components?.participation)}</div>
+        <div>سلوك: ${componentText(sub.behavior)}</div>
+      </div>
+    `;
+    monthsContainer.appendChild(box);
   });
 
-  // إعداد ملخص للمساعد
-  const summary = generateLocalAdvice(studentInfo, monthsData);
-  coachSummary.textContent = summary;
-  coachAnswer.textContent = "";
+  // إجمالي وتقدير
+  const overall = data.overall || {};
+  const total = overall.total ?? overall.rawTotal ?? 0;
+  const percentage = overall.percentage ?? ((total/40)*100).toFixed(2);
+  const band = computeBand(total, subjects);
+
+  totalEl.textContent = Number(total).toFixed(1);
+  percentEl.textContent= percentage;
+  bandEl.textContent   = band.text;
+  showNumericEl.textContent = (overall.showNumeric ?? true) ? 'نعم' : 'لا';
+  displayValueEl.textContent = overall.displayValue ?? String(total);
+
+  // ذكاء لوليّ الأمر
+  if(aiEnable.checked){
+    aiArea.value = buildGuardianSummary(band.key, total, subjects);
+  }
 }
 
-/* تحميل بالرقم */
-async function loadBySeat(seat7){
-  setStatus("جاري البحث عن رقم الجلوس…");
-  monthsTabs.innerHTML = "";
-  monthsPanels.innerHTML = "";
-  guardianNote.classList.add("is-hidden");
-  monthsData = [];
-
-  if (!/^\d{7}$/.test(seat7)){
-    setStatus("برجاء إدخال رقم جلوس صحيح (٧ أرقام).");
-    return;
-  }
-
-  const seatDoc = await findSeatDoc(seat7);
-  if (!seatDoc){
-    setStatus("رقم الجلوس غير موجود أو غير مفعل.");
-    return;
-  }
-
-  const basic = seatDoc.studentBasic || {};
-  fillStudentInfo({
-    fullName: basic.fullName || basic.name || "-",
-    classLabel: basic.classLabel || "-",
-    seat7,
-    yearId: seatDoc.yearId || "-"
-  });
-
-  setStatus("جاري تحميل النتائج…");
-  const rs = await fetchResults(seatDoc.studentId, seatDoc.yearId, seat7);
-
-  if (!rs.length){
-    setStatus("لا توجد نتائج مسجلة لهذا الطالب في هذا العام.");
-    return;
-  }
-
-  setStatus("");
-  renderResultsByMonths(rs);
+function componentText(c){
+  if(!c) return '-';
+  if(c.absent) return 'غ';
+  return `${c.score ?? 0} / ${c.max ?? 10}`;
 }
 
-/* URL param */
-(function initFromURL(){
-  const params = new URLSearchParams(location.search);
-  const s = params.get("seat");
-  if (s){
-    seatInput.value = s;
-    loadBySeat(s);
+// حساب التقدير وفق الشروط
+function computeBand(total, subjects){
+  // غياب إن كانت درجة الاختبار = 0 لأي مادة اختبار أساسي؟
+  const anyTestZero = subjects.some(s => (s.components?.test?.score ?? 0) === 0);
+  if(anyTestZero){
+    return { key:'absent', text:'غياب' };
   }
-})();
 
-/* أحداث */
-seatForm.addEventListener("submit", (e)=>{
-  e.preventDefault();
-  const s = seatInput.value.trim();
-  loadBySeat(s);
-});
-printBtn.addEventListener("click", ()=> window.print());
+  if(total >= 39.5){
+    return { key:'excellent', text:'ممتاز مع الشكر (شهادة تقدير)' };
+  }else if(total >= 36){
+    return { key:'verygood', text:'جيد جدًا' };
+  }else if(total >= 30){
+    return { key:'good', text:'جيد' };
+  }else{
+    return { key:'encourage', text:'بحاجة إلى دعم وتشجيع' };
+  }
+}
 
-/* التصدير */
-exportCsvBtn.addEventListener("click", ()=>{
-  if (!monthsData.length) { alert("لا توجد بيانات للتصدير."); return; }
-  exportAsCSV(studentInfo, monthsData);
-});
-exportPdfBtn.addEventListener("click", ()=>{
-  if (!monthsData.length) { alert("لا توجد بيانات للتصدير."); return; }
-  // نمرر مسار الشعار لو متاح
-  exportAsPDF(studentInfo, monthsData, "assets/logo.png");
+// ملخص ذكي بسيط (بدون API خارجي)
+function buildGuardianSummary(bandKey, total, subjects){
+  const names = subjects.map(s=>s.name).filter(Boolean);
+  let base = `المجموع: ${Number(total).toFixed(1)} من 40.\n`;
+  switch(bandKey){
+    case 'excellent':
+      base += 'المستوى ممتاز مع الشكر. ننصح بالاستمرار على نفس الوتيرة.';
+      break;
+    case 'verygood':
+      base += 'المستوى جيد جدًا. حافظ على المراجعة المنتظمة لتعزيز الدرجة.';
+      break;
+    case 'good':
+      base += 'المستوى جيد. بعض التركيز الإضافي في المواد سيحسّن النتائج.';
+      break;
+    case 'absent':
+      base += 'يرجى تلافي الغياب مستقبلًا والمتابعة المبكرة لضمان الاستفادة.';
+      break;
+    default:
+      base += 'الطالب يحتاج دعمًا من وليّ الأمر وخطة مراجعة قصيرة المدى.';
+  }
+  if(names.length) base += `\nالمواد: ${names.join('، ')}`;
+  return base;
+}
+
+// أزرار
+showBtn.addEventListener('click', ()=>{
+  const seat = seatInput.value.trim();
+  if(!seat){ alert('أدخل رقم الجلوس'); return; }
+  loadStudent(seat);
+  const url = new URL(location.href);
+  url.searchParams.set('seat', seat);
+  history.replaceState({},'',url);
 });
 
-/* المساعد */
-coachForm.addEventListener("submit", (e)=>{
-  e.preventDefault();
-  const q = coachQ.value.trim();
-  if (!q){ coachAnswer.textContent = "اكتب سؤالك أولًا."; return; }
-  coachAnswer.textContent = answerQuestionLocally(q, studentInfo, monthsData);
+printBtn.addEventListener('click', ()=> window.print());
+
+// CSV
+csvBtn.addEventListener('click', ()=>{
+  const rows = [];
+  rows.push(['الحقل','القيمة']);
+  rows.push(['الاسم', sName.textContent]);
+  rows.push(['الصف/الشعبة', sClass.textContent]);
+  rows.push(['العام الدراسي', sYear.textContent]);
+  rows.push(['المجموع', totalEl.textContent]);
+  rows.push(['النسبة', percentEl.textContent]);
+  rows.push(['التقدير', bandEl.textContent]);
+
+  const csv = rows.map(r=>r.map(x=>`"${(x??'').toString().replace(/"/g,'""')}"`).join(',')).join('\n');
+  downloadBlob(csv,'text/csv','result.csv');
 });
+
+// PDF (بالطباعة)
+pdfBtn.addEventListener('click', ()=> window.print());
+
+function downloadBlob(content, type, filename){
+  const blob = new Blob([content], {type});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// نبرات المساعد
+toneEnc.addEventListener('click', ()=>{
+  if(!aiEnable.checked) return;
+  aiArea.value = aiArea.value + '\nنبرة مشجعة: أحسنت، استمر في هذا التفوق!';
+});
+toneCare.addEventListener('click', ()=>{
+  if(!aiEnable.checked) return;
+  aiArea.value = aiArea.value + '\nنبرة رعاية: سنعمل معًا على تحسين الجوانب التي تحتاج دعمًا.';
+});
+toneFirm.addEventListener('click', ()=>{
+  if(!aiEnable.checked) return;
+  aiArea.value = aiArea.value + '\nنبرة حازمة: الالتزام بالمذاكرة شرط أساسي لتحقيق نتائج أفضل.';
+});
+
+// تحميل تلقائي لو seat موجود
+if(seatInput.value.trim()){
+  loadStudent(seatInput.value.trim());
+}
