@@ -2,106 +2,69 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>لتدريس المنهج المصري | معهد الدراسات الإدارية والفنية</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/base.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>معهد الدراسات الإدارية والفنية</title>
   <link rel="stylesheet" href="css/index.css" />
 </head>
 <body>
-  <!-- الهيدر -->
-  <header class="site-header">
-    <div class="container header-inner">
-      <div class="brand">
-        <img src="assets/logo.png" alt="شعار المعهد" class="logo" />
-        <div class="brand-text">
-          <h1 class="brand-title">معهد الدراسات الإدارية والفنية</h1>
-          <p class="brand-sub">بوابة المنصة</p>
-        </div>
-      </div>
-    </div>
-    <hr class="hairline" />
+  <header class="header">
+    <img src="assets/logo.png" alt="شعار المعهد" class="logo" />
+    <h1>معهد الدراسات الإدارية والفنية</h1>
   </header>
 
-  <!-- المحتوى -->
-  <main class="container main-area">
-    <!-- شريط التبويبات -->
-    <div class="tabs" role="tablist" aria-label="التنقل بين أقسام البوابة">
-      <button class="tab is-active" role="tab" aria-selected="true" aria-controls="panel-login" id="tab-login">
-        تسجيل الدخول
-      </button>
-      <button class="tab" role="tab" aria-selected="false" aria-controls="panel-register" id="tab-register">
-        التسجيل كمعلّم
-      </button>
-      <button class="tab" role="tab" aria-selected="false" aria-controls="panel-results" id="tab-results">
-        نتائج الطلاب
-      </button>
-    </div>
+  <!-- التبويبات -->
+  <div class="tabs">
+    <button class="tab is-active" id="tab-login">تسجيل الدخول</button>
+    <button class="tab" id="tab-register">تسجيل كمعلم</button>
+    <button class="tab" id="tab-admin">تسجيل كأدمن</button>
+    <button class="tab" id="tab-results">نتائج الطلاب</button>
+  </div>
 
-    <!-- لوحة: تسجيل الدخول -->
-    <section class="tab-panel card" id="panel-login" role="tabpanel" aria-labelledby="tab-login">
-      <h2 class="card-title">تسجيل الدخول</h2>
-      <form id="loginForm" class="form-grid" novalidate>
-        <div class="form-field">
-          <label for="loginEmail">البريد الإلكتروني</label>
-          <input type="email" id="loginEmail" placeholder="name@example.com" required />
-        </div>
-
-        <div class="form-field">
-          <label for="loginPassword">كلمة المرور</label>
-          <input type="password" id="loginPassword" placeholder="••••••••" required />
-        </div>
-
-        <div class="form-inline">
-          <label class="checkbox">
-            <input type="checkbox" id="rememberMe" />
-            <span>تذكّرني</span>
-          </label>
-
-          <a class="link subtle" href="#" id="forgotLink" title="لاحقًا نفعّل الاستعادة">نسيت كلمة المرور؟</a>
-        </div>
-
-        <button id="loginBtn" type="submit" class="btn btn-outline">دخول</button>
-        <div id="loginMsg" class="msg" aria-live="polite"></div>
+  <!-- لوحات التبويبات -->
+  <main>
+    <!-- تسجيل الدخول -->
+    <section class="tab-panel" id="panel-login">
+      <h2>تسجيل الدخول</h2>
+      <form id="loginForm">
+        <input type="email" id="loginEmail" placeholder="البريد الإلكتروني" required />
+        <input type="password" id="loginPassword" placeholder="كلمة المرور" required />
+        <button id="loginBtn" type="submit">دخول</button>
+        <div id="loginMsg" class="msg"></div>
       </form>
     </section>
 
-    <!-- لوحة: التسجيل كمعلّم -->
-    <section class="tab-panel card is-hidden" id="panel-register" role="tabpanel" aria-labelledby="tab-register" hidden>
-      <h2 class="card-title">معلّم جديد؟</h2>
-      <p class="card-desc">
-        سجّل بياناتك وسيتم تفعيل الحساب من الإدارة. ستتلقى إشعارًا فور الموافقة.
-      </p>
-      <!-- لو حابب نخلي التسجيل داخل نفس الصفحة لاحقًا نضيف الفورم هنا -->
-      <button id="goRegisterBtn" class="btn btn-ghost">بدء التسجيل</button>
-      <div class="msg info" style="margin-top:12px">
-        سيتم نقلك إلى صفحة التسجيل المخصّصة لإدخال بياناتك.
-      </div>
+    <!-- تسجيل كمعلم -->
+    <section class="tab-panel is-hidden" id="panel-register">
+      <h2>التسجيل كمعلم</h2>
+      <p>سيتم مراجعة بياناتك من قبل الإدارة قبل التفعيل.</p>
+      <button id="goRegisterBtn">بدء التسجيل</button>
     </section>
 
-    <!-- لوحة: نتائج الطلاب -->
-    <section class="tab-panel card is-hidden" id="panel-results" role="tabpanel" aria-labelledby="tab-results" hidden>
-      <h2 class="card-title">نتائج الطلاب</h2>
-      <p class="card-desc">
-        أدخل رقم الجلوس لعرض النتيجة ومتابعة المستوى الدراسي. لا تحتاج إلى إنشاء حساب.
-      </p>
-      <button id="goResultsBtn" class="btn btn-outline">عرض النتائج</button>
-      <div class="msg info" style="margin-top:12px">
-        سيتم نقلك إلى صفحة النتائج لإدخال رقم الجلوس.
-      </div>
+    <!-- تسجيل كأدمن -->
+    <section class="tab-panel is-hidden" id="panel-admin">
+      <h2>التسجيل كأدمن</h2>
+      <form id="adminRegisterForm">
+        <input type="text" id="adminFullName" placeholder="الاسم الكامل" required />
+        <input type="email" id="adminEmail" placeholder="البريد الإلكتروني" required />
+        <input type="tel" id="adminPhone" placeholder="رقم الهاتف (اختياري)" />
+        <input type="password" id="adminPassword" placeholder="كلمة المرور" required />
+        <input type="password" id="adminPassword2" placeholder="تأكيد كلمة المرور" required />
+        <button id="adminRegisterBtn" type="submit">إرسال طلب التسجيل</button>
+        <div id="adminRegisterMsg" class="msg"></div>
+      </form>
+    </section>
+
+    <!-- نتائج الطلاب -->
+    <section class="tab-panel is-hidden" id="panel-results">
+      <h2>الاستعلام عن النتيجة</h2>
+      <form id="resultsForm">
+        <input type="text" id="seatNumber" placeholder="أدخل رقم الجلوس" required />
+        <button type="submit">عرض النتيجة</button>
+        <div id="resultsMsg" class="msg"></div>
+      </form>
     </section>
   </main>
 
-  <!-- الفوتر -->
-  <footer class="site-footer">
-    <div class="container">
-      <hr class="hairline" />
-      <p class="muted">© 2025 معهد الدراسات الإدارية والفنية — جميع الحقوق محفوظة</p>
-    </div>
-  </footer>
-
-  <!-- JS -->
   <script type="module" src="js/index.js"></script>
 </body>
 </html>
