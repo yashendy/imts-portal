@@ -1,187 +1,33 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>بوابة المنصّة التعليمية</title>
-  <link rel="stylesheet" href="./css/index.css" />
-  <!-- Firebase CDN (استخدمي firebase.js الخاص بك) -->
-  <script type="module" src="./js/firebase.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IMTS - معهد الدراسات الإدارية والفنية</title>
+  <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
-  <main class="page">
-    <section class="card">
-      <h1 class="title">بوابة المنصّة التعليمية</h1>
+  <header>
+    <img src="./assets/logo.png" alt="IMTS logo" class="logo">
+    <h1>معهد الدراسات الإدارية والفنية</h1>
+    <p class="subtitle">لتدريس المنهج المصري</p>
+  </header>
 
-      <nav class="tabs" role="tablist" aria-label="التبويب">
-        <button class="tab active" data-tab="login" aria-selected="true">تسجيل الدخول</button>
-        <button class="tab" data-tab="results">متابعة النتائج (طالب/وليّ أمر)</button>
-        <button class="tab" data-tab="apply">طلب انضمام معلّم/إداري</button>
-      </nav>
-
-      <!-- تبويب الدخول -->
-      <section class="panel active" id="panel-login">
-        <form id="form-login" class="form">
-          <div class="grid">
-            <label class="field">
-              <span>البريد الإلكتروني</span>
-              <input type="email" id="loginEmail" required placeholder="name@example.com" />
-            </label>
-            <label class="field">
-              <span>كلمة المرور</span>
-              <input type="password" id="loginPassword" required minlength="6" />
-            </label>
-          </div>
-
-          <div id="loginInfo" class="info muted"></div>
-          <div id="loginError" class="info error" hidden></div>
-
-          <button class="btn primary" id="btnLogin" type="submit">دخول</button>
-        </form>
-      </section>
-
-      <!-- تبويب النتائج لولي الأمر/الطالب -->
-      <section class="panel" id="panel-results">
-        <form id="form-results" class="form">
-          <div class="grid">
-            <label class="field">
-              <span>رقم الجلوس</span>
-              <input type="text" id="seatNumber" required placeholder="مثال: 4101810001" />
-            </label>
-            <label class="field">
-              <span>العام الدراسي</span>
-              <input type="text" id="yearId" required placeholder="مثال: 2025-2026" />
-            </label>
-            <label class="field">
-              <span>تاريخ الميلاد (اختياري للتحقق الخفيف)</span>
-              <input type="date" id="dobCheck" />
-            </label>
-          </div>
-
-          <div id="resError" class="info error" hidden></div>
-          <button class="btn primary" id="btnFetch" type="submit">عرض النتيجة</button>
-        </form>
-
-        <div id="resultCard" class="result-card" hidden>
-          <h3>النتيجة</h3>
-          <div class="kv"><b>الاسم:</b><span id="rName">—</span></div>
-          <div class="kv"><b>الصف/الشعبة:</b><span id="rClass">—</span></div>
-          <div class="kv"><b>المجموع:</b><span id="rTotal">—</span></div>
-          <div class="kv"><b>التقدير:</b><span id="rGrade" class="badge">—</span></div>
-          <div class="kv"><b>ملاحظات:</b><span id="rNotes">—</span></div>
-          <button class="btn" id="btnPDF" type="button">تحميل PDF</button>
-        </div>
-      </section>
-
-      <!-- تبويب طلب انضمام معلّم -->
-      <section class="panel" id="panel-apply">
-        <form id="form-apply" class="form">
-          <h3>1) بيانات شخصية (مطلوبة)</h3>
-          <div class="grid">
-            <label class="field"><span>الاسم الكامل</span><input id="fullName" required /></label>
-            <label class="field"><span>تاريخ الميلاد</span><input type="date" id="dob" required /></label>
-            <label class="field"><span>الرقم المدني (12 رقم)</span><input id="civilId" required inputmode="numeric" maxlength="12" /></label>
-            <label class="field"><span>النوع</span>
-              <select id="gender" required>
-                <option value="">— اختر —</option>
-                <option value="male">ذكر</option>
-                <option value="female">أنثى</option>
-              </select>
-            </label>
-            <label class="field"><span>الجنسية</span><input id="nationality" required /></label>
-            <label class="field"><span>الحالة الاجتماعية (اختياري)</span><input id="maritalStatus" /></label>
-          </div>
-
-          <label class="field"><span>العنوان</span>
-            <input id="address" placeholder="محافظة/منطقة/شارع/وصف مختصر" required />
-          </label>
-
-          <div class="grid">
-            <label class="field"><span>الهاتف المحمول (دولي)</span><input id="phone" required placeholder="+9655xxxxxxx" /></label>
-            <label class="field"><span>واتساب (إن كان مختلفًا)</span><input id="whatsapp" placeholder="+9655xxxxxxx" /></label>
-            <label class="field"><span>بريد إلكتروني (للدخول)</span><input type="email" id="email" required /></label>
-            <label class="field"><span>كلمة المرور</span><input type="password" id="password" required minlength="6" /></label>
-          </div>
-
-          <h3>2) بيانات مهنية/تعليمية</h3>
-          <div class="grid">
-            <label class="field"><span>المؤهل</span>
-              <select id="degree">
-                <option value="diploma">دبلوم</option>
-                <option value="bachelor" selected>بكالوريوس</option>
-                <option value="master">ماجستير</option>
-                <option value="phd">دكتوراه</option>
-              </select>
-            </label>
-            <label class="field"><span>التخصص الأكاديمي</span><input id="major" /></label>
-            <label class="field"><span>سنوات الخبرة</span><input id="experienceYears" type="number" min="0" value="0" /></label>
-          </div>
-
-          <label class="field"><span>الدورات والشهادات المهنية (سطر لكل دورة)</span>
-            <textarea id="courses" rows="3" placeholder="ICDL&#10;Google Educator Level 1"></textarea>
-          </label>
-
-          <label class="field"><span>المواد التي يدرسها (مفصولة بفواصل)</span>
-            <input id="subjects" placeholder="Math, Science, Arabic" />
-          </label>
-
-          <div class="grid">
-            <label class="field"><span>المراحل المفضّلة</span>
-              <select id="preferredStages" multiple>
-                <option>ابتدائي</option><option>متوسط</option><option>ثانوي</option>
-              </select>
-            </label>
-            <label class="field"><span>اللغات التدريسية</span>
-              <select id="langs" multiple>
-                <option>عربي</option><option>إنجليزي</option><option>فرنسي</option>
-              </select>
-            </label>
-          </div>
-
-          <label class="field"><span>سيرة مختصرة</span><textarea id="bio" rows="3" placeholder="نبذة قصيرة عن الخبرات والإنجازات."></textarea></label>
-
-          <h3>3) بيانات وظيفية داخل المنصّة</h3>
-          <div class="grid">
-            <label class="field"><span>رقم الموظف الداخلي (اختياري)</span><input id="employeeNo" /></label>
-            <label class="field"><span>التوفّر الزمني (من – إلى)</span>
-              <div class="avail">
-                <input type="time" id="availFrom" value="16:00" />
-                <span>إلى</span>
-                <input type="time" id="availTo" value="20:00" />
-              </div>
-            </label>
-            <label class="field"><span>أيام التوفّر</span>
-              <select id="availDays" multiple>
-                <option>السبت</option><option>الأحد</option><option>الاثنين</option>
-                <option>الثلاثاء</option><option>الأربعاء</option><option>الخميس</option><option>الجمعة</option>
-              </select>
-            </label>
-          </div>
-
-          <fieldset class="notify">
-            <legend>خيارات الإشعارات</legend>
-            <label><input type="checkbox" id="nEmail" checked /> بريد إلكتروني</label>
-            <label><input type="checkbox" id="nPush" /> إشعارات المتصفح</label>
-            <label><input type="checkbox" id="nWhats" /> واتساب</label>
-            <label class="field">
-              <span>تواتر الإشعارات</span>
-              <select id="nFreq">
-                <option value="immediate">فوري</option>
-                <option value="daily" selected>يومي</option>
-                <option value="weekly">أسبوعي</option>
-              </select>
-            </label>
-          </fieldset>
-
-          <div id="applyError" class="info error" hidden></div>
-          <div id="applyInfo" class="info success" hidden></div>
-
-          <button id="btnApply" class="btn primary" type="submit">إرسال الطلب</button>
-        </form>
-      </section>
-    </section>
+  <main>
+    <div class="hero">
+      <h2>مرحبًا بكم في منصة IMTS</h2>
+      <p>البوابة التعليمية الإلكترونية لإدارة الصفوف والمواد والاختبارات بسهولة.</p>
+      <div class="buttons">
+        <a href="student.html" class="btn">دخول الطلاب</a>
+        <a href="admin.html" class="btn secondary">لوحة الأدمن</a>
+      </div>
+    </div>
   </main>
 
-  <script type="module" src="./js/index.js"></script>
+  <footer>
+    <p>© 2025 IMTS - جميع الحقوق محفوظة</p>
+  </footer>
+
+  <script src="./js/app.js"></script>
 </body>
 </html>
