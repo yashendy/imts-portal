@@ -1,33 +1,102 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IMTS - معهد الدراسات الإدارية والفنية</title>
-  <link rel="stylesheet" href="./css/style.css">
-</head>
-<body>
-  <header>
-    <img src="./assets/logo.png" alt="IMTS logo" class="logo">
-    <h1>معهد الدراسات الإدارية والفنية</h1>
-    <p class="subtitle">لتدريس المنهج المصري</p>
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>IMTS - معهد الدراسات الإدارية والفنية</title>
+    <meta name="description" content="بوابة التسجيل والدخول لمنصة IMTS - معهد الدراسات الإدارية والفنية" />
+    <link rel="icon" href="./assets/logo.png" />
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <img src="./assets/logo.png" alt="IMTS logo" class="logo" />
+      <h1 class="title">معهد الدراسات الإدارية والفنية</h1>
+      <p class="subtitle">لتدريس المنهج المصري</p>
+    </header>
 
-  <main>
-    <div class="hero">
-      <h2>مرحبًا بكم في منصة IMTS</h2>
-      <p>البوابة التعليمية الإلكترونية لإدارة الصفوف والمواد والاختبارات بسهولة.</p>
-      <div class="buttons">
-        <a href="student.html" class="btn">دخول الطلاب</a>
-        <a href="admin.html" class="btn secondary">لوحة الأدمن</a>
-      </div>
-    </div>
-  </main>
+    <main class="container">
+      <section class="card">
+        <nav class="tabs" role="tablist" aria-label="بوابة الدخول">
+          <button id="tab-login"  class="tab active" role="tab" aria-controls="panel-login"  aria-selected="true">تسجيل الدخول</button>
+          <button id="tab-register" class="tab" role="tab" aria-controls="panel-register" aria-selected="false">تسجيل جديد (كود دعوة)</button>
+        </nav>
 
-  <footer>
-    <p>© 2025 IMTS - جميع الحقوق محفوظة</p>
-  </footer>
+        <!-- Panel: Login -->
+        <section id="panel-login" class="panel active" role="tabpanel" aria-labelledby="tab-login">
+          <form id="form-login" class="form">
+            <label class="field">
+              <span>البريد الإلكتروني</span>
+              <input type="email" name="email" required autocomplete="username" />
+            </label>
 
-  <script src="./js/app.js"></script>
-</body>
+            <label class="field">
+              <span>كلمة المرور</span>
+              <input type="password" name="password" required autocomplete="current-password" minlength="6" />
+            </label>
+
+            <button type="submit" class="btn primary">دخول</button>
+          </form>
+
+          <div class="hint">
+            <p>لا تملك حسابًا؟ انتقل إلى تبويب <strong>تسجيل جديد</strong> بكود الدعوة الذي يصدره المدير.</p>
+          </div>
+        </section>
+
+        <!-- Panel: Register (Invite code) -->
+        <section id="panel-register" class="panel" role="tabpanel" aria-labelledby="tab-register" hidden>
+          <form id="form-register" class="form">
+            <div class="grid">
+              <label class="field">
+                <span>كود الدعوة</span>
+                <input type="text" name="code" required inputmode="latin" minlength="4" />
+              </label>
+
+              <label class="field">
+                <span>الاسم الكامل</span>
+                <input type="text" name="displayName" required />
+              </label>
+            </div>
+
+            <div class="grid">
+              <label class="field">
+                <span>البريد الإلكتروني</span>
+                <input type="email" name="email" required autocomplete="username" />
+              </label>
+
+              <label class="field">
+                <span>كلمة المرور</span>
+                <input type="password" name="password" required autocomplete="new-password" minlength="6" />
+              </label>
+            </div>
+
+            <button type="submit" class="btn primary">إنشاء حساب</button>
+          </form>
+
+          <div class="hint">
+            <ul>
+              <li>كود الدعوة يصدره <strong>المدير</strong>.</li>
+              <li>قد يكون الكود مقيّدًا ببريد محدد أو له تاريخ انتهاء.</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Inline notifications -->
+        <div id="message" class="message" role="status" aria-live="polite"></div>
+      </section>
+
+      <section class="links card subtle">
+        <a href="./student.html" class="btn ghost">بوابة الطلاب</a>
+        <a href="./admin.html"   class="btn ghost">لوحة الأدمن</a>
+        <a href="./teacher.html" class="btn ghost">لوحة المعلم</a>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <small>© 2025 IMTS — جميع الحقوق محفوظة</small>
+    </footer>
+
+    <!-- Firebase SDK (Modular) عبر CDN -->
+    <script type="module" src="./js/app.js"></script>
+  </body>
 </html>
