@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>لوحة الإدارة | معهد الدراسات الإدارية والفنية</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <img src="assets/logo.png" alt="logo">
+    <div>
+      <h1 id="instName">معهد الدراسات الإدارية والفنية</h1>
+      <div class="subtle">لوحة الإدارة</div>
+    </div>
+  </div>
+
+  <div class="top-actions">
+    <div class="chip" id="roleChip">الدور</div>
+    <select id="yearSelect" class="select"></select>
+    <button id="btnSignOut" class="btn muted">خروج</button>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <button class="nav active" data-tab="overview">نظرة عامة</button>
+    <button class="nav" data-tab="teachers">المعلّمون</button>
+    <button class="nav" data-tab="classes">الفصول</button>
+    <button class="nav" data-tab="students">الطلاب</button>
+    <button class="nav" data-tab="subjects">المواد</button>
+    <button class="nav" data-tab="assessments">التقييمات</button>
+    <button class="nav owner-only" data-tab="invites">الدعوات</button>
+    <button class="nav owner-only" data-tab="settings">الإعدادات</button>
+  </aside>
+
+  <main class="content">
+    <div id="globalMsg"></div>
+
+    <!-- Overview -->
+    <section id="tab-overview" class="tab active">
+      <div class="cards">
+        <div class="card kpi"><div class="k">المعلمون</div><div class="v" id="kTeachers">—</div></div>
+        <div class="card kpi"><div class="k">الفصول</div><div class="v" id="kClasses">—</div></div>
+        <div class="card kpi"><div class="k">الطلاب</div><div class="v" id="kStudents">—</div></div>
+        <div class="card kpi"><div class="k">المواد</div><div class="v" id="kSubjects">—</div></div>
+        <div class="card kpi owner-only"><div class="k">دعوات نشطة</div><div class="v" id="kInvites">—</div></div>
+      </div>
+      <div class="card">
+        <h3>آخر العمليات</h3>
+        <div id="recentLog" class="muted small">لا شيء بعد.</div>
+      </div>
+    </section>
+
+    <!-- Teachers -->
+    <section id="tab-teachers" class="tab">
+      <div class="card">
+        <h3>ربط معلّم بفصل/مادة</h3>
+        <div class="grid">
+          <select id="linkTeacher" class="select"></select>
+          <select id="linkGrade" class="select"></select>
+          <select id="linkClass" class="select"></select>
+          <select id="linkSubject" class="select"></select>
+          <button class="btn" id="btnLink">ربط</button>
+        </div>
+        <div class="hint">يُنشئ ارتباطًا في <code>classTeachers</code> ويضيف وثيقة في <code>classes/{classId}/teachers/{teacherId}</code>.</div>
+      </div>
+
+      <div class="card">
+        <h3>قائمة المعلّمين</h3>
+        <div class="row">
+          <input id="teacherSearch" class="input" placeholder="ابحث بالاسم أو البريد">
+          <button class="btn muted" id="btnReloadTeachers">تحديث</button>
+        </div>
+        <table class="table" id="teachersTable">
+          <thead><tr><th>الاسم</th><th>البريد</th><th>الحالة</th><th>فصول مرتبطة</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Classes -->
+    <section id="tab-classes" class="tab">
+      <div class="card">
+        <h3>إنشاء فصل</h3>
+        <div class="grid">
+          <select id="cGrade" class="select"></select>
+          <select id="cSection" class="select"></select>
+          <input id="cCapacity" class="input" type="number" min="1" value="35" placeholder="الطاقة الاستيعابية">
+          <button class="btn" id="btnCreateClass">إنشاء</button>
+        </div>
+        <div class="hint">المسار (track) اختياري للطلاب فقط — المعلّم غير مقيّد بالمسار.</div>
+      </div>
+
+      <div class="card">
+        <h3>فصول السنة الحالية</h3>
+        <table class="table" id="classesTable">
+          <thead><tr><th>المعرف</th><th>الصف</th><th>الشعبة</th><th>الطاقة</th><th>نشط</th><th>إدارة</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- Roster Modal -->
+      <dialog id="rosterDialog">
+        <form method="dialog" class="roster">
+          <h3>طلاب الفصل <span id="rosterClassId"></span></h3>
+
+          <div class="card soft">
+            <h4>إضافة طالب فردي</h4>
+            <div class="grid">
+              <input id="sFullName" class="input" placeholder="الاسم الكامل">
+              <input id="sCode" class="input" placeholder="كود الطالب (اختياري)">
+              <input id="sParent" class="input" placeholder="هاتف ولي الأمر (اختياري)">
+              <button class="btn" id="btnAddStudent" type="button">إضافة</button>
+            </div>
+          </div>
+
+          <div class="card soft">
+            <h4>استيراد طلاب من CSV</h4>
+            <div class="row">
+              <input id="csvFile" type="file" accept=".csv">
+              <button class="btn muted" id="btnDownloadTemplate" type="button">تنزيل قالب CSV</button>
+              <button class="btn" id="btnImportCsv" type="button">استيراد</button>
+            </div>
+            <div class="hint">رؤوس الأعمدة: <code>fullName,code,parentPhone,yearId,gradeId,classId,active</code></div>
+          </div>
+
+          <div class="card soft">
+            <h4>قائمة الطلاب</h4>
+            <table class="table" id="rosterTable">
+              <thead><tr><th>الاسم</th><th>الكود</th><th>الهاتف</th><th>إجراءات</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="row end">
+            <button class="btn muted" value="close">إغلاق</button>
+          </div>
+        </form>
+      </dialog>
+    </section>
+
+    <!-- Students (اختياري للتجميع العام) -->
+    <section id="tab-students" class="tab">
+      <div class="card">
+        <h3>بحث في الطلاب</h3>
+        <div class="row">
+          <input id="stSearch" class="input" placeholder="اسم/كود">
+          <button class="btn muted" id="btnReloadStudents">بحث</button>
+        </div>
+        <table class="table" id="studentsTable">
+          <thead><tr><th>الاسم</th><th>الكود</th><th>الفصل</th><th>السنة</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Subjects -->
+    <section id="tab-subjects" class="tab">
+      <div class="card">
+        <h3>المواد حسب الصف</h3>
+        <div class="row">
+          <select id="subjGrade" class="select"></select>
+          <button class="btn muted" id="btnReloadSubjects">عرض</button>
+        </div>
+        <table class="table" id="subjectsTable">
+          <thead><tr><th>المعرف</th><th>الاسم</th><th>الصف</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Assessments (تعريف فقط – إدخال الدرجات نضيفه لاحقًا) -->
+    <section id="tab-assessments" class="tab">
+      <div class="card">
+        <h3>إنشاء تقييم (للمعلّم لاحقًا)</h3>
+        <div class="hint">إنشاء وإدخال الدرجات سيكون من صفحة المعلّم؛ هنا عرض إداري لاحقًا.</div>
+      </div>
+    </section>
+
+    <!-- Invites (Owner only) -->
+    <section id="tab-invites" class="tab owner-only">
+      <div class="card">
+        <h3>الدعوات</h3>
+        <div class="grid">
+          <select id="invRole" class="select">
+            <option value="teacher">Teacher</option>
+            <option value="admin">Admin</option>
+          </select>
+          <input id="invCode" class="input" placeholder="كود الدعوة (اتركه فارغًا لتوليد تلقائي)">
+          <input id="invExpires" class="input" type="datetime-local" placeholder="تاريخ الانتهاء (اختياري)">
+          <button class="btn" id="btnCreateInvite">إنشاء دعوة</button>
+        </div>
+        <table class="table" id="invTable">
+          <thead><tr><th>الكود</th><th>الدور</th><th>انتهاء</th><th>نشط</th><th>إجراءات</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div class="hint">لو فضّلت Cloud Functions، عطل الكتابة على invites في القواعد واترك القراءة فقط.</div>
+      </div>
+    </section>
+
+    <!-- Settings (Owner only) -->
+    <section id="tab-settings" class="tab owner-only">
+      <div class="card">
+        <h3>إعدادات عامة</h3>
+        <div class="grid">
+          <input id="setName" class="input" placeholder="اسم المعهد">
+          <select id="setYear" class="select"></select>
+          <button class="btn" id="btnSaveSettings">حفظ</button>
+          <button class="btn secondary" id="btnRunSeed">تشغيل تهيئة (Seed) للبيانات</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script type="module" src="js/admin-dashboard.js"></script>
+</body>
+</html>
