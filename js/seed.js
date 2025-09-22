@@ -1,49 +1,70 @@
+// js/seed.js
 import {
-  doc, setDoc, collection, getDocs, serverTimestamp
+  doc, setDoc, getDoc, collection, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/**
- * تشغيل تهيئة سريعة: تنشئ صفوف، مواد، وفصول للسنة النشطة
- * الاستدعاء يتم من تبويب الإعدادات (للـ Owner فقط).
- */
-export async function runSeed({db, activeYearId}){
-  // 1) صفوف أساسية إن لم تكن موجودة
+export async function runSeed({ db, activeYearId }) {
   const grades = [
-    {id:"g10", name:"الصف الأول الثانوي", stage:"secondary", order:10},
-    {id:"g11", name:"الصف الثاني الثانوي", stage:"secondary", order:11},
-    {id:"g12", name:"الصف الثالث الثانوي", stage:"secondary", order:12}
+    {id:"g1",  name:"الصف الأول الابتدائي",  stage:"primary",   order:1},
+    {id:"g2",  name:"الصف الثاني الابتدائي", stage:"primary",   order:2},
+    {id:"g3",  name:"الصف الثالث الابتدائي", stage:"primary",   order:3},
+    {id:"g4",  name:"الصف الرابع الابتدائي", stage:"primary",   order:4},
+    {id:"g5",  name:"الصف الخامس الابتدائي", stage:"primary",   order:5},
+    {id:"g6",  name:"الصف السادس الابتدائي", stage:"primary",   order:6},
+    {id:"g7",  name:"الصف الأول الإعدادي",   stage:"prep",      order:7},
+    {id:"g8",  name:"الصف الثاني الإعدادي",  stage:"prep",      order:8},
+    {id:"g9",  name:"الصف الثالث الإعدادي",  stage:"prep",      order:9},
+    {id:"g10", name:"الصف الأول الثانوي",    stage:"secondary", order:10},
+    {id:"g11", name:"الصف الثاني الثانوي",   stage:"secondary", order:11},
+    {id:"g12", name:"الصف الثالث الثانوي",   stage:"secondary", order:12},
   ];
-  for(const g of grades){
-    await setDoc(doc(db,"grades", g.id), g, { merge:true });
+
+  // 1) درجات/صفوف
+  for (const g of grades) {
+    await setDoc(doc(db, "grades", g.id), {
+      code: g.id, name: g.name, stage: g.stage, order: g.order,
+      yearLength: 1, active: true, updatedAt: serverTimestamp(), createdAt: serverTimestamp()
+    }, { merge: true });
   }
 
-  // 2) مواد أساسية لكل صف (مثال — عدّل كما تريد)
-  const subjects = [
-    {id:"arabic-g10", name:"اللغة العربية", gradeId:"g10", code:"arabic"},
-    {id:"math-g10",   name:"الرياضيات",    gradeId:"g10", code:"math"},
-    {id:"physics-g10",name:"الفيزياء",     gradeId:"g10", code:"physics"},
-    {id:"arabic-g11", name:"اللغة العربية", gradeId:"g11", code:"arabic"},
-    {id:"math-g11",   name:"الرياضيات",    gradeId:"g11", code:"math"},
-    {id:"arabic-g12", name:"اللغة العربية", gradeId:"g12", code:"arabic"},
-  ];
-  for(const s of subjects){
-    await setDoc(doc(db,"subjects", s.id), s, { merge:true });
+  // 2) مسارات اختيارية (ar/lang) لكل صف — لو مش عايزها تجاهلها في الواجهة
+  for (const g of grades) {
+    await setDoc(doc(db, "tracks", `${g.id}-ar`),   { code:"ar",   gradeId:g.id, name:"عربي",  active:true }, { merge:true });
+    await setDoc(doc(db, "tracks", `${g.id}-lang`), { code:"lang", gradeId:g.id, name:"لغات", active:true }, { merge:true });
   }
 
-  // 3) أقسام افتراضية A..D من settings.global.sections أو افتراضي
-  let sections = ["A","B","C","D"];
-  try{
-    const gs = await (await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js")).getDoc(doc(db,"settings","global"));
-    if(gs.exists() && Array.isArray(gs.data().sections)) sections = gs.data().sections;
-  }catch{}
+  // 3) قالب فترات افتراضي (7 حصص)
+  await setDoc(doc(db,"periodTemplates","default-7"), {
+    name: "افتراضي (7 حصص)",
+    periods: [
+      {i:1, start:"08:00", end:"08:45"},
+      {i:2, start:"08:55", end:"09:40"},
+      {i:3, start:"09:50", end:"10:35"},
+      {i:4, start:"10:45", end:"11:30"},
+      {i:5, start:"11:40", end:"12:25"},
+      {i:6, start:"12:35", end:"13:20"},
+      {i:7, start:"13:30", end:"14:15"},
+    ],
+    createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+  }, { merge:true });
 
-  // 4) إنشاء فصول لكل صف بالسنة النشطة
-  for(const g of grades){
-    for(const sec of sections){
-      const classId = `${g.id}-${sec}`;
-      await setDoc(doc(db,"classes", classId), {
-        gradeId: g.id, section: sec, capacity: 35, active: true, yearId: activeYearId, createdAt: serverTimestamp()
-      }, { merge:true });
-    }
+  // 4) مادة عربية قياسية لكل صف (يمكن حذف الجزء ده لو مش محتاجه)
+  for (const g of grades) {
+    const sid = `arabic-${g.id}`;
+    await setDoc(doc(db,"subjects", sid), {
+      nameAr: "اللغة العربية", code:"arabic", gradeId: g.id,
+      compulsory: true, active: true, createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+    }, { merge:true });
   }
+
+  // 5) إعدادات عامة مبدئية (لو مش موجودة)
+  await setDoc(doc(db,"settings","global"), {
+    instituteName: "معهد الدراسات الإدارية والفنية",
+    activeYearId: activeYearId || "2025-2026",
+    sections: ["A","B","C","D"],
+    sectionsAr: ["أ","ب","ج","د"],
+    updatedAt: serverTimestamp()
+  }, { merge:true });
+
+  return true;
 }
