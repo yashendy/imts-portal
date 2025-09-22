@@ -1,10 +1,14 @@
-<!-- admin-dashboard.html -->
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>لوحة الإدارة • معهد الدراسات الإدارية والفنية</title>
+
+  <!-- الأيقونة (يحل مشكلة 404) -->
+  <link rel="icon" href="assets/logo.png" type="image/png">
+
+  <!-- الأنماط -->
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/admin-dashboard.css">
 </head>
@@ -16,25 +20,25 @@
     </div>
     <div class="top-actions">
       <select id="yearSelect" class="select"></select>
-      <span class="chip" id="roleChip">ADMIN</span>
-      <button id="btnSignOut" class="btn danger">خروج</button>
+      <span class="chip" id="roleChip">—</span>
+      <button id="btnSignOut" class="btn danger" type="button">خروج</button>
     </div>
   </header>
 
+  <!-- أزرار التبويبات (كلها type="button") -->
   <nav class="tabs">
-    <button class="nav active" data-tab="overview">نظرة عامة</button>
-    <button class="nav" data-tab="classes">الفصول</button>
-    <button class="nav" data-tab="teachers">المعلّمون</button>
-    <button class="nav" data-tab="link">الربط (معلّم ← فصل ← مادة)</button>
-    <button class="nav" data-tab="subjects">المواد</button>
-    <button class="nav" data-tab="students">الطلاب</button>
-    <button class="nav" data-tab="timetable">الجدول</button>
-    <button class="nav owner-only" style="display:none" data-tab="invites">الدعوات</button>
-    <button class="nav owner-only" style="display:none" data-tab="settings">الإعدادات</button>
+    <button class="nav active" type="button" data-tab="overview">نظرة عامة</button>
+    <button class="nav" type="button" data-tab="classes">الفصول</button>
+    <button class="nav" type="button" data-tab="teachers">المعلّمون</button>
+    <button class="nav" type="button" data-tab="link">الربط (معلّم ← فصل ← مادة)</button>
+    <button class="nav" type="button" data-tab="subjects">المواد</button>
+    <button class="nav" type="button" data-tab="students">الطلاب</button>
+    <button class="nav" type="button" data-tab="timetable">الجدول</button>
+    <button class="nav owner-only" type="button" data-tab="invites" style="display:none">الدعوات</button>
+    <button class="nav owner-only" type="button" data-tab="settings" style="display:none">الإعدادات</button>
   </nav>
 
   <main class="container">
-
     <div id="globalMsg"></div>
 
     <!-- نظرة عامة -->
@@ -62,11 +66,11 @@
           </select>
           <select id="cSection" class="select"></select>
           <input id="cSectionAr" class="input" placeholder="حرف الشعبة بالعربي (مثال: أ)">
-          <input id="cNameAr" class="input" placeholder="الاسم العربي للفصل (مثال: الصف الرابع الابتدائي لغات ب)">
+          <input id="cNameAr" class="input" placeholder="الاسم العربي للفصل">
           <input id="cCapacity" class="input" type="number" value="40" min="10" max="60" />
-          <button id="btnCreateClass" class="btn primary">حفظ/إضافة فصل</button>
+          <button id="btnCreateClass" class="btn primary" type="button">حفظ/إضافة فصل</button>
         </div>
-        <p class="hint">المعرّف ثابت للنيتج مثل g4-lang-B، والاسم العربي للعرض.</p>
+        <p class="hint">المعرّف يكون مثل g4-lang-B، والاسم العربي للعرض فقط.</p>
       </div>
 
       <div class="card">
@@ -87,26 +91,26 @@
       <div class="card">
         <div class="toolbar">
           <input id="teacherSearch" class="input" placeholder="بحث بالاسم/البريد">
-          <button id="btnReloadTeachers" class="btn">تحديث</button>
+          <button id="btnReloadTeachers" class="btn" type="button">تحديث</button>
         </div>
         <table class="table" id="teachersTable">
           <thead><tr>
-            <th>الاسم</th><th>البريد</th><th>الحالة</th><th>روابط</th><th>StaffCode</th><th>إجراءات</th>
+            <th>الاسم</th><th>البريد</th><th>الحالة</th><th>الدور</th>
           </tr></thead>
           <tbody></tbody>
         </table>
       </div>
     </section>
 
-    <!-- الربط (معلّم ← فصل ← مادة) -->
+    <!-- الربط -->
     <section class="tab" id="tab-link">
       <div class="card">
         <div class="grid">
           <select id="linkTeacher" class="select"></select>
-          <select id="linkGrade"   class="select"></select>
-          <select id="linkClass"   class="select"></select>
+          <select id="linkGrade" class="select"></select>
+          <select id="linkClass" class="select"></select>
           <select id="linkSubject" class="select"></select>
-          <button id="btnLink" class="btn primary">ربط المعلّم</button>
+          <button id="btnLink" class="btn primary" type="button">ربط المعلّم</button>
         </div>
       </div>
     </section>
@@ -116,17 +120,17 @@
       <div class="card">
         <div class="grid">
           <select id="subjGradeSel" class="select"></select>
-          <input id="subjId" class="input" placeholder="subjectId (مثال: arabic-g4 أو arabic-g10-ar)">
+          <input id="subjId" class="input" placeholder="subjectId (مثال: arabic-g10 أو arabic-g10-ar)">
           <input id="subjNameAr" class="input" placeholder="اسم المادة بالعربي">
           <input id="subjCode" class="input" placeholder="كود مختصر (arabic/math/...)">
-          <button id="btnCreateSubject" class="btn primary">حفظ/إضافة مادة</button>
+          <button id="btnCreateSubject" class="btn primary" type="button">حفظ/إضافة مادة</button>
         </div>
       </div>
 
       <div class="card">
         <div class="toolbar">
           <select id="subjGrade" class="select"><option value="">كل الصفوف</option></select>
-          <button id="btnReloadSubjects" class="btn">تحديث</button>
+          <button id="btnReloadSubjects" class="btn" type="button">تحديث</button>
         </div>
         <table class="table" id="subjectsTable">
           <thead><tr><th>المعرّف</th><th>الاسم</th><th>الصف</th><th>إدارة</th></tr></thead>
@@ -140,8 +144,7 @@
       <div class="card">
         <div class="toolbar">
           <input id="stSearch" class="input" placeholder="بحث بالاسم/الكود">
-          <button id="btnReloadStudents" class="btn">تحديث</button>
-          <button id="btnOpenStudentForm" class="btn primary">إضافة طالب</button>
+          <button id="btnReloadStudents" class="btn" type="button">تحديث</button>
         </div>
         <table class="table" id="studentsTable">
           <thead><tr>
@@ -158,10 +161,7 @@
         <div class="grid">
           <select id="ttClass" class="select"></select>
           <select id="ttTemplate" class="select"></select>
-          <button id="btnTTLoad" class="btn primary">تحميل الجدول</button>
-          <input type="file" id="ttCsv" accept=".csv" />
-          <button id="btnTTImport" class="btn">استيراد CSV</button>
-          <button id="btnTTExport" class="btn">تصدير CSV</button>
+          <button id="btnTTLoad" class="btn primary" type="button">تحميل الجدول</button>
         </div>
       </div>
       <div class="card">
@@ -179,109 +179,31 @@
           </select>
           <input id="invCode" class="input" placeholder="اتركه فارغًا لتوليد تلقائي">
           <input id="invExpires" class="input" type="date">
-          <button id="btnCreateInvite" class="btn primary">إنشاء دعوة</button>
+          <button id="btnCreateInvite" class="btn primary" type="button">إنشاء دعوة</button>
         </div>
       </div>
       <div class="card owner-only" style="display:none">
         <table class="table" id="invTable">
-          <thead><tr><th>الكود</th><th>الدور</th><th>ينتهي</th><th>نشط</th><th>إدارة</th></tr></thead>
+          <thead><tr><th>الكود</th><th>الدور</th><th>ينتهي</th><th>نشط</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
     </section>
 
-    <!-- الإعدادات (للـ owner) -->
+    <!-- الإعدادات -->
     <section class="tab" id="tab-settings">
       <div class="card owner-only" style="display:none">
         <div class="grid">
           <input id="setName" class="input" placeholder="اسم المعهد">
           <select id="setYear" class="select"></select>
-          <button id="btnSaveSettings" class="btn primary">حفظ الإعدادات</button>
-          <button id="btnRunSeed" class="btn secondary">تشغيل التهيئة</button>
+          <button id="btnSaveSettings" class="btn primary" type="button">حفظ الإعدادات</button>
+          <button id="btnRunSeed" class="btn secondary" type="button">تشغيل التهيئة</button>
         </div>
       </div>
     </section>
-
   </main>
 
-  <!-- حوار طلاب الفصل -->
-  <dialog id="rosterDialog" class="dialog">
-    <h3>طلاب الفصل: <span id="rosterClassId"></span></h3>
-    <div class="grid">
-      <select id="filterGender" class="select">
-        <option value="">الكل (النوع)</option>
-        <option value="male">ذكر</option>
-        <option value="female">أنثى</option>
-      </select>
-      <select id="filterReligion" class="select">
-        <option value="">الكل (الديانة)</option>
-        <option value="islam">مسلم</option>
-        <option value="christian">مسيحي</option>
-        <option value="other">أخرى</option>
-      </select>
-      <input type="file" id="csvFile" accept=".csv">
-      <button id="btnDownloadTemplate" class="btn">تحميل قالب CSV</button>
-      <button id="btnImportCsv" class="btn">استيراد CSV</button>
-    </div>
-    <div class="grid">
-      <input id="sFullName" class="input" placeholder="اسم الطالب">
-      <select id="sGender" class="select"><option value="">النوع</option><option value="male">ذكر</option><option value="female">أنثى</option></select>
-      <select id="sReligion" class="select"><option value="">الديانة</option><option value="islam">مسلم</option><option value="christian">مسيحي</option><option value="other">أخرى</option></select>
-      <input id="sCode" class="input" placeholder="كود الطالب (اختياري)">
-      <input id="sParent" class="input" placeholder="هاتف ولي الأمر (اختياري)">
-      <button id="btnAddStudent" class="btn primary">إضافة</button>
-    </div>
-    <div class="scroll">
-      <table class="table" id="rosterTable">
-        <thead><tr><th>الاسم</th><th>النوع</th><th>الديانة</th><th>الكود</th><th>الهاتف</th><th>إدارة</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-    <form method="dialog"><button class="btn">إغلاق</button></form>
-  </dialog>
-
-  <!-- حوار إدارة حصة -->
-  <dialog id="periodDialog" class="dialog">
-    <h3>إدارة الحصة</h3>
-    <div class="grid tight">
-      <input id="pdDay" class="input" disabled>
-      <input id="pdPeriod" class="input" disabled>
-      <select id="pdType" class="select">
-        <option value="normal">حصة عادية</option>
-        <option value="religion">تربية دينية (مقسّمة)</option>
-      </select>
-    </div>
-
-    <div id="pdNormal">
-      <div class="grid">
-        <select id="pdSubject" class="select"></select>
-        <select id="pdTeacher" class="select"></select>
-        <input id="pdRoom" class="input" placeholder="قاعة (اختياري)">
-      </div>
-    </div>
-
-    <div id="pdReligion" style="display:none">
-      <h4>شعبة إسلامية</h4>
-      <div class="grid">
-        <select id="pdSubjIslam" class="select"></select>
-        <select id="pdTeachIslam" class="select"></select>
-        <input id="pdRoomIslam" class="input" placeholder="قاعة (اختياري)">
-      </div>
-      <h4>شعبة مسيحية</h4>
-      <div class="grid">
-        <select id="pdSubjChris" class="select"></select>
-        <select id="pdTeachChris" class="select"></select>
-        <input id="pdRoomChris" class="input" placeholder="قاعة (اختياري)">
-      </div>
-    </div>
-
-    <div class="actions">
-      <button id="btnPdSave" class="btn primary">حفظ</button>
-      <button id="btnPdClear" class="btn danger">تفريغ</button>
-      <form method="dialog"><button class="btn">إغلاق</button></form>
-    </div>
-  </dialog>
-
+  <!-- سكربت -->
   <script type="module" src="js/admin-dashboard.js"></script>
 </body>
 </html>
