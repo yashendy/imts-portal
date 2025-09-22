@@ -32,7 +32,7 @@
     <button class="nav" data-tab="classes">الفصول</button>
     <button class="nav" data-tab="students">الطلاب</button>
     <button class="nav" data-tab="subjects">المواد</button>
-    <button class="nav" data-tab="assessments">التقييمات</button>
+    <button class="nav" data-tab="timetable">جدول الحصص</button>
     <button class="nav owner-only" data-tab="invites">الدعوات</button>
     <button class="nav owner-only" data-tab="settings">الإعدادات</button>
   </aside>
@@ -43,7 +43,7 @@
     <!-- Overview -->
     <section id="tab-overview" class="tab active">
       <div class="cards">
-        <div class="card kpi"><div class="k">المعلمون</div><div class="v" id="kTeachers">—</div></div>
+        <div class="card kpi"><div class="k">المعلّمون</div><div class="v" id="kTeachers">—</div></div>
         <div class="card kpi"><div class="k">الفصول</div><div class="v" id="kClasses">—</div></div>
         <div class="card kpi"><div class="k">الطلاب</div><div class="v" id="kStudents">—</div></div>
         <div class="card kpi"><div class="k">المواد</div><div class="v" id="kSubjects">—</div></div>
@@ -66,7 +66,7 @@
           <select id="linkSubject" class="select"></select>
           <button class="btn" id="btnLink">ربط</button>
         </div>
-        <div class="hint">يُنشئ ارتباطًا في <code>classTeachers</code> ويضيف وثيقة في <code>classes/{classId}/teachers/{teacherId}</code>.</div>
+        <div class="hint">إنشاء مستند في <code>classTeachers</code> + مرآة داخل <code>classes/{classId}/teachers/{teacherId}</code>.</div>
       </div>
 
       <div class="card">
@@ -76,7 +76,9 @@
           <button class="btn muted" id="btnReloadTeachers">تحديث</button>
         </div>
         <table class="table" id="teachersTable">
-          <thead><tr><th>الاسم</th><th>البريد</th><th>الحالة</th><th>فصول مرتبطة</th></tr></thead>
+          <thead>
+            <tr><th>الاسم</th><th>البريد</th><th>الحالة</th><th>روابط</th><th>StaffCode</th><th>إجراءات</th></tr>
+          </thead>
           <tbody></tbody>
         </table>
       </div>
@@ -85,20 +87,27 @@
     <!-- Classes -->
     <section id="tab-classes" class="tab">
       <div class="card">
-        <h3>إنشاء فصل</h3>
+        <h3>إنشاء/تعديل فصل</h3>
         <div class="grid">
           <select id="cGrade" class="select"></select>
+          <select id="cTrack" class="select">
+            <option value="">بدون مسار</option>
+            <option value="ar">عربي</option>
+            <option value="lang">لغات</option>
+          </select>
           <select id="cSection" class="select"></select>
-          <input id="cCapacity" class="input" type="number" min="1" value="35" placeholder="الطاقة الاستيعابية">
-          <button class="btn" id="btnCreateClass">إنشاء</button>
+          <input id="cSectionAr" class="input" placeholder="حرف الشعبة بالعربي (مثال: أ)">
+          <input id="cNameAr" class="input" placeholder="الاسم العربي للفصل (مثال: الصف الرابع الابتدائي لغات ب)">
+          <input id="cCapacity" class="input" type="number" min="1" value="40" placeholder="الطاقة الاستيعابية">
+          <button class="btn" id="btnCreateClass">حفظ/إضافة فصل</button>
         </div>
-        <div class="hint">المسار (track) اختياري للطلاب فقط — المعلّم غير مقيّد بالمسار.</div>
+        <div class="hint small">المعرّف ثابت لاتيني مثل <code>g4-lang-B</code>، والاسم العربي للعرض.</div>
       </div>
 
       <div class="card">
         <h3>فصول السنة الحالية</h3>
         <table class="table" id="classesTable">
-          <thead><tr><th>المعرف</th><th>الصف</th><th>الشعبة</th><th>الطاقة</th><th>نشط</th><th>إدارة</th></tr></thead>
+          <thead><tr><th>المعرف</th><th>الاسم العربي</th><th>الصف</th><th>الشعبة</th><th>الطاقة</th><th>نشط</th><th>إدارة</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
@@ -111,11 +120,23 @@
           <div class="card soft">
             <h4>إضافة طالب فردي</h4>
             <div class="grid">
-              <input id="sFullName" class="input" placeholder="الاسم الكامل">
+              <input id="sFullName" class="input" placeholder="الاسم الكامل" required>
               <input id="sCode" class="input" placeholder="كود الطالب (اختياري)">
               <input id="sParent" class="input" placeholder="هاتف ولي الأمر (اختياري)">
+              <select id="sGender" class="select" required>
+                <option value="" disabled selected>النوع</option>
+                <option value="male">ذكر</option>
+                <option value="female">أنثى</option>
+              </select>
+              <select id="sReligion" class="select" required>
+                <option value="" disabled selected>الديانة</option>
+                <option value="islam">مسلم</option>
+                <option value="christian">مسيحي</option>
+                <option value="other">أخرى</option>
+              </select>
               <button class="btn" id="btnAddStudent" type="button">إضافة</button>
             </div>
+            <div class="hint small">لن تُعرض الديانة/النوع على الشهادة. الديانة للتقسيم في حصة الدين، والنوع لضبط الصياغة فقط.</div>
           </div>
 
           <div class="card soft">
@@ -125,13 +146,26 @@
               <button class="btn muted" id="btnDownloadTemplate" type="button">تنزيل قالب CSV</button>
               <button class="btn" id="btnImportCsv" type="button">استيراد</button>
             </div>
-            <div class="hint">رؤوس الأعمدة: <code>fullName,code,parentPhone,yearId,gradeId,classId,active</code></div>
+            <div class="hint small">رؤوس: <code>fullName,gender,religion,code,parentPhone,yearId,gradeId,classId,active</code></div>
           </div>
 
           <div class="card soft">
             <h4>قائمة الطلاب</h4>
+            <div class="row">
+              <select id="filterGender" class="select">
+                <option value="">الكل (النوع)</option>
+                <option value="male">ذكور</option>
+                <option value="female">إناث</option>
+              </select>
+              <select id="filterReligion" class="select">
+                <option value="">الكل (الديانة)</option>
+                <option value="islam">مسلم</option>
+                <option value="christian">مسيحي</option>
+                <option value="other">أخرى</option>
+              </select>
+            </div>
             <table class="table" id="rosterTable">
-              <thead><tr><th>الاسم</th><th>الكود</th><th>الهاتف</th><th>إجراءات</th></tr></thead>
+              <thead><tr><th>الاسم</th><th>النوع</th><th>الديانة</th><th>الكود</th><th>الهاتف</th><th>إجراءات</th></tr></thead>
               <tbody></tbody>
             </table>
           </div>
@@ -143,23 +177,65 @@
       </dialog>
     </section>
 
-    <!-- Students (اختياري للتجميع العام) -->
+    <!-- Students -->
     <section id="tab-students" class="tab">
       <div class="card">
-        <h3>بحث في الطلاب</h3>
+        <h3>إضافة/تحرير طالب (عام)</h3>
         <div class="row">
-          <input id="stSearch" class="input" placeholder="اسم/كود">
+          <button class="btn" id="btnOpenStudentForm">إضافة طالب</button>
+          <input id="stSearch" class="input" placeholder="بحث سريع (اسم/كود)">
           <button class="btn muted" id="btnReloadStudents">بحث</button>
         </div>
         <table class="table" id="studentsTable">
-          <thead><tr><th>الاسم</th><th>الكود</th><th>الفصل</th><th>السنة</th></tr></thead>
+          <thead><tr><th>الاسم</th><th>النوع</th><th>الديانة</th><th>الكود</th><th>الفصل</th><th>السنة</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
+
+      <!-- Student Form Dialog -->
+      <dialog id="studentFormDialog">
+        <form method="dialog" class="roster">
+          <h3>إدخال بيانات طالب</h3>
+          <div class="grid">
+            <input id="sfFullName" class="input" placeholder="الاسم الكامل" required>
+            <input id="sfCode" class="input" placeholder="كود الطالب (اختياري)">
+            <input id="sfPhone" class="input" placeholder="هاتف ولي الأمر (اختياري)">
+            <select id="sfGender" class="select" required>
+              <option value="" disabled selected>النوع</option>
+              <option value="male">ذكر</option>
+              <option value="female">أنثى</option>
+            </select>
+            <select id="sfReligion" class="select" required>
+              <option value="" disabled selected>الديانة</option>
+              <option value="islam">مسلم</option>
+              <option value="christian">مسيحي</option>
+              <option value="other">أخرى</option>
+            </select>
+            <select id="sfClass" class="select" required></select>
+          </div>
+          <div class="row end">
+            <button class="btn muted" value="close">إلغاء</button>
+            <button class="btn" id="btnSaveStudent" type="button">حفظ</button>
+            <button class="btn secondary" id="btnSaveStudentNext" type="button">حفظ وإدخال التالي</button>
+          </div>
+        </form>
+      </dialog>
     </section>
 
     <!-- Subjects -->
     <section id="tab-subjects" class="tab">
+      <div class="card">
+        <h3>إضافة مادة</h3>
+        <div class="grid">
+          <input id="subjId" class="input" placeholder="subjectId (مثال: arabic-g4)">
+          <input id="subjNameAr" class="input" placeholder="اسم المادة بالعربي">
+          <input id="subjCode" class="input" placeholder="code (مثال: arabic)">
+          <select id="subjGradeSel" class="select"></select>
+          <button class="btn" id="btnCreateSubject">حفظ/إضافة مادة</button>
+        </div>
+        <div class="hint small">تأكّد من تطابق gradeId في subjectId مثل <code>arabic-g4</code>.</div>
+      </div>
+
       <div class="card">
         <h3>المواد حسب الصف</h3>
         <div class="row">
@@ -167,21 +243,75 @@
           <button class="btn muted" id="btnReloadSubjects">عرض</button>
         </div>
         <table class="table" id="subjectsTable">
-          <thead><tr><th>المعرف</th><th>الاسم</th><th>الصف</th></tr></thead>
+          <thead><tr><th>المعرف</th><th>الاسم</th><th>الصف</th><th>إجراءات</th></tr></thead>
           <tbody></tbody>
         </table>
       </div>
     </section>
 
-    <!-- Assessments (تعريف فقط – إدخال الدرجات نضيفه لاحقًا) -->
-    <section id="tab-assessments" class="tab">
+    <!-- Timetable -->
+    <section id="tab-timetable" class="tab">
       <div class="card">
-        <h3>إنشاء تقييم (للمعلّم لاحقًا)</h3>
-        <div class="hint">إنشاء وإدخال الدرجات سيكون من صفحة المعلّم؛ هنا عرض إداري لاحقًا.</div>
+        <h3>جدول الحصص للفصل</h3>
+        <div class="row">
+          <select id="ttClass" class="select"></select>
+          <select id="ttTemplate" class="select"></select>
+          <button class="btn muted" id="btnTTLoad">تحميل الجدول</button>
+          <button class="btn secondary" id="btnTTExport">تصدير CSV</button>
+          <input id="ttCsv" type="file" accept=".csv">
+          <button class="btn" id="btnTTImport">استيراد CSV</button>
+        </div>
+        <div id="ttGrid" class="tt-grid"></div>
       </div>
+
+      <!-- Period Dialog -->
+      <dialog id="periodDialog">
+        <form method="dialog" class="pd">
+          <h3>تعديل حصة</h3>
+          <div class="grid">
+            <input id="pdDay" class="input" disabled>
+            <input id="pdPeriod" class="input" disabled>
+            <select id="pdType" class="select">
+              <option value="normal">عادية</option>
+              <option value="religion">دينية (مقسّمة)</option>
+            </select>
+          </div>
+
+          <div id="pdNormal" class="card soft">
+            <h4>حصة عادية</h4>
+            <div class="grid">
+              <select id="pdSubject" class="select"></select>
+              <select id="pdTeacher" class="select"></select>
+              <input id="pdRoom" class="input" placeholder="قاعة (اختياري)">
+            </div>
+          </div>
+
+          <div id="pdReligion" class="card soft" style="display:none">
+            <h4>التربية الدينية (شعبتان متزامنتان)</h4>
+            <div class="grid">
+              <div class="subtle">الإسلامية</div><div class="subtle"></div><div class="subtle"></div>
+              <select id="pdSubjIslam" class="select"></select>
+              <select id="pdTeachIslam" class="select"></select>
+              <input id="pdRoomIslam" class="input" placeholder="قاعة (اختياري)">
+            </div>
+            <div class="grid">
+              <div class="subtle">المسيحية</div><div class="subtle"></div><div class="subtle"></div>
+              <select id="pdSubjChris" class="select"></select>
+              <select id="pdTeachChris" class="select"></select>
+              <input id="pdRoomChris" class="input" placeholder="قاعة (اختياري)">
+            </div>
+          </div>
+
+          <div class="row end">
+            <button class="btn muted" value="close">إلغاء</button>
+            <button class="btn" id="btnPdSave" type="button">حفظ</button>
+            <button class="btn danger" id="btnPdClear" type="button">تفريغ</button>
+          </div>
+        </form>
+      </dialog>
     </section>
 
-    <!-- Invites (Owner only) -->
+    <!-- Invites (Owner) -->
     <section id="tab-invites" class="tab owner-only">
       <div class="card">
         <h3>الدعوات</h3>
@@ -190,7 +320,7 @@
             <option value="teacher">Teacher</option>
             <option value="admin">Admin</option>
           </select>
-          <input id="invCode" class="input" placeholder="كود الدعوة (اتركه فارغًا لتوليد تلقائي)">
+          <input id="invCode" class="input" placeholder="كود الدعوة (اختياري)">
           <input id="invExpires" class="input" type="datetime-local" placeholder="تاريخ الانتهاء (اختياري)">
           <button class="btn" id="btnCreateInvite">إنشاء دعوة</button>
         </div>
@@ -198,11 +328,10 @@
           <thead><tr><th>الكود</th><th>الدور</th><th>انتهاء</th><th>نشط</th><th>إجراءات</th></tr></thead>
           <tbody></tbody>
         </table>
-        <div class="hint">لو فضّلت Cloud Functions، عطل الكتابة على invites في القواعد واترك القراءة فقط.</div>
       </div>
     </section>
 
-    <!-- Settings (Owner only) -->
+    <!-- Settings (Owner) -->
     <section id="tab-settings" class="tab owner-only">
       <div class="card">
         <h3>إعدادات عامة</h3>
@@ -210,7 +339,7 @@
           <input id="setName" class="input" placeholder="اسم المعهد">
           <select id="setYear" class="select"></select>
           <button class="btn" id="btnSaveSettings">حفظ</button>
-          <button class="btn secondary" id="btnRunSeed">تشغيل تهيئة (Seed) للبيانات</button>
+          <button class="btn secondary" id="btnRunSeed">تشغيل تهيئة (Seed)</button>
         </div>
       </div>
     </section>
