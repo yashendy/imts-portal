@@ -1,3 +1,14 @@
+/* =======================================================================
+   Admin Dashboard (Final) — معهد الدراسات الإدارية والفنية
+   - ثنائي اللغة داخليًا لكن الواجهة RTL عربية
+   - متوافق مع هيكل Firestore المعتمد عندك (subjects قد تكون track-specific)
+   - يحل خطأ ReferenceError: linkTeacherHandler
+   - يفلتر المواد حسب gradeId + توافق trackId مع الفصل (أو مواد عامة)
+   - يتضمن توليد StaffCode + Invite للمعلمين
+   - إدارة الطلاب (فردي + CSV) مع gender/religion
+   - جدول حصص كامل مع تضارب، استيراد/تصدير CSV
+======================================================================= */
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
@@ -25,11 +36,11 @@ const db   = getFirestore(app);
 const $  = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
 const msg = $("#globalMsg");
-function ok(t){ msg.innerHTML = `<div class="success">${escapeHtml(t)}</div>`; }
-function err(t){ msg.innerHTML = `<div class="error">${escapeHtml(t)}</div>`; }
-function clearMsg(){ msg.innerHTML = ""; }
+function ok(t){ if(msg) msg.innerHTML = `<div class="success">${escapeHtml(t)}</div>`; }
+function err(t){ if(msg) msg.innerHTML = `<div class="error">${escapeHtml(t)}</div>`; }
+function clearMsg(){ if(msg) msg.innerHTML = ""; }
 function escapeHtml(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-function id(){ return Math.random().toString(36).slice(2,8).toUpperCase(); }
+function rid(){ return Math.random().toString(36).slice(2,8).toUpperCase(); }
 const DAYS = ["Sat","Sun","Mon","Tue","Wed","Thu"];
 const DAY_AR = {Sat:"السبت", Sun:"الأحد", Mon:"الاثنين", Tue:"الثلاثاء", Wed:"الأربعاء", Thu:"الخميس"};
 let currentUser=null, currentRole="admin", activeYearId="";
@@ -42,7 +53,7 @@ $$(".nav").forEach(b=>{
     b.classList.add("active");
     const tab = b.dataset.tab;
     $$(".tab").forEach(x=>x.classList.remove("active"));
-    $(`#tab-${tab}`).classList.add("active");
+    const target = $(`#tab-${tab}`); if(target) target.classList.add("active");
     clearMsg();
     if(tab==="invites") loadInvites();
   });
@@ -57,7 +68,7 @@ onAuthStateChanged(auth, async (u)=>{
   const us   = await getDoc(uref);
   if(!us.exists()){ err("لا توجد وثيقة مستخدم، برجاء إعادة التفعيل."); return; }
   currentRole = us.data().role || "admin";
-  $("#roleChip").textContent = currentRole.toUpperCase();
+  const roleChip = $("#roleChip"); if(roleChip) roleChip.textContent = currentRole.toUpperCase();
   if(currentRole === "owner"){ $$(".owner-only").forEach(el=> el.style.display = ""); }
 
   await loadSettings();
@@ -71,36 +82,50 @@ onAuthStateChanged(auth, async (u)=>{
     reloadSubjects()
   ]);
 
-  $("#btnSignOut").addEventListener("click", async ()=>{
-    await signOut(auth); window.location.href = "index.html";
-  });
+  // Header actions
+  const signBtn = $("#btnSignOut");
+  if(signBtn) signBtn.addEventListener("click", async ()=>{ await signOut(auth); window.location.href = "index.html"; });
 
-  // Teachers link
-  $("#btnLink").addEventListener("click", linkTeacherHandler);
-  $("#btnReloadTeachers").addEventListener("click", reloadTeachers);
+  // Teachers tab
+  const btnLink = $("#btnLink");
+  if(btnLink) btnLink.addEventListener("click", linkTeacherHandler);
+  const btnReloadTeachers = $("#btnReloadTeachers");
+  if(btnReloadTeachers) btnReloadTeachers.addEventListener("click", reloadTeachers);
 
-  // Classes
-  $("#btnCreateClass").addEventListener("click", createClassHandler);
+  // Classes tab
+  const btnCreateClass = $("#btnCreateClass");
+  if(btnCreateClass) btnCreateClass.addEventListener("click", createClassHandler);
 
   // Roster dialog
-  $("#btnDownloadTemplate").addEventListener("click", downloadTemplate);
-  $("#btnImportCsv").addEventListener("click", importCsvHandler);
-  $("#btnAddStudent").addEventListener("click", addOneStudent);
-  $("#filterGender").addEventListener("change", reloadRoster);
-  $("#filterReligion").addEventListener("change", reloadRoster);
+  const btnDownloadTemplate = $("#btnDownloadTemplate");
+  if(btnDownloadTemplate) btnDownloadTemplate.addEventListener("click", downloadTemplate);
+  const btnImportCsv = $("#btnImportCsv");
+  if(btnImportCsv) btnImportCsv.addEventListener("click", importCsvHandler);
+  const btnAddStudent = $("#btnAddStudent");
+  if(btnAddStudent) btnAddStudent.addEventListener("click", addOneStudent);
+  const filterGender = $("#filterGender");
+  if(filterGender) filterGender.addEventListener("change", reloadRoster);
+  const filterReligion = $("#filterReligion");
+  if(filterReligion) filterReligion.addEventListener("change", reloadRoster);
 
   // Students tab
-  $("#btnReloadStudents").addEventListener("click", reloadStudents);
-  $("#btnOpenStudentForm").addEventListener("click", async ()=>{
+  const btnReloadStudents = $("#btnReloadStudents");
+  if(btnReloadStudents) btnReloadStudents.addEventListener("click", reloadStudents);
+  const btnOpenStudentForm = $("#btnOpenStudentForm");
+  if(btnOpenStudentForm) btnOpenStudentForm.addEventListener("click", async ()=>{
     await fillStudentFormClasses();
     $("#studentFormDialog").showModal();
   });
-  $("#btnSaveStudent").addEventListener("click", ()=> saveStudentForm(false));
-  $("#btnSaveStudentNext").addEventListener("click", ()=> saveStudentForm(true));
+  const btnSaveStudent = $("#btnSaveStudent");
+  if(btnSaveStudent) btnSaveStudent.addEventListener("click", ()=> saveStudentForm(false));
+  const btnSaveStudentNext = $("#btnSaveStudentNext");
+  if(btnSaveStudentNext) btnSaveStudentNext.addEventListener("click", ()=> saveStudentForm(true));
 
-  // Subjects
-  $("#btnCreateSubject").addEventListener("click", createSubjectHandler);
-  $("#btnReloadSubjects").addEventListener("click", reloadSubjects);
+  // Subjects tab
+  const btnCreateSubject = $("#btnCreateSubject");
+  if(btnCreateSubject) btnCreateSubject.addEventListener("click", createSubjectHandler);
+  const btnReloadSubjects = $("#btnReloadSubjects");
+  if(btnReloadSubjects) btnReloadSubjects.addEventListener("click", reloadSubjects);
 
   // Invites (owner)
   const btnCreateInvite = $("#btnCreateInvite");
@@ -112,10 +137,14 @@ onAuthStateChanged(auth, async (u)=>{
   const btnRunSeed = $("#btnRunSeed");
   if(btnRunSeed) btnRunSeed.addEventListener("click", ()=> runSeed({db, activeYearId}).then(()=>ok("تمت التهيئة بنجاح")).catch(e=>err(e.message||e)));
 
-  $("#yearSelect").addEventListener("change", async (e)=>{
+  const yearSel = $("#yearSelect");
+  if(yearSel) yearSel.addEventListener("change", async (e)=>{
     activeYearId = e.target.value;
     await Promise.all([reloadOverview(), reloadClasses(), reloadSubjects(), fillTTClasses()]);
   });
+
+  // Timetable UI
+  await initTimetableUI();
 });
 
 /* ------------ Settings ------------ */
@@ -123,26 +152,27 @@ async function loadSettings(){
   try{
     const gsnap = await getDoc(doc(db,"settings","global"));
     const name = gsnap.exists() ? (gsnap.data().instituteName || "المعهد") : "المعهد";
-    $("#instName").textContent = name;
+    const title = $("#instName"); if(title) title.textContent = name;
 
     const years = new Set();
     (await getDocs(collection(db,"academicYears"))).forEach(d=> years.add(d.id));
     activeYearId = gsnap.exists() ? (gsnap.data().activeYearId || [...years][0]) : ([...years][0] || "2025-2026");
 
-    const yearSel = $("#yearSelect"); yearSel.innerHTML="";
-    [...years].sort().forEach(y=>{
-      const opt = document.createElement("option");
-      opt.value=opt.textContent=y;
-      if(y===activeYearId) opt.selected=true;
-      yearSel.appendChild(opt);
-    });
+    const yearSel = $("#yearSelect"); if(yearSel){ yearSel.innerHTML="";
+      [...years].sort().forEach(y=>{
+        const opt = document.createElement("option");
+        opt.value=opt.textContent=y;
+        if(y===activeYearId) opt.selected=true;
+        yearSel.appendChild(opt);
+      });
+    }
 
     const setYear = $("#setYear"); if(setYear){
       setYear.innerHTML="";
       [...years].sort().forEach(y=>{
         const o=document.createElement("option"); o.value=o.textContent=y; setYear.appendChild(o);
       });
-      $("#setName").value = name;
+      const setName = $("#setName"); if(setName) setName.value = name;
       setYear.value = activeYearId;
     }
   }catch(e){ err("تعذّر تحميل الإعدادات"); console.error(e); }
@@ -152,16 +182,16 @@ async function loadSettings(){
 async function reloadOverview(){
   try{
     const tSnap = await getDocs(query(collection(db,"users"), where("role","==","teacher")));
-    $("#kTeachers").textContent = tSnap.size;
+    const kTeachers = $("#kTeachers"); if(kTeachers) kTeachers.textContent = tSnap.size;
 
     const cSnap = await getDocs(query(collection(db,"classes"), where("yearId","==",activeYearId)));
-    $("#kClasses").textContent = cSnap.size;
+    const kClasses = $("#kClasses"); if(kClasses) kClasses.textContent = cSnap.size;
 
     const sSnap = await getDocs(collection(db,"students"));
-    $("#kStudents").textContent = sSnap.size;
+    const kStudents = $("#kStudents"); if(kStudents) kStudents.textContent = sSnap.size;
 
     const subjSnap = await getDocs(collection(db,"subjects"));
-    $("#kSubjects").textContent = subjSnap.size;
+    const kSubjects = $("#kSubjects"); if(kSubjects) kSubjects.textContent = subjSnap.size;
 
     if(currentRole==="owner"){
       try{
@@ -173,13 +203,13 @@ async function reloadOverview(){
           const exp = x.expiresAt && x.expiresAt.toMillis ? x.expiresAt.toMillis() : null;
           if(x.active && (!exp || exp > now)) active++;
         });
-        $("#kInvites").textContent = active;
+        const kInvites = $("#kInvites"); if(kInvites) kInvites.textContent = active;
       }catch(e){
         console.warn("invites list blocked by rules", e);
-        $("#kInvites").textContent = "—";
+        const kInvites = $("#kInvites"); if(kInvites) kInvites.textContent = "—";
       }
     }
-    $("#recentLog").textContent = "جاهز ✨";
+    const recent = $("#recentLog"); if(recent) recent.textContent = "جاهز ✨";
   }catch(e){ err("فشل تحميل النظرة العامة"); console.error(e); }
 }
 
@@ -187,10 +217,12 @@ async function reloadOverview(){
 async function loadGradesSelects(){
   const grades = []; (await getDocs(collection(db,"grades"))).forEach(d=> grades.push({id:d.id, ...d.data()}));
   let sections = ["A","B","C","D"];
-  const gsnap = await getDoc(doc(db,"settings","global"));
-  if(gsnap.exists() && Array.isArray(gsnap.data().sections)) sections = gsnap.data().sections;
+  try{
+    const gsnap = await getDoc(doc(db,"settings","global"));
+    if(gsnap.exists() && Array.isArray(gsnap.data().sections)) sections = gsnap.data().sections;
+  }catch{}
 
-  const fill = (sel, options)=>{ sel.innerHTML=""; options.forEach(o=> sel.insertAdjacentHTML("beforeend", `<option value="${o.value}">${o.label}</option>`)); };
+  const fill = (sel, options)=>{ if(!sel) return; sel.innerHTML=""; options.forEach(o=> sel.insertAdjacentHTML("beforeend", `<option value="${o.value}">${o.label}</option>`)); };
   fill($("#linkGrade"), grades.map(g=>({value:g.id,label:g.name||g.id})));
   fill($("#cGrade"), grades.map(g=>({value:g.id,label:g.name||g.id})));
   fill($("#subjGrade"), grades.map(g=>({value:g.id,label:g.name||g.id})));
@@ -201,34 +233,66 @@ async function loadGradesSelects(){
 
   const teachers = [];
   (await getDocs(query(collection(db,"users"), where("role","==","teacher")))).forEach(d=> teachers.push({id:d.id,...d.data()}));
-  $("#linkTeacher").innerHTML = teachers.map(t=> `<option value="${t.id}">${escapeHtml(t.displayName||t.email)} (${t.email})</option>`).join("");
+  const linkTeacher = $("#linkTeacher");
+  if(linkTeacher) linkTeacher.innerHTML = teachers.map(t=> `<option value="${t.id}">${escapeHtml(t.displayName||t.email)} (${t.email})</option>`).join("");
 
-  $("#linkGrade").addEventListener("change", ()=> reloadClassAndSubjectSelects());
-  await reloadClassAndSubjectSelects();
+  const linkGrade = $("#linkGrade");
+  if(linkGrade){
+    linkGrade.addEventListener("change", ()=> reloadClassAndSubjectSelects());
+    await reloadClassAndSubjectSelects();
+  }
   await fillTTClasses();
 }
 
+/* ------------ Track-aware subjects + classes for Teacher linking ------------ */
 async function reloadClassAndSubjectSelects(){
-  const g = $("#linkGrade").value;
-  const clsSel = $("#linkClass"); clsSel.innerHTML = "";
-  const cSnap = await getDocs(query(collection(db,"classes"),
-               where("yearId","==",activeYearId), where("gradeId","==",g)));
+  const gradeSel = $("#linkGrade"); const clsSel = $("#linkClass"); const sSel = $("#linkSubject");
+  if(!gradeSel || !clsSel || !sSel) return;
+
+  const g = gradeSel.value;
+  clsSel.innerHTML = ""; sSel.innerHTML = "";
+
+  // classes of grade + year
+  const cSnap = await getDocs(query(
+    collection(db,"classes"),
+    where("yearId","==",activeYearId),
+    where("gradeId","==",g)
+  ));
+  const classes = [];
   cSnap.forEach(d=>{
-    const c = d.data();
+    const c = d.data(); classes.push({id:d.id, ...c});
     const label = c.displayNameAr ? `${c.displayNameAr} (${d.id})` : d.id;
     clsSel.insertAdjacentHTML("beforeend", `<option value="${d.id}">${escapeHtml(label)}</option>`);
   });
+  if(classes.length===0) return;
 
-  const sSel = $("#linkSubject"); sSel.innerHTML="";
-  const sSnap = await getDocs(query(collection(db,"subjects"), where("gradeId","==",g)));
-  sSnap.forEach(d=> sSel.insertAdjacentHTML("beforeend", `<option value="${d.id}">${escapeHtml((d.data().nameAr||d.data().name||d.id))}</option>`));
+  // determine selected class + its trackId (e.g., "g10-ar")
+  const classId = clsSel.value;
+  const C = classes.find(x=> x.id===classId);
+  const classTrackId = C?.trackId || null;
+
+  // fetch subjects by grade; filter by track compatibility:
+  //   OK if subject.trackId == classTrackId OR subject.trackId is missing (general)
+  const subjSnap = await getDocs(query(collection(db,"subjects"), where("gradeId","==",g)));
+  sSel.innerHTML = "";
+  subjSnap.forEach(d=>{
+    const s = d.data();
+    const okByTrack = !s.trackId || !classTrackId || s.trackId === classTrackId;
+    if(okByTrack){
+      const label = s.nameAr || s.name || d.id;
+      sSel.insertAdjacentHTML("beforeend", `<option value="${d.id}">${escapeHtml(label)}</option>`);
+    }
+  });
+
+  // reload subjects when class changes (to reflect track)
+  clsSel.addEventListener("change", reloadClassAndSubjectSelects, { once:true });
 }
 
 /* ------------ Teachers listing + codes ------------ */
 async function reloadTeachers(){
   try{
-    const term = $("#teacherSearch").value?.trim()?.toLowerCase() || "";
-    const tbody = $("#teachersTable tbody"); tbody.innerHTML="";
+    const term = ($("#teacherSearch")?.value || "").trim().toLowerCase();
+    const tbody = $("#teachersTable tbody"); if(!tbody) return; tbody.innerHTML="";
 
     const snap = await getDocs(query(collection(db,"users"), where("role","==","teacher")));
     for (const d of snap.docs){
@@ -237,10 +301,7 @@ async function reloadTeachers(){
       const email= (u.email||"").toLowerCase();
       if(term && !(name.includes(term) || email.includes(term))) continue;
 
-      let count=0;
       const links = await getDocs(query(collection(db,"classTeachers"), where("teacherId","==",d.id)));
-      count = links.size;
-
       const staffCode = u.staffCode || "-";
 
       const tr = document.createElement("tr");
@@ -248,7 +309,7 @@ async function reloadTeachers(){
         `<td>${escapeHtml(u.displayName||"")}</td>
          <td>${escapeHtml(u.email||"")}</td>
          <td>${escapeHtml(u.status||"-")}</td>
-         <td>${count}</td>
+         <td>${links.size}</td>
          <td>${escapeHtml(staffCode)}</td>
          <td>
            <button class="btn secondary" data-act="staff" data-uid="${d.id}">${staffCode==="-"?"توليد StaffCode":"إعادة توليد"}</button>
@@ -288,7 +349,7 @@ async function generateTeacherInvite(uid){
     const u = await getDoc(doc(db,"users", uid));
     if(!u.exists()) return err("مستخدم غير موجود.");
     const email = u.data().email || "teacher";
-    const code = `TCH-${id()}-${id()}`;
+    const code = `TCH-${rid()}-${rid()}`;
     await setDoc(doc(db,"invites", code), {
       role: "teacher", active:true, usageLimit:1, createdAt: serverTimestamp(),
       createdBy: currentUser.uid, note: `Invite for ${email}`
@@ -297,9 +358,34 @@ async function generateTeacherInvite(uid){
   }catch(e){ err("فشل إنشاء الدعوة"); console.error(e); }
 }
 
+/* ------------ Teacher ↔ Class ↔ Subject (FIXED) ------------ */
+async function linkTeacherHandler(){
+  try{
+    const teacherId = $("#linkTeacher")?.value;
+    const gradeId   = $("#linkGrade")?.value;
+    const classId   = $("#linkClass")?.value;
+    const subjectId = $("#linkSubject")?.value;
+    if(!teacherId || !gradeId || !classId || !subjectId){
+      return err("اختَر المعلّم والصف والفصل والمادّة.");
+    }
+    const yearId = activeYearId;
+
+    const linkId = `ct-${yearId}-${classId}-${teacherId}-${subjectId}`;
+    await setDoc(doc(db,"classTeachers", linkId), {
+      yearId, classId, teacherId, subjectId, active: true, createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+    }, { merge:true });
+
+    await setDoc(doc(db,"classes", classId, "teachers", teacherId), {
+      teacherId, yearId, active: true
+    }, { merge:true });
+
+    ok("تم ربط المعلّم بالفصل/المادة.");
+  }catch(e){ err("فشل الربط"); console.error(e); }
+}
+
 /* ------------ Classes ------------ */
 async function reloadClasses(){
-  const tbody = $("#classesTable tbody"); tbody.innerHTML="";
+  const tbody = $("#classesTable tbody"); if(!tbody) return; tbody.innerHTML="";
   try{
     const snap = await getDocs(query(collection(db,"classes"), where("yearId","==",activeYearId)));
     for(const d of snap.docs){
@@ -325,23 +411,29 @@ async function reloadClasses(){
 
 async function createClassHandler(){
   clearMsg();
-  const gradeId = $("#cGrade").value;
-  const trackId = $("#cTrack").value || "";
-  const section = $("#cSection").value;
-  const sectionAr = $("#cSectionAr").value.trim();
-  const nameAr = $("#cNameAr").value.trim();
-  const capacity= Number($("#cCapacity").value||40);
+  const gradeId = $("#cGrade")?.value;
+  const trackCodeSel = $("#cTrack")?.value || ""; // "ar|lang" أو ""
+  const section = $("#cSection")?.value;
+  const sectionAr = $("#cSectionAr")?.value.trim();
+  const nameAr = $("#cNameAr")?.value.trim();
+  const capacity= Number($("#cCapacity")?.value||40);
   if(!gradeId || !section) return err("اختر الصف والشعبة.");
-  const classId = trackId ? `${gradeId}-${trackId}-${section}` : `${gradeId}-${section}`;
+
+  // نشتق classId
+  const classId = trackCodeSel ? `${gradeId}-${trackCodeSel}-${section}` : `${gradeId}-${section}`;
+
+  // trackId في DB عندك يكون مثل "g10-ar" (document id في tracks) إن أردت ربطه
+  const trackId = trackCodeSel ? `${gradeId}-${trackCodeSel}` : null;
+
   try{
     await setDoc(doc(db,"classes", classId), {
-      gradeId, section, trackId: trackId || null, sectionNameAr: sectionAr || null,
+      gradeId, section, trackId, sectionNameAr: sectionAr || null,
       displayNameAr: nameAr || null, capacity, yearId: activeYearId, active:true,
       updatedAt: serverTimestamp(), createdAt: serverTimestamp()
     }, { merge:true });
     ok("تم حفظ/إضافة الفصل.");
-    $("#cNameAr").value = "";
-    await reloadClasses(); await fillTTClasses();
+    const nameInput = $("#cNameAr"); if(nameInput) nameInput.value = "";
+    await reloadClasses(); await fillTTClasses(); await reloadClassAndSubjectSelects();
   }catch(e){ err("فشل حفظ الفصل"); console.error(e); }
 }
 
@@ -349,7 +441,6 @@ async function deleteClass(classId){
   clearMsg();
   if(!confirm(`حذف الفصل ${classId}؟ لن يُسمح بالحذف إن وجدت تبعيات.`)) return;
   try{
-    // فحص تبعيات
     const stSnap = await getDocs(collection(db,"classes", classId, "students"));
     const ctSnap = await getDocs(query(collection(db,"classTeachers"), where("classId","==",classId)));
     const ttSnap = await getDocs(query(collection(db,"timetableEntries"), where("classId","==",classId)));
@@ -366,17 +457,18 @@ async function deleteClass(classId){
 let currentClassId = "";
 async function openRoster(classId){
   currentClassId = classId;
-  $("#rosterClassId").textContent = classId;
-  $("#filterGender").value = ""; $("#filterReligion").value = "";
+  const rosterClassId = $("#rosterClassId"); if(rosterClassId) rosterClassId.textContent = classId;
+  const gSel = $("#filterGender"); if(gSel) gSel.value = "";
+  const rSel = $("#filterReligion"); if(rSel) rSel.value = "";
   await reloadRoster();
   $("#rosterDialog").showModal();
 }
 
 async function reloadRoster(){
-  const tb = $("#rosterTable tbody"); tb.innerHTML="";
+  const tb = $("#rosterTable tbody"); if(!tb) return; tb.innerHTML="";
   try{
-    const gFilter = $("#filterGender").value;
-    const rFilter = $("#filterReligion").value;
+    const gFilter = $("#filterGender")?.value || "";
+    const rFilter = $("#filterReligion")?.value || "";
     const snap = await getDocs(collection(db,"classes", currentClassId, "students"));
     for(const d of snap.docs){
       const s = d.data();
@@ -399,18 +491,18 @@ async function reloadRoster(){
 
 async function addOneStudent(){
   clearMsg();
-  const fullName = $("#sFullName").value.trim();
-  const code  = $("#sCode").value.trim() || null;
-  const phone = $("#sParent").value.trim() || null;
-  const gender= $("#sGender").value;
-  const religion = $("#sReligion").value;
+  const fullName = $("#sFullName")?.value.trim();
+  const code  = $("#sCode")?.value.trim() || null;
+  const phone = $("#sParent")?.value.trim() || null;
+  const gender= $("#sGender")?.value;
+  const religion = $("#sReligion")?.value;
 
   if(!fullName) return err("اسم الطالب مطلوب.");
   if(!gender) return err("اختر النوع.");
   if(!religion) return err("اختر الديانة.");
 
   try{
-    const sid = crypto.randomUUID ? crypto.randomUUID() : `S-${Date.now()}-${id()}`;
+    const sid = (window.crypto?.randomUUID?.() || `S-${Date.now()}-${rid()}`);
     await setDoc(doc(db,"students", sid), {
       fullName, code, parentPhone: phone, yearId: activeYearId,
       classId: currentClassId, gradeId: currentClassId.split("-")[0], active:true,
@@ -420,8 +512,11 @@ async function addOneStudent(){
       fullName, studentId: sid, code, parentPhone: phone, gender, religion
     });
     ok("تمت إضافة الطالب.");
-    $("#sFullName").value = $("#sCode").value = $("#sParent").value = "";
-    $("#sGender").value = ""; $("#sReligion").value = "";
+    if($("#sFullName")) $("#sFullName").value = "";
+    if($("#sCode")) $("#sCode").value = "";
+    if($("#sParent")) $("#sParent").value = "";
+    if($("#sGender")) $("#sGender").value = "";
+    if($("#sReligion")) $("#sReligion").value = "";
     await reloadRoster(); await reloadOverview();
   }catch(e){ err("فشل إضافة الطالب"); console.error(e); }
 }
@@ -437,7 +532,7 @@ async function removeStudent(sid){
 
 /* ------------ Student Form (global) ------------ */
 async function fillStudentFormClasses(){
-  const sel = $("#sfClass"); sel.innerHTML="";
+  const sel = $("#sfClass"); if(!sel) return; sel.innerHTML="";
   const cSnap = await getDocs(query(collection(db,"classes"), where("yearId","==",activeYearId)));
   cSnap.forEach(d=>{
     const c = d.data();
@@ -447,17 +542,17 @@ async function fillStudentFormClasses(){
 }
 async function saveStudentForm(keepOpen){
   clearMsg();
-  const fullName = $("#sfFullName").value.trim();
-  const code  = $("#sfCode").value.trim() || null;
-  const phone = $("#sfPhone").value.trim() || null;
-  const gender= $("#sfGender").value;
-  const religion = $("#sfReligion").value;
-  const classId = $("#sfClass").value;
+  const fullName = $("#sfFullName")?.value.trim();
+  const code  = $("#sfCode")?.value.trim() || null;
+  const phone = $("#sfPhone")?.value.trim() || null;
+  const gender= $("#sfGender")?.value;
+  const religion = $("#sfReligion")?.value;
+  const classId = $("#sfClass")?.value;
   if(!fullName || !gender || !religion || !classId) return err("أكمل الحقول المطلوبة.");
   const gradeId = classId.split("-")[0];
 
   try{
-    const sid = crypto.randomUUID ? crypto.randomUUID() : `S-${Date.now()}-${id()}`;
+    const sid = (window.crypto?.randomUUID?.() || `S-${Date.now()}-${rid()}`);
     await setDoc(doc(db,"students", sid), {
       fullName, code, parentPhone: phone, yearId: activeYearId, gradeId, classId, active:true,
       gender, religion, createdAt: serverTimestamp(), updatedAt: serverTimestamp()
@@ -468,10 +563,13 @@ async function saveStudentForm(keepOpen){
     ok("تم حفظ الطالب.");
     await reloadStudents();
     if(keepOpen){
-      $("#sfFullName").value=""; $("#sfCode").value=""; $("#sfPhone").value="";
-      $("#sfGender").value=""; $("#sfReligion").value="";
+      if($("#sfFullName")) $("#sfFullName").value="";
+      if($("#sfCode")) $("#sfCode").value="";
+      if($("#sfPhone")) $("#sfPhone").value="";
+      if($("#sfGender")) $("#sfGender").value="";
+      if($("#sfReligion")) $("#sfReligion").value="";
     }else{
-      $("#studentFormDialog").close();
+      $("#studentFormDialog")?.close();
     }
   }catch(e){ err("فشل حفظ الطالب"); console.error(e); }
 }
@@ -521,7 +619,7 @@ function mapReligion(v){
 }
 async function importCsvHandler(){
   clearMsg();
-  const f = $("#csvFile").files[0];
+  const f = $("#csvFile")?.files?.[0];
   if(!f) return err("اختر ملف CSV أولًا.");
   if(!currentClassId) return err("افتح نافذة فصل أولًا.");
 
@@ -544,7 +642,7 @@ async function importCsvHandler(){
     if(!gender || !religion){ bad++; continue; }
 
     try{
-      const sid = crypto.randomUUID ? crypto.randomUUID() : `S-${Date.now()}-${id()}`;
+      const sid = (window.crypto?.randomUUID?.() || `S-${Date.now()}-${rid()}`);
       await setDoc(doc(db,"students", sid), {
         fullName, code, parentPhone: phone, yearId, gradeId, classId, active, gender, religion,
         createdAt: serverTimestamp(), updatedAt: serverTimestamp()
@@ -562,8 +660,8 @@ async function importCsvHandler(){
 
 /* ------------ Students list (global) ------------ */
 async function reloadStudents(){
-  const term = $("#stSearch").value?.trim()?.toLowerCase() || "";
-  const tb = $("#studentsTable tbody"); tb.innerHTML="";
+  const term = ($("#stSearch")?.value || "").trim().toLowerCase();
+  const tb = $("#studentsTable tbody"); if(!tb) return; tb.innerHTML="";
   const snap = await getDocs(collection(db,"students"));
   snap.forEach(d=>{
     const s = d.data();
@@ -582,19 +680,24 @@ async function reloadStudents(){
 /* ------------ Subjects (add/delete) ------------ */
 async function createSubjectHandler(){
   clearMsg();
-  const idStr = $("#subjId").value.trim();
-  const nameAr= $("#subjNameAr").value.trim();
-  const code  = $("#subjCode").value.trim();
-  const grade = $("#subjGradeSel").value;
+  const idStr = $("#subjId")?.value.trim();
+  const nameAr= $("#subjNameAr")?.value.trim();
+  const code  = $("#subjCode")?.value.trim();
+  const grade = $("#subjGradeSel")?.value;
   if(!idStr || !nameAr || !code || !grade) return err("أكمل الحقول.");
-  if(!idStr.endsWith(`-${grade}`)) return err("تأكّد أن subjectId ينتهي بـ -gradeId (مثال: arabic-g4).");
+  if(!idStr.endsWith(`-${grade}`) && !/-g\d+-(ar|lang)$/.test(idStr)) {
+    return err("تأكّد من تطابق subjectId مع الصف/المسار (مثال: arabic-g10 أو arabic-g10-ar).");
+  }
 
   try{
     await setDoc(doc(db,"subjects", idStr), {
-      nameAr, code, gradeId: grade, compulsory: true, active: true, updatedAt: serverTimestamp(), createdAt: serverTimestamp()
+      nameAr, code, gradeId: grade, compulsory: true, active: true,
+      updatedAt: serverTimestamp(), createdAt: serverTimestamp()
     }, { merge:true });
     ok("تم حفظ/إضافة المادة.");
-    $("#subjId").value = $("#subjNameAr").value = $("#subjCode").value = "";
+    if($("#subjId")) $("#subjId").value = "";
+    if($("#subjNameAr")) $("#subjNameAr").value = "";
+    if($("#subjCode")) $("#subjCode").value = "";
     await reloadSubjects();
   }catch(e){ err("فشل حفظ المادة"); console.error(e); }
 }
@@ -614,8 +717,8 @@ async function deleteSubject(subjectId){
 }
 
 async function reloadSubjects(){
-  const g = $("#subjGrade").value || null;
-  const tb = $("#subjectsTable tbody"); tb.innerHTML="";
+  const g = $("#subjGrade")?.value || null;
+  const tb = $("#subjectsTable tbody"); if(!tb) return; tb.innerHTML="";
   let qs = collection(db,"subjects");
   if(g){ qs = query(qs, where("gradeId","==",g)); }
   const snap = await getDocs(qs);
@@ -636,12 +739,13 @@ async function reloadSubjects(){
 async function createInviteHandler(){
   clearMsg();
   if(currentRole!=="owner") return err("هذه العملية للمدير فقط.");
-  const role = $("#invRole").value;
-  let code   = $("#invCode").value.trim();
-  const exp  = $("#invExpires").value ? new Date($("#invExpires").value) : null;
+  const role = $("#invRole")?.value;
+  let code   = $("#invCode")?.value.trim();
+  const expInput = $("#invExpires")?.value || null;
+  const exp  = expInput ? new Date(expInput) : null;
 
   try{
-    if(!code) code = `${role.toUpperCase()}-${id()}-${id()}`;
+    if(!code) code = `${role.toUpperCase()}-${rid()}-${rid()}`;
     await setDoc(doc(db,"invites", code), {
       role, active:true, usageLimit:1, createdAt: serverTimestamp(),
       expiresAt: exp ? {seconds: Math.floor(exp.getTime()/1000)} : null,
@@ -675,7 +779,7 @@ async function loadInvites(){
     }
   }catch(e){
     console.warn("cannot list invites (rules)", e);
-    tb.innerHTML = `<tr><td colspan="5">لا توجد صلاحية لعرض قائمة الدعوات (list). يمكنك تفعيلها في القواعد للـ Owner فقط.</td></tr>`;
+    tb.innerHTML = `<tr><td colspan="5">لا توجد صلاحية لعرض قائمة الدعوات. يمكنك تمكين list للـ Owner في القواعد.</td></tr>`;
   }
 }
 
@@ -685,8 +789,8 @@ async function saveSettingsHandler(){
   if(currentRole!=="owner") return err("الإعدادات للمدير فقط.");
   try{
     await setDoc(doc(db,"settings","global"), {
-      instituteName: $("#setName").value.trim() || "المعهد",
-      activeYearId: $("#setYear").value
+      instituteName: $("#setName")?.value.trim() || "المعهد",
+      activeYearId: $("#setYear")?.value
     }, { merge:true });
     ok("تم الحفظ."); await loadSettings();
   }catch(e){ err("فشل حفظ الإعدادات"); console.error(e); }
@@ -698,12 +802,19 @@ async function saveSettingsHandler(){
 
 let PERIOD_TEMPLATE = null;
 async function initTimetableUI(){
-  $("#btnTTLoad").addEventListener("click", buildTTGrid);
-  $("#btnTTExport").addEventListener("click", exportTT);
-  $("#btnTTImport").addEventListener("click", importTT);
-  $("#btnPdSave").addEventListener("click", savePeriod);
-  $("#btnPdClear").addEventListener("click", clearPeriod);
-  $("#pdType").addEventListener("change", onPdTypeChange);
+  const btnTTLoad = $("#btnTTLoad");
+  if(btnTTLoad) btnTTLoad.addEventListener("click", buildTTGrid);
+  const btnTTExport = $("#btnTTExport");
+  if(btnTTExport) btnTTExport.addEventListener("click", exportTT);
+  const btnTTImport = $("#btnTTImport");
+  if(btnTTImport) btnTTImport.addEventListener("click", importTT);
+  const btnPdSave = $("#btnPdSave");
+  if(btnPdSave) btnPdSave.addEventListener("click", savePeriod);
+  const btnPdClear = $("#btnPdClear");
+  if(btnPdClear) btnPdClear.addEventListener("click", clearPeriod);
+  const pdType = $("#pdType");
+  if(pdType) pdType.addEventListener("change", onPdTypeChange);
+
   await fillTTClasses(); await fillTemplates();
 }
 async function fillTTClasses(){
@@ -717,7 +828,8 @@ async function fillTTClasses(){
   });
 }
 async function fillTemplates(){
-  const sel = $("#ttTemplate"); sel.innerHTML="";
+  const sel = $("#ttTemplate"); if(!sel) return;
+  sel.innerHTML="";
   const snap = await getDocs(collection(db,"periodTemplates"));
   if(snap.size===0){
     sel.insertAdjacentHTML("beforeend", `<option value="__default__">افتراضي (7 حصص)</option>`);
@@ -726,13 +838,14 @@ async function fillTemplates(){
   }
 }
 function onPdTypeChange(){
-  const v = $("#pdType").value;
-  $("#pdNormal").style.display = v==="normal"?"":"none";
-  $("#pdReligion").style.display = v==="religion"?"":"none";
+  const v = $("#pdType")?.value;
+  const n = $("#pdNormal"), r = $("#pdReligion");
+  if(n) n.style.display = v==="normal"?"":"none";
+  if(r) r.style.display = v==="religion"?"":"none";
 }
 async function loadTemplateObject(){
   PERIOD_TEMPLATE = null;
-  const tId = $("#ttTemplate").value;
+  const tId = $("#ttTemplate")?.value;
   if(tId === "__default__" || !tId){
     PERIOD_TEMPLATE = { periods:[
       {i:1,start:"08:00",end:"08:45"},
@@ -755,12 +868,20 @@ async function buildTTGrid(){
   await loadTemplateObject();
   if(!PERIOD_TEMPLATE || !PERIOD_TEMPLATE.periods?.length) return err("لا يوجد قالب فترات.");
 
-  const classId = $("#ttClass").value;
+  const classId = $("#ttClass")?.value;
+  if(!classId) return err("اختر فصلًا.");
   const gradeId = classId.split("-")[0];
 
-  // subjects for grade
+  // subjects for this grade (track-aware)
+  // نحتاج class.trackId لمطابقة subject.trackId أو قبول المواد العامة
+  const classDoc = await getDoc(doc(db,"classes", classId));
+  const classTrackId = classDoc.exists() ? (classDoc.data().trackId || null) : null;
+
   const subj = [];
-  (await getDocs(query(collection(db,"subjects"), where("gradeId","==",gradeId)))).forEach(d=> subj.push({id:d.id, ...d.data()}));
+  (await getDocs(query(collection(db,"subjects"), where("gradeId","==",gradeId)))).forEach(d=>{
+    const s = d.data(); const okByTrack = !s.trackId || !classTrackId || s.trackId === classTrackId;
+    if(okByTrack) subj.push({id:d.id, ...s});
+  });
 
   // class teachers
   const links = [];
@@ -773,7 +894,7 @@ async function buildTTGrid(){
   }
 
   // render grid
-  const grid = $("#ttGrid"); grid.innerHTML="";
+  const grid = $("#ttGrid"); if(!grid) return; grid.innerHTML="";
   const table = document.createElement("table"); table.className = "tt-table";
   const thead = document.createElement("thead");
   const trh = document.createElement("tr");
@@ -832,15 +953,16 @@ let PD_CTX = null;
 async function openPeriodDialog(classId, gradeId, day, periodIndex, subjList, teachersList){
   PD_CTX = {classId, gradeId, day, periodIndex, subjList, teachersList};
 
-  $("#pdDay").value = `${DAY_AR[day]} (${day})`;
-  $("#pdPeriod").value = `حصة ${periodIndex}`;
-  $("#pdType").value = "normal"; onPdTypeChange();
+  const pdDay = $("#pdDay"), pdPeriod=$("#pdPeriod"), pdType=$("#pdType");
+  if(pdDay) pdDay.value = `${DAY_AR[day]} (${day})`;
+  if(pdPeriod) pdPeriod.value = `حصة ${periodIndex}`;
+  if(pdType) pdType.value = "normal"; onPdTypeChange();
 
-  const fillSel = (sel, items)=>{ sel.innerHTML=""; items.forEach(x=> sel.insertAdjacentHTML("beforeend", `<option value="${x.id}">${escapeHtml(x.nameAr||x.name||x.id)}</option>`)); };
+  const fillSel = (sel, items)=>{ if(!sel) return; sel.innerHTML=""; items.forEach(x=> sel.insertAdjacentHTML("beforeend", `<option value="${x.id}">${escapeHtml(x.nameAr||x.name||x.id)}</option>`)); };
   fillSel($("#pdSubject"), subjList);
   fillSel($("#pdSubjIslam"), subjList.filter(x=> (x.code||"").includes("religion") || (x.id||"").includes("religion")));
   fillSel($("#pdSubjChris"), subjList.filter(x=> (x.code||"").includes("religion") || (x.id||"").includes("religion")));
-  const fillTeach = (sel)=>{ sel.innerHTML=""; teachersList.forEach(t=> sel.insertAdjacentHTML("beforeend", `<option value="${t.id}">${escapeHtml(t.displayName||t.email||t.id)}</option>`)); };
+  const fillTeach = (sel)=>{ if(!sel) return; sel.innerHTML=""; teachersList.forEach(t=> sel.insertAdjacentHTML("beforeend", `<option value="${t.id}">${escapeHtml(t.displayName||t.email||t.id)}</option>`)); };
   fillTeach($("#pdTeacher")); fillTeach($("#pdTeachIslam")); fillTeach($("#pdTeachChris"));
 
   // populate existing
@@ -849,7 +971,9 @@ async function openPeriodDialog(classId, gradeId, day, periodIndex, subjList, te
   const items = []; existed.forEach(d=> items.push({...d.data(), id:d.id}));
 
   if(items.length===0){
-    $("#pdRoom").value = $("#pdRoomIslam").value = $("#pdRoomChris").value = "";
+    if($("#pdRoom")) $("#pdRoom").value = "";
+    if($("#pdRoomIslam")) $("#pdRoomIslam").value = "";
+    if($("#pdRoomChris")) $("#pdRoomChris").value = "";
   }else if(items.length===1 && items[0].groupKey!=="religion"){
     $("#pdType").value="normal"; onPdTypeChange();
     $("#pdSubject").value = items[0].subjectId;
@@ -898,15 +1022,15 @@ async function checkConflicts({classId, day, startMin, endMin, teacherId, roomId
 
 async function savePeriod(){
   clearMsg();
-  const type = $("#pdType").value;
+  const type = $("#pdType")?.value;
   const {classId, day, periodIndex} = PD_CTX;
   const {startMin, endMin} = getPeriodTime(periodIndex);
 
   try{
     if(type==="normal"){
-      const subjectId = $("#pdSubject").value;
-      const teacherId = $("#pdTeacher").value;
-      const roomId    = $("#pdRoom").value.trim() || null;
+      const subjectId = $("#pdSubject")?.value;
+      const teacherId = $("#pdTeacher")?.value;
+      const roomId    = $("#pdRoom")?.value.trim() || null;
       if(!subjectId || !teacherId) return err("اختر المادة والمعلّم.");
 
       const conflict = await checkConflicts({classId, day, startMin, endMin, teacherId, roomId});
@@ -920,8 +1044,8 @@ async function savePeriod(){
       }, { merge:true });
       ok("تم حفظ الحصة.");
     }else{
-      const isl = { subjectId: $("#pdSubjIslam").value, teacherId: $("#pdTeachIslam").value, roomId: $("#pdRoomIslam").value.trim()||null };
-      const chr = { subjectId: $("#pdSubjChris").value, teacherId: $("#pdTeachChris").value, roomId: $("#pdRoomChris").value.trim()||null };
+      const isl = { subjectId: $("#pdSubjIslam")?.value, teacherId: $("#pdTeachIslam")?.value, roomId: $("#pdRoomIslam")?.value.trim()||null };
+      const chr = { subjectId: $("#pdSubjChris")?.value, teacherId: $("#pdTeachChris")?.value, roomId: $("#pdRoomChris")?.value.trim()||null };
       if(!isl.subjectId || !isl.teacherId || !chr.subjectId || !chr.teacherId) return err("أكمل اختيارات شعبتي الدين.");
       for(const row of [isl, chr]){
         const conflict = await checkConflicts({classId, day, startMin, endMin, teacherId: row.teacherId, roomId: row.roomId});
@@ -940,7 +1064,7 @@ async function savePeriod(){
       }, { merge:true });
       ok("تم حفظ حصتي التربية الدينية.");
     }
-    $("#periodDialog").close(); await buildTTGrid();
+    $("#periodDialog")?.close(); await buildTTGrid();
   }catch(e){ err("فشل حفظ الحصة"); console.error(e); }
 }
 async function clearPeriod(){
@@ -957,12 +1081,13 @@ async function clearPeriod(){
       const s = await getDoc(ref);
       if(s.exists()) await deleteDoc(ref);
     }
-    ok("تم التفريغ."); $("#periodDialog").close(); await buildTTGrid();
+    ok("تم التفريغ."); $("#periodDialog")?.close(); await buildTTGrid();
   }catch(e){ err("فشل التفريغ"); console.error(e); }
 }
 async function exportTT(){
   clearMsg();
-  const classId = $("#ttClass").value;
+  const classId = $("#ttClass")?.value;
+  if(!classId) return err("اختر فصلًا.");
   const rows = ["yearId,classId,day,periodIndex,start,end,subjectId,teacherId,roomId,groupKey,groupValue"];
   const snap = await getDocs(query(collection(db,"timetableEntries"),
       where("yearId","==",activeYearId), where("classId","==",classId)));
@@ -978,7 +1103,7 @@ async function exportTT(){
 }
 async function importTT(){
   clearMsg();
-  const f = $("#ttCsv").files[0];
+  const f = $("#ttCsv")?.files?.[0];
   if(!f) return err("اختر ملف CSV للجدول.");
   await loadTemplateObject();
   const text = await f.text();
