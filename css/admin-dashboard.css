@@ -1,46 +1,53 @@
-/* css/admin-dashboard.css */
+/* ألوان عامة */
 :root{
   --bg:#f7fafc; --card:#fff; --border:#e5e7eb; --text:#0f172a;
   --muted:#64748b; --primary:#3b82f6; --primary-600:#2563eb;
   --danger:#ef4444; --success:#16a34a;
 }
-body{background:var(--bg); color:var(--text); font-family:system-ui,Segoe UI,Tahoma,Arial; margin:0}
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--text); font-family:system-ui,Segoe UI,Arial; margin:0}
+
+/* ترويسة */
 .topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#fff;border-bottom:1px solid var(--border)}
 .brand{display:flex;align-items:center;gap:12px}
 .logo{width:44px;height:44px;border-radius:8px}
-.tabs{display:flex;gap:6px;padding:10px 16px;background:#fff;border-bottom:1px solid var(--border)}
-.nav{padding:8px 12px;border:1px solid var(--border);background:#fff;border-radius:8px;cursor:pointer}
+
+/* تبويبات */
+.tabs{display:flex;gap:6px;padding:10px 16px;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:3}
+.nav{padding:8px 12px;border:1px solid var(--border);background:#fff;border-radius:10px;cursor:pointer}
 .nav.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* حاوية */
 .container{max-width:1100px;margin:16px auto;padding:0 12px}
+
+/* البطاقات والجداول */
 .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 4px 12px rgba(0,0,0,.04)}
-.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
-.grid.tight{grid-template-columns:repeat(3,1fr)}
-.toolbar{display:flex;gap:8px;margin-bottom:10px}
-.select,.input{padding:10px;border:1px solid var(--border);border-radius:10px;background:#fff}
-.btn{padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:#fff;cursor:pointer}
-.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
-.btn.secondary{background:#e0f2fe;border-color:#bae6fd;color:#075985}
-.btn.muted{background:#eef2ff;border-color:#e0e7ff;color:#4338ca}
-.btn.danger{background:#fee2e2;border-color:#fecaca;color:#b91c1c}
-.hint{color:var(--muted);font-size:.85rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
 .kpi{display:flex;flex-direction:column;align-items:center;gap:6px}
 .kpi .kpi-title{color:var(--muted)}
 .kpi .kpi-value{font-size:28px;font-weight:700}
-.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+
+.select,.input{padding:10px;border:1px solid var(--border);border-radius:10px;background:#fff;width:100%}
+.btn{padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:#fff;cursor:pointer}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn.secondary{background:#e0f2fe;border-color:#bae6fd;color:#075985}
+.btn.danger{background:#fee2e2;border-color:#fecaca;color:#b91c1c}
+.hint{color:var(--muted);font-size:.85rem}
+
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+@media (max-width: 992px){ .grid{grid-template-columns:repeat(3,1fr)} }
+@media (max-width: 640px){ .grid{grid-template-columns:1fr 1fr} .table{display:block;overflow-x:auto} }
+
 .table{width:100%;border-collapse:collapse}
 .table th,.table td{padding:10px;border-bottom:1px solid var(--border);text-align:center}
 .table th{background:#f8fafc}
+
 .chip{background:#e2e8f0;border:1px solid var(--border);border-radius:999px;padding:6px 10px}
+
+/* رسائل */
 .success{background:#ecfdf5;border:1px solid #bbf7d0;padding:10px;border-radius:10px;margin-bottom:12px;color:#166534}
 .error{background:#fef2f2;border:1px solid #fecaca;padding:10px;border-radius:10px;margin-bottom:12px;color:#991b1b}
-dialog.dialog{border:none;border-radius:12px;max-width:900px;width:95%;padding:16px}
-.actions{display:flex;gap:8px;justify-content:flex-start;margin-top:10px}
-.scroll{max-height:380px;overflow:auto;border:1px solid var(--border);border-radius:8px}
 
-/* Timetable */
-.tt-table{width:100%;border-collapse:separate;border-spacing:0}
-.tt-table th,.tt-table td{border:1px solid var(--border);padding:8px;vertical-align:top}
-.tt-cell{min-height:92px;background:#fafafa;position:relative}
-.tt-actions{position:absolute;inset-inline-end:6px;inset-block-start:6px}
-.tt-item{background:#fff;border:1px solid var(--border);border-radius:10px;padding:6px 8px;margin-top:28px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
-.meta{color:var(--muted);font-size:.85rem}
+/* إظهار تبويب واحد فقط */
+.tab{display:none}
+.tab.active{display:block}
