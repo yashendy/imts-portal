@@ -95,23 +95,25 @@ async function loadRoleBadge(user){
 
 /* ====================== KPIs سريعة ====================== */
 
-async function loadKPIs(){
+// ===== KPIs =====
+async function loadKPIs() {
   try {
-    // counts سريعة — لو ما كانش عندك بيانات كثيرة هيبقى كفاية
+    // استخدم collectionGroup للطلاب والمعلمين
     const [cS, cT, cC] = await Promise.all([
-      getCountFromServer(collection(db,"students")),
-      getCountFromServer(collection(db,"teachers")),
-      getCountFromServer(collection(db,"classes")),
+      getCountFromServer(collectionGroup(db, "students")),
+      getCountFromServer(collectionGroup(db, "teachers")),
+      getCountFromServer(collection(db, "classes")), // لو classes مجموعة رئيسية
     ]);
-    kpiStudents.textContent = cS.data().count ?? "—";
-    kpiTeachers.textContent = cT.data().count ?? "—";
-    kpiClasses.textContent  = cC.data().count ?? "—";
 
-    const alertsCount = await estimateAlerts();
-    kpiAlerts.textContent = String(alertsCount);
-  } catch(e){
-    console.warn("loadKPIs:", e);
-    kpiStudents.textContent = kpiTeachers.textContent = kpiClasses.textContent = "—";
+    document.getElementById("kpiStudents").textContent = cS.data().count;
+    document.getElementById("kpiTeachers").textContent = cT.data().count;
+    document.getElementById("kpiClasses").textContent = cC.data().count;
+  } catch (e) {
+    console.error("loadKPIs:", e);
+    document.getElementById("kpiStudents").textContent = "—";
+    document.getElementById("kpiTeachers").textContent = "—";
+    document.getElementById("kpiClasses").textContent = "—";
+    showToast("⚠️ لا يمكن تحميل مؤشرات الأداء","err");
   }
 }
 
