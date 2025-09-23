@@ -1,0 +1,32 @@
+@import url("admin-dashboard.css");
+
+/* تخصيص صفحة الطلاب */
+.student-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.student-form input,
+.student-form select {
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-width: 150px;
+}
+
+.students-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.students-table th,
+.students-table td {
+  border: 1px solid var(--border);
+  padding: 8px;
+  text-align: center;
+}
+
+.students-table th {
+  background: var(--bg);
+}
