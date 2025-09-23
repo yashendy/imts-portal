@@ -1,111 +1,128 @@
-:root{
-  --bg:#f7f8fa;
-  --card:#ffffff;
-  --text:#1b1f24;
-  --muted:#6b7280;
-  --border:#e5e7eb;
-  --primary:#0ea5e9;
-  --danger:#ef4444;
-  --ok:#065f46;
-  --warn:#a16207;
+:root {
+  --bg: #f9fafb;
+  --border: #e5e7eb;
+  --text: #111827;
+  --primary: #2563eb;
+  --danger: #dc2626;
 }
 
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0; font-family:system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans Arabic", "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
-  color:var(--text); background:var(--bg); direction:rtl;
+body {
+  font-family: 'Cairo', sans-serif;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
 }
 
-/* Header */
-.app-header{
-  display:flex; align-items:center; justify-content:space-between;
-  gap:16px; padding:12px 16px; background:var(--card); border-bottom:1px solid var(--border);
-  position:sticky; top:0; z-index:10;
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
 }
 
-/* يسار الهيدر: الشعار + الاسم */
-.brand-left{
-  display:flex; align-items:center; gap:10px; order:1; margin-inline-start:auto;
-}
-.brand-logo{width:36px; height:36px; object-fit:contain}
-.brand-name{font-weight:800; white-space:nowrap}
-
-/* يمين الهيدر: الأدوات */
-.header-actions{ display:flex; align-items:center; gap:10px; order:2; }
-.yr-label{color:var(--muted); font-size:.9rem}
-.yr-select{
-  border:1px solid var(--border); background:#fff; padding:6px 10px; border-radius:8px; min-width:140px;
-}
-.role-badge{
-  padding:6px 10px; border-radius:999px; background:#eef2ff; color:#3730a3; font-weight:700; border:1px solid #e0e7ff;
+.brand-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.btn{
-  background:var(--primary); color:#fff; border:none; padding:8px 12px; border-radius:10px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+.brand-logo {
+  width: 40px;
+  height: 40px;
 }
-.btn-danger{ background:var(--danger); }
 
-.app-main{max-width:1200px; margin:16px auto; padding:0 12px}
-
-/* Cards */
-.card{
-  background:var(--card); border:1px solid var(--border); border-radius:16px; margin-block:12px; overflow:hidden;
+.brand-name {
+  font-weight: bold;
+  font-size: 1.1rem;
 }
-.card-head{padding:12px 16px; border-bottom:1px solid var(--border)}
-.card-head h3{margin:0; font-size:1.05rem}
-.card-body{padding:16px}
 
-.kpis .kpi-grid{
-  display:grid; grid-template-columns:repeat(4,1fr); gap:12px; padding:12px;
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-.kpi{
-  background:#fff; border:1px solid var(--border); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:8px;
+
+.role-badge {
+  background: var(--primary);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 8px;
 }
-.kpi-title{color:var(--muted); font-size:.95rem}
-.kpi-value{font-size:1.8rem; font-weight:800}
-.kpi-link{color:var(--primary); text-decoration:none; font-weight:700}
 
-.cards.two-col{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-.placeholder{padding:24px; text-align:center; color:var(--muted); border:2px dashed var(--border); border-radius:12px}
-
-/* Alerts & Activity */
-.alerts{list-style:none; margin:0; padding:0}
-.alerts li{
-  border-bottom:1px solid var(--border); padding:12px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px;
+.user-name {
+  font-weight: bold;
+  margin-inline: 5px;
 }
-.alerts li:last-child{border-bottom:none}
-.alert-cta{color:var(--primary); text-decoration:none; font-weight:700}
 
-.activity-list{list-style:none; margin:0; padding:0}
-.activity-list li{padding:10px 16px; border-bottom:1px solid var(--border); color:var(--text)}
-.activity-list li:last-child{border-bottom:none}
-
-/* AI summary & command */
-.ai-summary .card-body{font-weight:600; color:var(--text)}
-.ai-cmd-body{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
-.ai-input{
-  flex:1; min-width:260px; border:1px solid var(--border); background:#fff; padding:10px 12px; border-radius:10px;
+.btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
 }
-.ai-hint{color:var(--muted); font-size:.9rem}
 
-.quick-actions{display:flex; flex-wrap:wrap; gap:10px; margin:16px 0}
-
-/* وصولية */
-.sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); border:0}
-
-/* Toast */
-.toast{
-  position:fixed; inset-inline-start:16px; inset-block-end:16px;
-  background:#111827; color:#fff; padding:10px 14px; border-radius:12px; opacity:0; transform:translateY(10px); pointer-events:none; transition:.2s;
+.btn-danger {
+  background: var(--danger);
+  color: white;
 }
-.toast.show{opacity:1; transform:translateY(0)}
 
-/* تجاوب */
-@media (max-width: 1024px){
-  .kpis .kpi-grid{grid-template-columns:repeat(2,1fr)}
-  .cards.two-col{grid-template-columns:1fr}
+.app-main {
+  padding: 20px;
+  display: grid;
+  gap: 20px;
 }
-@media (max-width: 640px){
-  .brand-name{display:none}
+
+.kpis {
+  display: flex;
+  gap: 20px;
+}
+
+.kpi-card {
+  flex: 1;
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  text-align: center;
+}
+
+.charts {
+  display: flex;
+  gap: 20px;
+}
+
+.chart-card {
+  flex: 1;
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.notifications,
+.activities,
+.ai-helper,
+.actions {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.toast {
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #065f46;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  display: none;
+}
+
+.toast.show {
+  display: block;
 }
