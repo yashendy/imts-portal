@@ -3,11 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>لوحة تحكم الإدارة</title>
+  <title>لوحة تحكم الإدارة — معهد الدراسات الإدارية والفنية</title>
   <link rel="stylesheet" href="css/admin-dashboard.css" />
+  <meta name="color-scheme" content="light only" />
 </head>
 <body>
-  <!-- الهيدر -->
+  <!-- Header -->
   <header class="app-header">
     <div class="brand-left">
       <img src="assets/logo.png" alt="شعار المعهد" class="brand-logo" />
@@ -20,73 +21,78 @@
         <option value="2025-2026">2025-2026</option>
       </select>
 
-      <!-- بيانات المستخدم -->
       <span id="userName" class="user-name"></span>
       <span id="roleBadge" class="role-badge">—</span>
 
+      <!-- (يمين الهيدر حسب طلبك) -->
       <button id="btnSignOut" class="btn btn-danger">خروج</button>
     </div>
   </header>
 
-  <!-- المحتوى -->
+  <!-- Main -->
   <main class="app-main">
-    <section class="kpis">
-      <div class="kpi-card">
-        <h4>الطلاب</h4>
-        <p id="kpiStudents">—</p>
-        <a href="students.html">عرض التفاصيل</a>
-      </div>
-      <div class="kpi-card">
-        <h4>المعلمون</h4>
-        <p id="kpiTeachers">—</p>
-        <a href="#">عرض التفاصيل</a>
-      </div>
-      <div class="kpi-card">
-        <h4>الفصول</h4>
-        <p id="kpiClasses">—</p>
-        <a href="#">عرض التفاصيل</a>
+    <!-- ملخص ذكي -->
+    <section class="card">
+      <div class="card-head"><h3>ملخص سريع</h3></div>
+      <div class="card-body" id="aiSummary">لا توجد مؤشرات غير طبيعية الآن ✅</div>
+    </section>
+
+    <!-- KPIs -->
+    <section class="card kpis">
+      <h2 class="sr-only">المؤشرات الرئيسية</h2>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-title">الطلاب</div>
+          <div class="kpi-value" id="kpiStudents">—</div>
+          <a href="students.html" class="kpi-link">عرض التفاصيل</a>
+        </div>
+        <div class="kpi">
+          <div class="kpi-title">المعلّمون</div>
+          <div class="kpi-value" id="kpiTeachers">—</div>
+          <a href="teachers.html" class="kpi-link">عرض التفاصيل</a>
+        </div>
+        <div class="kpi">
+          <div class="kpi-title">الفصول</div>
+          <div class="kpi-value" id="kpiClasses">—</div>
+          <a href="classes.html" class="kpi-link">عرض التفاصيل</a>
+        </div>
+        <div class="kpi">
+          <div class="kpi-title">التنبيهات</div>
+          <div class="kpi-value" id="kpiAlerts">—</div>
+          <a href="#alerts" class="kpi-link">اذهب للتنبيهات</a>
+        </div>
       </div>
     </section>
 
-    <section class="charts">
-      <div class="chart-card">
-        <h4>إشغال الفصول</h4>
-        <div id="chartClasses">سيظهر الرسم بعد التحميل...</div>
+    <!-- تنبيهات -->
+    <section id="alerts" class="card">
+      <div class="card-head"><h3>التنبيهات</h3></div>
+      <ul class="alerts" id="alertsList" aria-live="polite"></ul>
+    </section>
+
+    <!-- نشاطات -->
+    <section class="card">
+      <div class="card-head"><h3>أحدث النشاطات</h3></div>
+      <div class="card-body">
+        <ul id="activityList" class="activity-list"></ul>
       </div>
-      <div class="chart-card">
-        <h4>توزيع الطلاب حسب الصف</h4>
-        <div id="chartStudents">سيظهر الرسم بعد التحميل...</div>
-      </div>
     </section>
 
-    <section class="notifications">
-      <h4>التنبيهات</h4>
-      <p id="alerts">لا توجد تنبيهات الآن ✅</p>
-    </section>
-
-    <section class="activities">
-      <h4>أحدث الأنشطة</h4>
-      <p id="recentActivities">تعتذر تحميل الأنشطة.</p>
-    </section>
-
-    <section class="ai-helper">
-      <h4>اسأل الداشبورد</h4>
-      <input type="text" id="aiInput" placeholder="اكتب سؤالك هنا..." />
-      <button id="aiAskBtn">تنفيذ</button>
-    </section>
-
-    <section class="actions">
-      <button class="btn">إضافة طالب</button>
-      <button class="btn">إضافة معلم</button>
-      <button class="btn">إنشاء فصل</button>
-      <button class="btn">إدارة الجدول</button>
-      <button class="btn">إنشاء دعوة</button>
-      <button class="btn">الإعدادات</button>
+    <!-- اختصارات -->
+    <section class="quick-actions">
+      <a class="btn" href="students.html">إضافة طالب</a>
+      <a class="btn" href="teachers.html">إضافة معلّم</a>
+      <a class="btn" href="classes.html">إنشاء فصل</a>
+      <a class="btn" href="timetable.html">إدارة الجدول</a>
+      <a class="btn only-admin" href="invites.html">إنشاء دعوة</a>
+      <a class="btn only-admin" href="settings.html">الإعدادات</a>
     </section>
   </main>
 
-  <div id="globalMsg" class="toast"></div>
+  <!-- Toast -->
+  <div id="globalMsg" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
+  <!-- Firebase + Dashboard JS -->
   <script type="module" src="js/admin-dashboard.js"></script>
 </body>
 </html>
