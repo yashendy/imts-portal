@@ -1,209 +1,139 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>لوحة الإدارة • معهد الدراسات الإدارية والفنية</title>
-
-  <!-- الأيقونة (يحل مشكلة 404) -->
-  <link rel="icon" href="assets/logo.png" type="image/png">
-
-  <!-- الأنماط -->
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/admin-dashboard.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>لوحة الإدارة — معهد الدراسات الإدارية والفنية</title>
+  <link rel="stylesheet" href="css/admin-dashboard.css" />
+  <meta name="color-scheme" content="light only" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <img src="assets/logo.png" alt="logo" class="logo">
-      <h1 id="instName">معهد الدراسات الإدارية والفنية</h1>
+  <!-- Header -->
+  <header class="app-header">
+    <!-- يسار: الشعار + اسم المعهد -->
+    <div class="brand-left">
+      <img src="assets/logo.png" alt="شعار المعهد" class="brand-logo" />
+      <span class="brand-name">معهد الدراسات الإدارية والفنية</span>
     </div>
-    <div class="top-actions">
-      <select id="yearSelect" class="select"></select>
-      <span class="chip" id="roleChip">—</span>
-      <button id="btnSignOut" class="btn danger" type="button">خروج</button>
+
+    <!-- يمين: الأدوات -->
+    <div class="header-actions">
+      <label class="yr-label" for="yearSelect">العام الأكاديمي</label>
+      <select id="yearSelect" class="yr-select" aria-label="اختيار العام الأكاديمي">
+        <option value="2025-2026">2025-2026</option>
+      </select>
+
+      <span id="roleBadge" class="role-badge" title="دور المستخدم">—</span>
+
+      <button id="btnSignOut" class="btn btn-danger" type="button" aria-label="تسجيل الخروج">
+        خروج
+      </button>
     </div>
   </header>
 
-  <!-- أزرار التبويبات (كلها type="button") -->
-  <nav class="tabs">
-    <button class="nav active" type="button" data-tab="overview">نظرة عامة</button>
-    <button class="nav" type="button" data-tab="classes">الفصول</button>
-    <button class="nav" type="button" data-tab="teachers">المعلّمون</button>
-    <button class="nav" type="button" data-tab="link">الربط (معلّم ← فصل ← مادة)</button>
-    <button class="nav" type="button" data-tab="subjects">المواد</button>
-    <button class="nav" type="button" data-tab="students">الطلاب</button>
-    <button class="nav" type="button" data-tab="timetable">الجدول</button>
-    <button class="nav owner-only" type="button" data-tab="invites" style="display:none">الدعوات</button>
-    <button class="nav owner-only" type="button" data-tab="settings" style="display:none">الإعدادات</button>
-  </nav>
-
-  <main class="container">
-    <div id="globalMsg"></div>
-
-    <!-- نظرة عامة -->
-    <section class="tab active" id="tab-overview">
-      <div class="cards">
-        <div class="card kpi"><div class="kpi-title">المعلّمون</div><div class="kpi-value" id="kTeachers">0</div></div>
-        <div class="card kpi"><div class="kpi-title">الفصول</div><div class="kpi-value" id="kClasses">0</div></div>
-        <div class="card kpi"><div class="kpi-title">الطلاب</div><div class="kpi-value" id="kStudents">0</div></div>
-        <div class="card kpi"><div class="kpi-title">المواد</div><div class="kpi-value" id="kSubjects">0</div></div>
-        <div class="card kpi owner-only" style="display:none"><div class="kpi-title">دعوات فعّالة</div><div class="kpi-value" id="kInvites">—</div></div>
-      </div>
-      <div class="card"><h3>آخر العمليات</h3><div id="recentLog">—</div></div>
+  <!-- المحتوى -->
+  <main class="app-main">
+    <!-- ملخص ذكي (AI Summary) -->
+    <section class="card ai-summary" aria-live="polite" id="aiSummary">
+      <div class="card-body">ملخص نظامي: لا توجد مؤشرات غير طبيعية الآن ✅</div>
     </section>
 
-    <!-- الفصول -->
-    <section class="tab" id="tab-classes">
-      <div class="card">
-        <h3>إنشاء/تعديل فصل</h3>
-        <div class="grid">
-          <select id="cGrade" class="select"></select>
-          <select id="cTrack" class="select">
-            <option value="">— بدون مسار —</option>
-            <option value="ar">عربي</option>
-            <option value="lang">لغات</option>
-          </select>
-          <select id="cSection" class="select"></select>
-          <input id="cSectionAr" class="input" placeholder="حرف الشعبة بالعربي (مثال: أ)">
-          <input id="cNameAr" class="input" placeholder="الاسم العربي للفصل">
-          <input id="cCapacity" class="input" type="number" value="40" min="10" max="60" />
-          <button id="btnCreateClass" class="btn primary" type="button">حفظ/إضافة فصل</button>
+    <!-- KPIs -->
+    <section aria-labelledby="kpiTitle" class="card kpis">
+      <h2 id="kpiTitle" class="sr-only">المؤشرات الرئيسية</h2>
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="kpi-title">الطلاب</div>
+          <div class="kpi-value" id="kpiStudents">—</div>
+          <a href="students.html" class="kpi-link">عرض التفاصيل</a>
         </div>
-        <p class="hint">المعرّف يكون مثل g4-lang-B، والاسم العربي للعرض فقط.</p>
-      </div>
 
-      <div class="card">
-        <h3>فصول السنة الحالية</h3>
-        <table class="table" id="classesTable">
-          <thead>
-            <tr>
-              <th>المعرّف</th><th>الاسم العربي</th><th>الصف</th><th>الشعبة</th><th>الطاقة</th><th>نشط</th><th>إدارة</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- المعلّمون -->
-    <section class="tab" id="tab-teachers">
-      <div class="card">
-        <div class="toolbar">
-          <input id="teacherSearch" class="input" placeholder="بحث بالاسم/البريد">
-          <button id="btnReloadTeachers" class="btn" type="button">تحديث</button>
+        <div class="kpi">
+          <div class="kpi-title">المعلّمون</div>
+          <div class="kpi-value" id="kpiTeachers">—</div>
+          <a href="teachers.html" class="kpi-link">عرض التفاصيل</a>
         </div>
-        <table class="table" id="teachersTable">
-          <thead><tr>
-            <th>الاسم</th><th>البريد</th><th>الحالة</th><th>الدور</th>
-          </tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
 
-    <!-- الربط -->
-    <section class="tab" id="tab-link">
-      <div class="card">
-        <div class="grid">
-          <select id="linkTeacher" class="select"></select>
-          <select id="linkGrade" class="select"></select>
-          <select id="linkClass" class="select"></select>
-          <select id="linkSubject" class="select"></select>
-          <button id="btnLink" class="btn primary" type="button">ربط المعلّم</button>
+        <div class="kpi">
+          <div class="kpi-title">الفصول</div>
+          <div class="kpi-value" id="kpiClasses">—</div>
+          <a href="classes.html" class="kpi-link">عرض التفاصيل</a>
+        </div>
+
+        <div class="kpi">
+          <div class="kpi-title">تنبيهات</div>
+          <div class="kpi-value" id="kpiAlerts">—</div>
+          <a href="#alerts" class="kpi-link">اذهب للتنبيهات</a>
         </div>
       </div>
     </section>
 
-    <!-- المواد -->
-    <section class="tab" id="tab-subjects">
+    <!-- مخططات خفيفة -->
+    <section class="cards two-col">
       <div class="card">
-        <div class="grid">
-          <select id="subjGradeSel" class="select"></select>
-          <input id="subjId" class="input" placeholder="subjectId (مثال: arabic-g10 أو arabic-g10-ar)">
-          <input id="subjNameAr" class="input" placeholder="اسم المادة بالعربي">
-          <input id="subjCode" class="input" placeholder="كود مختصر (arabic/math/...)">
-          <button id="btnCreateSubject" class="btn primary" type="button">حفظ/إضافة مادة</button>
+        <div class="card-head">
+          <h3>توزيع الطلاب حسب الصف</h3>
+        </div>
+        <div class="card-body" id="chartByGrade">
+          <div class="placeholder">سيظهر الرسم بعد التحميل…</div>
         </div>
       </div>
 
       <div class="card">
-        <div class="toolbar">
-          <select id="subjGrade" class="select"><option value="">كل الصفوف</option></select>
-          <button id="btnReloadSubjects" class="btn" type="button">تحديث</button>
+        <div class="card-head">
+          <h3>إشغال الفصول</h3>
         </div>
-        <table class="table" id="subjectsTable">
-          <thead><tr><th>المعرّف</th><th>الاسم</th><th>الصف</th><th>إدارة</th></tr></thead>
-          <tbody></tbody>
-        </table>
+        <div class="card-body" id="chartCapacity">
+          <div class="placeholder">سيظهر الرسم بعد التحميل…</div>
+        </div>
       </div>
     </section>
 
-    <!-- الطلاب -->
-    <section class="tab" id="tab-students">
-      <div class="card">
-        <div class="toolbar">
-          <input id="stSearch" class="input" placeholder="بحث بالاسم/الكود">
-          <button id="btnReloadStudents" class="btn" type="button">تحديث</button>
-        </div>
-        <table class="table" id="studentsTable">
-          <thead><tr>
-            <th>الاسم</th><th>النوع</th><th>الديانة</th><th>الكود</th><th>الفصل</th><th>السنة</th>
-          </tr></thead>
-          <tbody></tbody>
-        </table>
+    <!-- التنبيهات -->
+    <section id="alerts" class="card">
+      <div class="card-head">
+        <h3>التنبيهات</h3>
+      </div>
+      <ul class="alerts" id="alertsList" aria-live="polite"></ul>
+    </section>
+
+    <!-- أحدث النشاطات -->
+    <section class="card">
+      <div class="card-head">
+        <h3>أحدث النشاطات</h3>
+      </div>
+      <div class="card-body">
+        <ul id="activityList" class="activity-list"></ul>
       </div>
     </section>
 
-    <!-- الجدول -->
-    <section class="tab" id="tab-timetable">
-      <div class="card">
-        <div class="grid">
-          <select id="ttClass" class="select"></select>
-          <select id="ttTemplate" class="select"></select>
-          <button id="btnTTLoad" class="btn primary" type="button">تحميل الجدول</button>
-        </div>
+    <!-- مساعد أوامر (AI Command) -->
+    <section class="card ai-cmd">
+      <div class="card-head">
+        <h3>اسأل الداشبورد</h3>
       </div>
-      <div class="card">
-        <div id="ttGrid"></div>
+      <div class="card-body ai-cmd-body">
+        <input id="aiCmdInput" class="ai-input" type="text" placeholder="مثال: اعرض فصول الصف العاشر أقل من 30 طالب" />
+        <button id="aiCmdRun" class="btn" type="button">تنفيذ</button>
+        <div id="aiCmdHint" class="ai-hint">يدعم أوامر مثل: “طلاب الصف العاشر أقل من 30” أو “تعارض جدول الأربعاء”.</div>
       </div>
     </section>
 
-    <!-- الدعوات (للـ owner) -->
-    <section class="tab" id="tab-invites">
-      <div class="card owner-only" style="display:none">
-        <div class="grid">
-          <select id="invRole" class="select">
-            <option value="teacher">Teacher</option>
-            <option value="admin">Admin</option>
-          </select>
-          <input id="invCode" class="input" placeholder="اتركه فارغًا لتوليد تلقائي">
-          <input id="invExpires" class="input" type="date">
-          <button id="btnCreateInvite" class="btn primary" type="button">إنشاء دعوة</button>
-        </div>
-      </div>
-      <div class="card owner-only" style="display:none">
-        <table class="table" id="invTable">
-          <thead><tr><th>الكود</th><th>الدور</th><th>ينتهي</th><th>نشط</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- الإعدادات -->
-    <section class="tab" id="tab-settings">
-      <div class="card owner-only" style="display:none">
-        <div class="grid">
-          <input id="setName" class="input" placeholder="اسم المعهد">
-          <select id="setYear" class="select"></select>
-          <button id="btnSaveSettings" class="btn primary" type="button">حفظ الإعدادات</button>
-          <button id="btnRunSeed" class="btn secondary" type="button">تشغيل التهيئة</button>
-        </div>
-      </div>
+    <!-- اختصارات -->
+    <section class="quick-actions">
+      <a class="btn" href="students.html">إضافة طالب</a>
+      <a class="btn" href="teachers.html">إضافة معلّم</a>
+      <a class="btn" href="classes.html">إنشاء فصل</a>
+      <a class="btn" href="timetable.html">إدارة الجدول</a>
+      <a class="btn only-admin" href="invites.html">إنشاء دعوة</a>
+      <a class="btn only-admin" href="settings.html">الإعدادات</a>
     </section>
   </main>
 
-  <!-- سكربت -->
+  <!-- Toast -->
+  <div id="globalMsg" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- سكربت الداشبورد (ES Module) -->
   <script type="module" src="js/admin-dashboard.js"></script>
 </body>
 </html>
