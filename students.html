@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>إدارة الطلاب — معهد الدراسات الإدارية والفنية</title>
+  <link rel="stylesheet" href="css/students.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="app-header">
+    <!-- الشعار + الاسم -->
+    <div class="brand-left">
+      <img src="assets/logo.png" alt="شعار المعهد" class="brand-logo" />
+      <span class="brand-name">معهد الدراسات الإدارية والفنية</span>
+    </div>
+
+    <!-- الأدوات -->
+    <div class="header-actions">
+      <label for="yearSelect">العام الأكاديمي</label>
+      <select id="yearSelect">
+        <option value="2025-2026">2025-2026</option>
+      </select>
+      <span id="roleBadge" class="role-badge">—</span>
+      <button id="btnSignOut" class="btn btn-danger">خروج</button>
+    </div>
+  </header>
+
+  <!-- المحتوى -->
+  <main class="app-main">
+    <!-- فورم إضافة طالب -->
+    <section class="card">
+      <div class="card-head">
+        <h3>إضافة طالب جديد</h3>
+      </div>
+      <div class="card-body">
+        <form id="studentForm" class="student-form">
+          <input type="text" id="name" placeholder="اسم الطالب" required />
+          <select id="grade" required>
+            <option value="">اختر الصف</option>
+            <option value="G1">الأول</option>
+            <option value="G2">الثاني</option>
+            <option value="G3">الثالث</option>
+            <option value="G4">الرابع</option>
+            <option value="G5">الخامس</option>
+            <option value="G6">السادس</option>
+            <option value="G7">الأول الإعدادي</option>
+            <option value="G8">الثاني الإعدادي</option>
+            <option value="G9">الثالث الإعدادي</option>
+            <option value="G10">الأول الثانوي</option>
+            <option value="G11">الثاني الثانوي</option>
+            <option value="G12">الثالث الثانوي</option>
+          </select>
+          <select id="gender" required>
+            <option value="">اختر النوع</option>
+            <option value="M">ذكر</option>
+            <option value="F">أنثى</option>
+          </select>
+          <select id="religion" required>
+            <option value="">اختر الديانة</option>
+            <option value="muslim">مسلم</option>
+            <option value="christian">مسيحي</option>
+          </select>
+          <select id="active" required>
+            <option value="true">مفعل</option>
+            <option value="false">غير مفعل</option>
+          </select>
+          <button type="submit" class="btn">إضافة</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- جدول الطلاب -->
+    <section class="card">
+      <div class="card-head">
+        <h3>قائمة الطلاب</h3>
+      </div>
+      <div class="card-body">
+        <table class="students-table">
+          <thead>
+            <tr>
+              <th>اسم الطالب</th>
+              <th>الصف</th>
+              <th>النوع</th>
+              <th>الديانة</th>
+              <th>Student Code</th>
+              <th>Seat Number</th>
+              <th>الحالة</th>
+            </tr>
+          </thead>
+          <tbody id="studentsList"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="globalMsg" class="toast"></div>
+
+  <script type="module" src="js/students.js"></script>
+</body>
+</html>
