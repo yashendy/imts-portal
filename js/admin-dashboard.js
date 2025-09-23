@@ -6,7 +6,7 @@ import {
   getFirestore, doc, getDoc, collection, collectionGroup, getCountFromServer 
 } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
-// Firebase Config
+// ===== Firebase Config =====
 const firebaseConfig = {
   apiKey: "AIzaSyCoZ19SWabidrk...WnuYtSSM",
   authDomain: "imts-4b827.firebaseapp.com",
@@ -23,7 +23,7 @@ const db = getFirestore(app);
 const $ = (id) => document.getElementById(id);
 const toast = $("globalMsg");
 
-// 🔔 Toast
+// ===== Toast =====
 function showToast(msg, type="ok") {
   toast.textContent = msg;
   toast.style.background = type==="err" ? "#7f1d1d" : "#065f46";
@@ -52,30 +52,37 @@ async function loadKPIs() {
   }
 }
 
-// ===== Auth =====
+// ===== Auth & User Info =====
 onAuthStateChanged(auth, async (user) => {
-  if (!user) { 
-    location.href = "index.html"; 
-    return; 
+  if (!user) {
+    // مش مسجل → يروح لصفحة الدخول
+    location.href = "index.html";
+    return;
   }
 
   try {
     const uDoc = await getDoc(doc(db, "users", user.uid));
+
     if (uDoc.exists()) {
       const data = uDoc.data();
-      $("userName").textContent = data.displayName || user.email;
-      $("roleBadge").textContent = data.role || "—";
-    } else {
-      $("userName").textContent = user.email;
-      $("roleBadge").textContent = "—";
+
+      // لو الحساب Active
+      if (data.status === "active") {
+        $("userName").textContent = data.displayName || user.email;
+        $("roleBadge").textContent = data.role || "—";
+        loadKPIs();
+        return;
+      }
     }
+
+    // ❌ المستخدم مش موجود أو غير مفعل
+    await signOut(auth);
+    location.href = "index.html";
   } catch (err) {
     console.error("⚠️ User load error:", err);
-    $("userName").textContent = user.email;
-    $("roleBadge").textContent = "—";
+    await signOut(auth);
+    location.href = "index.html";
   }
-
-  loadKPIs();
 });
 
 // ===== SignOut =====
