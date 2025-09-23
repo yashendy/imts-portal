@@ -1,152 +1,92 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<header class="app-header">
-  <div class="brand-left">
-    <img src="assets/logo.png" alt="شعار المعهد" class="brand-logo" />
-    <span class="brand-name">معهد الدراسات الإدارية والفنية</span>
-  </div>
-
-  <div class="header-actions">
-    <label for="yearSelect">العام الأكاديمي</label>
-    <select id="yearSelect">
-      <option value="2025-2026">2025-2026</option>
-    </select>
-
-    <!-- اسم المستخدم + الدور -->
-    <span id="userName" class="user-name"></span>
-    <span id="roleBadge" class="role-badge">—</span>
-
-    <button id="btnSignOut" class="btn btn-danger">خروج</button>
-  </div>
-</header>
-
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>لوحة تحكم الإدارة</title>
+  <link rel="stylesheet" href="css/admin-dashboard.css" />
+</head>
 <body>
-  <!-- Header -->
+  <!-- الهيدر -->
   <header class="app-header">
-    <!-- يسار: الشعار + اسم المعهد -->
     <div class="brand-left">
       <img src="assets/logo.png" alt="شعار المعهد" class="brand-logo" />
       <span class="brand-name">معهد الدراسات الإدارية والفنية</span>
     </div>
 
-    <!-- يمين: الأدوات -->
     <div class="header-actions">
-      <label class="yr-label" for="yearSelect">العام الأكاديمي</label>
-      <select id="yearSelect" class="yr-select" aria-label="اختيار العام الأكاديمي">
+      <label for="yearSelect">العام الأكاديمي</label>
+      <select id="yearSelect">
         <option value="2025-2026">2025-2026</option>
       </select>
 
-      <span id="roleBadge" class="role-badge" title="دور المستخدم">—</span>
+      <!-- بيانات المستخدم -->
+      <span id="userName" class="user-name"></span>
+      <span id="roleBadge" class="role-badge">—</span>
 
-      <button id="btnSignOut" class="btn btn-danger" type="button" aria-label="تسجيل الخروج">
-        خروج
-      </button>
+      <button id="btnSignOut" class="btn btn-danger">خروج</button>
     </div>
   </header>
 
   <!-- المحتوى -->
   <main class="app-main">
-    <!-- ملخص ذكي (AI Summary) -->
-    <section class="card ai-summary" aria-live="polite" id="aiSummary">
-      <div class="card-body">ملخص نظامي: لا توجد مؤشرات غير طبيعية الآن ✅</div>
-    </section>
-
-    <!-- KPIs -->
-    <section aria-labelledby="kpiTitle" class="card kpis">
-      <h2 id="kpiTitle" class="sr-only">المؤشرات الرئيسية</h2>
-      <div class="kpi-grid">
-        <div class="kpi">
-          <div class="kpi-title">الطلاب</div>
-          <div class="kpi-value" id="kpiStudents">—</div>
-          <a href="students.html" class="kpi-link">عرض التفاصيل</a>
-        </div>
-
-        <div class="kpi">
-          <div class="kpi-title">المعلّمون</div>
-          <div class="kpi-value" id="kpiTeachers">—</div>
-          <a href="teachers.html" class="kpi-link">عرض التفاصيل</a>
-        </div>
-
-        <div class="kpi">
-          <div class="kpi-title">الفصول</div>
-          <div class="kpi-value" id="kpiClasses">—</div>
-          <a href="classes.html" class="kpi-link">عرض التفاصيل</a>
-        </div>
-
-        <div class="kpi">
-          <div class="kpi-title">تنبيهات</div>
-          <div class="kpi-value" id="kpiAlerts">—</div>
-          <a href="#alerts" class="kpi-link">اذهب للتنبيهات</a>
-        </div>
+    <section class="kpis">
+      <div class="kpi-card">
+        <h4>الطلاب</h4>
+        <p id="kpiStudents">—</p>
+        <a href="students.html">عرض التفاصيل</a>
+      </div>
+      <div class="kpi-card">
+        <h4>المعلمون</h4>
+        <p id="kpiTeachers">—</p>
+        <a href="#">عرض التفاصيل</a>
+      </div>
+      <div class="kpi-card">
+        <h4>الفصول</h4>
+        <p id="kpiClasses">—</p>
+        <a href="#">عرض التفاصيل</a>
       </div>
     </section>
 
-    <!-- مخططات خفيفة -->
-    <section class="cards two-col">
-      <div class="card">
-        <div class="card-head">
-          <h3>توزيع الطلاب حسب الصف</h3>
-        </div>
-        <div class="card-body" id="chartByGrade">
-          <div class="placeholder">سيظهر الرسم بعد التحميل…</div>
-        </div>
+    <section class="charts">
+      <div class="chart-card">
+        <h4>إشغال الفصول</h4>
+        <div id="chartClasses">سيظهر الرسم بعد التحميل...</div>
       </div>
-
-      <div class="card">
-        <div class="card-head">
-          <h3>إشغال الفصول</h3>
-        </div>
-        <div class="card-body" id="chartCapacity">
-          <div class="placeholder">سيظهر الرسم بعد التحميل…</div>
-        </div>
+      <div class="chart-card">
+        <h4>توزيع الطلاب حسب الصف</h4>
+        <div id="chartStudents">سيظهر الرسم بعد التحميل...</div>
       </div>
     </section>
 
-    <!-- التنبيهات -->
-    <section id="alerts" class="card">
-      <div class="card-head">
-        <h3>التنبيهات</h3>
-      </div>
-      <ul class="alerts" id="alertsList" aria-live="polite"></ul>
+    <section class="notifications">
+      <h4>التنبيهات</h4>
+      <p id="alerts">لا توجد تنبيهات الآن ✅</p>
     </section>
 
-    <!-- أحدث النشاطات -->
-    <section class="card">
-      <div class="card-head">
-        <h3>أحدث النشاطات</h3>
-      </div>
-      <div class="card-body">
-        <ul id="activityList" class="activity-list"></ul>
-      </div>
+    <section class="activities">
+      <h4>أحدث الأنشطة</h4>
+      <p id="recentActivities">تعتذر تحميل الأنشطة.</p>
     </section>
 
-    <!-- مساعد أوامر (AI Command) -->
-    <section class="card ai-cmd">
-      <div class="card-head">
-        <h3>اسأل الداشبورد</h3>
-      </div>
-      <div class="card-body ai-cmd-body">
-        <input id="aiCmdInput" class="ai-input" type="text" placeholder="مثال: اعرض فصول الصف العاشر أقل من 30 طالب" />
-        <button id="aiCmdRun" class="btn" type="button">تنفيذ</button>
-        <div id="aiCmdHint" class="ai-hint">يدعم أوامر مثل: “طلاب الصف العاشر أقل من 30” أو “تعارض جدول الأربعاء”.</div>
-      </div>
+    <section class="ai-helper">
+      <h4>اسأل الداشبورد</h4>
+      <input type="text" id="aiInput" placeholder="اكتب سؤالك هنا..." />
+      <button id="aiAskBtn">تنفيذ</button>
     </section>
 
-    <!-- اختصارات -->
-    <section class="quick-actions">
-      <a class="btn" href="students.html">إضافة طالب</a>
-      <a class="btn" href="teachers.html">إضافة معلّم</a>
-      <a class="btn" href="classes.html">إنشاء فصل</a>
-      <a class="btn" href="timetable.html">إدارة الجدول</a>
-      <a class="btn only-admin" href="invites.html">إنشاء دعوة</a>
-      <a class="btn only-admin" href="settings.html">الإعدادات</a>
+    <section class="actions">
+      <button class="btn">إضافة طالب</button>
+      <button class="btn">إضافة معلم</button>
+      <button class="btn">إنشاء فصل</button>
+      <button class="btn">إدارة الجدول</button>
+      <button class="btn">إنشاء دعوة</button>
+      <button class="btn">الإعدادات</button>
     </section>
   </main>
 
-  <!-- Toast -->
-  <div id="globalMsg" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  <div id="globalMsg" class="toast"></div>
 
-  <!-- سكربت الداشبورد (ES Module) -->
   <script type="module" src="js/admin-dashboard.js"></script>
 </body>
 </html>
