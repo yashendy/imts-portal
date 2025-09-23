@@ -96,26 +96,52 @@ async function loadRoleBadge(user){
 /* ====================== KPIs سريعة ====================== */
 
 // ===== KPIs =====
+// ===== KPIs =====
 async function loadKPIs() {
   try {
-    // استخدم collectionGroup للطلاب والمعلمين
     const [cS, cT, cC] = await Promise.all([
       getCountFromServer(collectionGroup(db, "students")),
       getCountFromServer(collectionGroup(db, "teachers")),
-      getCountFromServer(collection(db, "classes")), // لو classes مجموعة رئيسية
+      getCountFromServer(collection(db, "classes")),
     ]);
 
-    document.getElementById("kpiStudents").textContent = cS.data().count;
-    document.getElementById("kpiTeachers").textContent = cT.data().count;
-    document.getElementById("kpiClasses").textContent = cC.data().count;
+    document.getElementById("kpiStudents").textContent = cS.data().count || 0;
+    document.getElementById("kpiTeachers").textContent = cT.data().count || 0;
+    document.getElementById("kpiClasses").textContent = cC.data().count || 0;
   } catch (e) {
-    console.error("loadKPIs:", e);
+    console.warn("⚠️ loadKPIs:", e.message);
     document.getElementById("kpiStudents").textContent = "—";
     document.getElementById("kpiTeachers").textContent = "—";
     document.getElementById("kpiClasses").textContent = "—";
-    showToast("⚠️ لا يمكن تحميل مؤشرات الأداء","err");
   }
 }
+
+// ===== Auth =====
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { 
+    location.href = "index.html"; 
+    return; 
+  }
+
+  try {
+    const uDoc = await getDoc(doc(db, "users", user.uid));
+    if (uDoc.exists()) {
+      const data = uDoc.data();
+      document.getElementById("userName").textContent = data.displayName || user.email;
+      document.getElementById("roleBadge").textContent = data.role || "—";
+    } else {
+      document.getElementById("userName").textContent = user.email;
+      document.getElementById("roleBadge").textContent = "—";
+    }
+  } catch (err) {
+    console.error("⚠️ User load error:", err);
+    document.getElementById("userName").textContent = user.email;
+    document.getElementById("roleBadge").textContent = "—";
+  }
+
+  loadKPIs();
+});
+
 
 /* ====================== تنبيهات ====================== */
 
