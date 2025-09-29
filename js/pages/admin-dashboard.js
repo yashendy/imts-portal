@@ -98,7 +98,7 @@ onAuthStateChanged(auth, async (user) => {
     hydrateOverview();
     loadInvites();
     hydrateUsers();
-    hydrateClasses();
+    hydrateClasses();   // ← هنا المشكلة كانت بتظهر
     hydrateInstitute();
   }
 });
@@ -208,11 +208,7 @@ async function hydrateUsers(){
     _usersCache.sort((a,b)=>(b?.createdAt?.seconds||0)-(a?.createdAt?.seconds||0));
 
     renderUsers(_usersCache); bindUserFilters();
- } catch(err){
-  console.error("hydrateClasses failed:", err);
-  els.classesList.innerHTML = `<tr><td colspan="10">تعذّر التحميل: ${err?.code || err?.message}</td></tr>`;
-}
-
+  }catch(err){ console.error(err); toast("error","فشل تحميل المستخدمين"); els.usersList.innerHTML=`<tr><td colspan="7">تعذّر التحميل.</td></tr>`; }
   finally{ hideLoader(); }
 }
 function fillHomeroomSelect(classes=[]){
@@ -312,6 +308,48 @@ els.btnSaveUser?.addEventListener("click", async ()=>{
 
 /* ============= Classes ============= */
 let _classesAll=[]; let _templatesCache=[]; let _teachersActive=[];
+
+/* ✅ المهم: لا تفشل الصفحة لو جزء فرعي وقع */
+async function hydrateClasses(){
+  showLoader();
+  let step = "init";
+  try{
+    // 1) periodTemplates
+    try{
+      step = "periodTemplates";
+      const ptSnap=await getDocs(collection(db,"periodTemplates"));
+      _templatesCache=ptSnap.docs.map(d=>({id:d.id, ...(d.data()||{})}));
+    }catch(e){
+      console.warn("[warn] فشل تحميل قوالب الحصص:", e?.code || e?.message || e);
+      _templatesCache=[];  // نكمل بدون قوالب
+    }
+    fillTemplateSelects();
+
+    // 2) active teachers
+    try{
+      step = "teachers";
+      const qT=query(collection(db,"users"), where("role","==","teacher"), where("status","==","active"));
+      const tSnap=await getDocs(qT);
+      _teachersActive=tSnap.docs.map(d=>({id:d.id, ...(d.data()||{})}));
+    }catch(e){
+      console.warn("[warn] فشل تحميل المعلّمين:", e?.code || e?.message || e);
+      _teachersActive=[];
+    }
+    fillHomeroomTeachers();
+
+    // 3) classes (أساسي)
+    step = "classes";
+    const cSnap=await getDocs(collection(db,"classes"));
+    _classesAll=cSnap.docs.map(d=>({id:d.id, ...(d.data()||{})}));
+    renderClasses(_classesAll);
+    bindClassFilters();
+    bindClassForm();
+  }catch(err){
+    console.error(`hydrateClasses failed @${step}:`, err);
+    els.classesList.innerHTML=`<tr><td colspan="10">تعذّر التحميل: ${err?.code || err?.message || err}</td></tr>`;
+  }finally{ hideLoader(); }
+}
+
 function fillTemplateSelects(){
   const labelOf=(t)=> (t.name || t.nameAr || t.id || "قالب بدون اسم");
   if(els.periodTemplateId){
@@ -340,33 +378,6 @@ function fillHomeroomTeachers(){
       const opt=document.createElement("option"); opt.value=t.id; opt.textContent=(t.nameAr||t.nameEn||t.email||t.id); els.cHomeroom.appendChild(opt);
     });
   }
-}
-async function hydrateClasses(){
-  showLoader();
-  try{
-    // templates
-    try{
-      const ptSnap=await getDocs(collection(db,"periodTemplates"));
-      _templatesCache=ptSnap.docs.map(d=>({id:d.id, ...(d.data()||{})}));
-      fillTemplateSelects();
-    }catch(e){ console.error("periodTemplates error:",e); toast("error","تعذّر تحميل قوالب الحصص"); throw e; }
-    // teachers
-    try{
-      const qT=query(collection(db,"users"), where("role","==","teacher"), where("status","==","active"));
-      const tSnap=await getDocs(qT);
-      _teachersActive=tSnap.docs.map(d=>({id:d.id, ...(d.data()||{})}));
-      fillHomeroomTeachers();
-    }catch(e){ console.error("users(teachers) error:",e); toast("error","تعذّر تحميل قائمة المعلمين"); throw e; }
-    // classes
-    try{
-      const cSnap=await getDocs(collection(db,"classes"));
-      _classesAll=cSnap.docs.map(d=>({id:d.id, ...(d.data()||{})}));
-      renderClasses(_classesAll); bindClassFilters(); bindClassForm();
-    }catch(e){ console.error("classes error:",e); toast("error","تعذّر تحميل الصفوف"); throw e; }
-  }catch(err){
-    console.error("hydrateClasses failed:",err);
-    els.classesList.innerHTML=`<tr><td colspan="10">تعذّر التحميل.</td></tr>`;
-  }finally{ hideLoader(); }
 }
 function bindClassFilters(){ [els.cGradeFilter,els.cTrackFilter,els.cSearch].forEach(el=>el?.addEventListener("input",()=>renderClasses(_classesAll))); }
 function renderClasses(data=[]){
