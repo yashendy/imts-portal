@@ -1,9 +1,17 @@
 import { auth, db, serverTimestamp } from "../core/firebase.js";
-import { requireRole, toast, showLoader, hideLoader, signOutSafe, getInstituteInfo } from "../core/app.js";
+import { 
+  requireRole, 
+  toast, 
+  showLoader, 
+  hideLoader, 
+  signOutSafe, 
+  getInstituteInfo, 
+  getCurrentYearId 
+} from "../core/app.js";
 import {
   collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query, where
 } from "https://www.gstatic.com/firebasejs/12.2.0/firebase-firestore.js";
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.2.0/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.0/firebase-auth.js";
 
 const els = {
   tabs: document.querySelectorAll(".tab"),
@@ -31,7 +39,10 @@ els.tabs.forEach(tab=>{
 onAuthStateChanged(auth, async (user)=>{
   if(!user){ location.href="index.html"; return; }
   const ok = await requireRole(["owner","admin"]);
-  if(!ok){ toast("error","صلاحيات غير كافية"); location.href="index.html"; }
+  if(!ok){ 
+    toast("error","صلاحيات غير كافية"); 
+    location.href="index.html"; 
+  }
   else{
     hydrateOverview();
     loadInvites();
@@ -59,9 +70,9 @@ async function hydrateOverview(){
     const iSnap = await getDocs(qI);
     els.countInvites.textContent = iSnap.size;
 
-    // current year
-    const inst = await getInstituteInfo();
-    els.currentYear.textContent = inst?.currentAcademicYearId || "—";
+    // current year (من settings/global)
+    const yearId = await getCurrentYearId();
+    els.currentYear.textContent = yearId || "—";
 
   }catch(err){
     console.error(err);
