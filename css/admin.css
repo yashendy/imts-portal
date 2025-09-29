@@ -54,3 +54,10 @@ body{
 .invite-table th, .invite-table td{
   border:1px solid var(--border); padding:8px; text-align:center;
 }
+.btn-action{
+  padding:6px 10px; border-radius:10px; border:1px solid var(--border);
+  background:#fff; cursor:pointer; margin-inline:2px;
+}
+.btn-action:hover{ background:#f3f4f6; }
+.btn-action.danger{ border-color:#fecaca; color:#7f1d1d; }
+
