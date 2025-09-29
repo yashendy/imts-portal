@@ -1,24 +1,12 @@
 // js/pages/admin-dashboard.js
 import { auth, db, serverTimestamp } from "../core/firebase.js";
 import {
-  requireRole,
-  toast,
-  showLoader,
-  hideLoader,
-  signOutSafe,
-  getInstituteInfo,
-  getCurrentYearId,
+  requireRole, toast, showLoader, hideLoader, signOutSafe,
+  getInstituteInfo, getCurrentYearId
 } from "../core/app.js";
 import {
-  collection,
-  getDocs,
-  setDoc,
-  doc,
-  updateDoc,
-  deleteDoc,
-  query,
-  where,
-  getDoc,
+  collection, getDocs, setDoc, doc, updateDoc, deleteDoc,
+  query, where, getDoc, orderBy
 } from "https://www.gstatic.com/firebasejs/12.2.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.0/firebase-auth.js";
 
@@ -26,12 +14,29 @@ const els = {
   tabs: document.querySelectorAll(".tab"),
   contents: document.querySelectorAll(".tab-content"),
   btnLogout: document.getElementById("btnLogout"),
+  // overview
   countClasses: document.getElementById("countClasses"),
   countTeachers: document.getElementById("countTeachers"),
   countInvites: document.getElementById("countInvites"),
   currentYear: document.getElementById("currentYear"),
+  // invites
   inviteForm: document.getElementById("inviteForm"),
   inviteList: document.getElementById("inviteList"),
+  // users
+  usersList: document.getElementById("usersList"),
+  fRole: document.getElementById("fRole"),
+  fStatus: document.getElementById("fStatus"),
+  fSearch: document.getElementById("fSearch"),
+  // user modal
+  userModal: document.getElementById("userModal"),
+  uId: document.getElementById("uId"),
+  uNameAr: document.getElementById("uNameAr"),
+  uNameEn: document.getElementById("uNameEn"),
+  uRole: document.getElementById("uRole"),
+  uStatus: document.getElementById("uStatus"),
+  uHomeroom: document.getElementById("uHomeroom"),
+  uTracks: document.getElementById("uTracks"),
+  btnSaveUser: document.getElementById("btnSaveUser"),
 };
 
 // ===== تبويبات =====
@@ -46,75 +51,57 @@ els.tabs.forEach((tab) => {
 
 // ===== حماية الدور =====
 onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    location.href = "index.html";
-    return;
-  }
+  if (!user) { location.href = "index.html"; return; }
   const ok = await requireRole(["owner", "admin"]);
-  if (!ok) {
-    toast("error", "صلاحيات غير كافية");
-    location.href = "index.html";
-  } else {
+  if (!ok) { toast("error", "صلاحيات غير كافية"); location.href = "index.html"; }
+  else {
     hydrateOverview();
     loadInvites();
+    hydrateUsers();
     hydrateInstitute();
   }
 });
 
 els.btnLogout?.addEventListener("click", () => signOutSafe(true));
 
-// ===== Overview =====
+/* ---------------- Overview ---------------- */
 async function hydrateOverview() {
   try {
     showLoader();
-    // classes count
     const cSnap = await getDocs(collection(db, "classes"));
     els.countClasses.textContent = cSnap.size;
 
-    // teachers count
-    const qT = query(
-      collection(db, "users"),
-      where("role", "==", "teacher"),
-      where("status", "==", "active")
-    );
+    const qT = query(collection(db, "users"),
+      where("role", "==", "teacher"), where("status", "==", "active"));
     const tSnap = await getDocs(qT);
     els.countTeachers.textContent = tSnap.size;
 
-    // invites count
     const qI = query(collection(db, "invites"), where("active", "==", true));
     const iSnap = await getDocs(qI);
     els.countInvites.textContent = iSnap.size;
 
-    // current year (من settings/global)
     const yearId = await getCurrentYearId();
     els.currentYear.textContent = yearId || "—";
   } catch (err) {
     console.error(err);
     toast("error", "تعذّر تحميل البيانات");
-  } finally {
-    hideLoader();
-  }
+  } finally { hideLoader(); }
 }
 
-// ===== Utilities =====
+/* ---------------- Invites ---------------- */
 function genCode(prefix = "INV") {
-  // كود قصير ثابت الشكل
   return `${prefix}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 }
-
 function fmtDateMaybe(ts) {
   if (!ts) return "—";
   try {
-    // Firestore Timestamp
     if (ts.seconds) return new Date(ts.seconds * 1000).toLocaleDateString("ar-EG");
-    // JS Date or ISO
     const d = typeof ts === "string" ? new Date(ts) : ts;
     if (!isNaN(d)) return d.toLocaleDateString("ar-EG");
-  } catch {}
+  } catch { }
   return "—";
 }
 
-// ===== Invites: Create =====
 els.inviteForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
   const role = (document.getElementById("role").value || "teacher").trim().toLowerCase();
@@ -123,24 +110,15 @@ els.inviteForm?.addEventListener("submit", async (e) => {
   const allowedEmail = (document.getElementById("allowedEmail").value || "").trim();
 
   if (!role) return toast("warning", "من فضلك حدِّد الدور.");
-  if (usageLimit < 1 || !Number.isFinite(usageLimit)) {
-    return toast("warning", "عدد الاستخدامات يجب أن يكون رقمًا موجبًا.");
-  }
+  if (usageLimit < 1 || !Number.isFinite(usageLimit)) return toast("warning", "عدد الاستخدامات يجب أن يكون رقمًا موجبًا.");
 
   try {
     showLoader();
-    // ⚠️ مهم: نخلي docId = code عشان صفحة activate تلاقي الدعوة بالـ ID
     const code = genCode("INV");
     const ref = doc(db, "invites", code);
-
     const payload = {
-      code,                 // نخزّنه أيضًا كحقل داخلي لعرضه بسهولة
-      role,                 // teacher | admin (للداخلية فقط)
-      active: true,
-      usageLimit,
-      usedCount: 0,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
+      code, role, active: true, usageLimit, usedCount: 0,
+      createdAt: serverTimestamp(), updatedAt: serverTimestamp()
     };
     if (expiresAtRaw) payload.expiresAt = new Date(expiresAtRaw);
     if (allowedEmail) payload.allowedEmail = allowedEmail.toLowerCase();
@@ -152,35 +130,24 @@ els.inviteForm?.addEventListener("submit", async (e) => {
   } catch (err) {
     console.error(err);
     toast("error", "فشل إنشاء الدعوة");
-  } finally {
-    hideLoader();
-  }
+  } finally { hideLoader(); }
 });
 
-// ===== Invites: List & actions =====
 async function loadInvites() {
   try {
-    els.inviteList.innerHTML = "<tr><td colspan='7'>تحميل...</td></tr>";
+    els.inviteList.innerHTML = "<tr><td colspan='6'>تحميل...</td></tr>";
     const snap = await getDocs(collection(db, "invites"));
-    if (snap.empty) {
-      els.inviteList.innerHTML = "<tr><td colspan='7'>لا توجد دعوات</td></tr>";
-      return;
-    }
+    if (snap.empty) { els.inviteList.innerHTML = "<tr><td colspan='6'>لا توجد دعوات</td></tr>"; return; }
     els.inviteList.innerHTML = "";
     snap.forEach((docu) => {
-      const inv = docu.data();
-      const id = docu.id; // يساوي code في إنشائنا الجديد
-      const stateTxt = inv.active ? "نشط" : "مغلق";
-      const usedVsLimit = `${inv.usedCount || 0}/${inv.usageLimit || 1}`;
-      const expiresTxt = fmtDateMaybe(inv.expiresAt);
-
+      const inv = docu.data(); const id = docu.id;
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${inv.code || id}</td>
         <td>${inv.role || "—"}</td>
-        <td>${stateTxt}</td>
-        <td>${usedVsLimit}</td>
-        <td>${expiresTxt}</td>
+        <td>${inv.active ? "نشط" : "مغلق"}</td>
+        <td>${(inv.usedCount || 0)}/${(inv.usageLimit || 1)}</td>
+        <td>${fmtDateMaybe(inv.expiresAt)}</td>
         <td>
           <button class="btn-action" data-id="${id}" data-action="copy">نسخ</button>
           <button class="btn-action" data-id="${id}" data-action="toggle">${inv.active ? "تعطيل" : "تفعيل"}</button>
@@ -189,59 +156,204 @@ async function loadInvites() {
       `;
       els.inviteList.appendChild(tr);
     });
-
     els.inviteList.querySelectorAll("button.btn-action").forEach((btn) => {
-      btn.addEventListener("click", () =>
-        inviteAction(btn.dataset.id, btn.dataset.action)
-      );
+      btn.addEventListener("click", () => inviteAction(btn.dataset.id, btn.dataset.action));
     });
   } catch (err) {
     console.error(err);
     toast("error", "فشل تحميل الدعوات");
   }
 }
-
 async function inviteAction(id, action) {
   try {
     const ref = doc(db, "invites", id);
-
-    if (action === "copy") {
-      await navigator.clipboard.writeText(id);
-      toast("success", "تم نسخ الكود للحافظة");
-      return;
-    }
-
-    if (action === "delete") {
-      if (!confirm("متأكد من حذف الدعوة؟")) return;
-      await deleteDoc(ref);
-      toast("success", "تم الحذف");
-      loadInvites();
-      return;
-    }
-
+    if (action === "copy") { await navigator.clipboard.writeText(id); toast("success", "تم نسخ الكود"); return; }
+    if (action === "delete") { if (!confirm("متأكد من حذف الدعوة؟")) return; await deleteDoc(ref); toast("success", "تم الحذف"); loadInvites(); return; }
     if (action === "toggle") {
-      const snap = await getDoc(ref);
-      if (!snap.exists()) return toast("error", "الدعوة غير موجودة");
+      const snap = await getDoc(ref); if (!snap.exists()) return toast("error", "الدعوة غير موجودة");
       const current = !!snap.data().active;
-      await updateDoc(ref, {
-        active: !current,
-        updatedAt: serverTimestamp(),
-      });
+      await updateDoc(ref, { active: !current, updatedAt: serverTimestamp() });
       toast("success", current ? "تم التعطيل" : "تم التفعيل");
-      loadInvites();
+      loadInvites(); return;
+    }
+  } catch (err) {
+    console.error(err); toast("error", "خطأ في العملية");
+  }
+}
+
+/* ---------------- Users ---------------- */
+let _usersCache = [];  // بنعرض منها بعد الفلترة والبحث
+let _classesCache = []; // لقائمة مربي الصف
+
+async function hydrateUsers() {
+  try {
+    showLoader();
+
+    // الفصول لمربي الصف
+    const cSnap = await getDocs(collection(db, "classes"));
+    _classesCache = cSnap.docs.map(d => ({ id: d.id, ...(d.data() || {}) }));
+    fillHomeroomSelect(_classesCache);
+
+    // جميع المستخدمين
+    const uSnap = await getDocs(query(collection(db, "users"), orderBy("createdAt","desc")));
+    _usersCache = uSnap.docs.map(d => ({ id: d.id, ...(d.data() || {}) }));
+
+    renderUsers(_usersCache);
+    bindUserFilters();
+  } catch (err) {
+    console.error(err);
+    toast("error", "فشل تحميل المستخدمين");
+  } finally { hideLoader(); }
+}
+
+function fillHomeroomSelect(classes = []) {
+  const sel = els.uHomeroom;
+  if (!sel) return;
+  // احتفظ بخيار فارغ
+  sel.innerHTML = `<option value="">— لا شيء —</option>`;
+  classes.sort((a,b)=> (a.order||0)-(b.order||0) || String(a.id).localeCompare(b.id,"ar"));
+  classes.forEach(c=>{
+    const name = c.nameAr || c.nameEn || c.id;
+    const opt = document.createElement("option");
+    opt.value = c.id; opt.textContent = name;
+    sel.appendChild(opt);
+  });
+}
+
+function bindUserFilters() {
+  [els.fRole, els.fStatus, els.fSearch].forEach(el => {
+    el?.addEventListener("input", () => renderUsers(_usersCache));
+  });
+}
+
+function renderUsers(data = []) {
+  if (!els.usersList) return;
+  const role = (els.fRole?.value || "").trim().toLowerCase();
+  const status = (els.fStatus?.value || "").trim().toLowerCase();
+  const q = (els.fSearch?.value || "").trim().toLowerCase();
+
+  let rows = data.filter(u => {
+    const okRole = !role || (String(u.role||"").toLowerCase() === role);
+    const okStatus = !status || (String(u.status||"").toLowerCase() === status);
+    const text = `${u.nameAr||""} ${u.nameEn||""} ${u.email||""}`.toLowerCase();
+    const okQ = !q || text.includes(q);
+    return okRole && okStatus && okQ;
+  });
+
+  if (!rows.length) {
+    els.usersList.innerHTML = `<tr><td colspan="7">لا نتائج مطابقة…</td></tr>`;
+    return;
+  }
+
+  els.usersList.innerHTML = "";
+  rows.forEach(u => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${u.nameAr || u.nameEn || "—"}</td>
+      <td>${u.email || "—"}</td>
+      <td>${u.role || "—"}</td>
+      <td>${u.status || "—"}</td>
+      <td>${u.homeroomClassId || "—"}</td>
+      <td>${Array.isArray(u.trackCodes) ? u.trackCodes.join("، ") : "—"}</td>
+      <td>
+        <button class="btn-action" data-id="${u.id}" data-act="toggleStatus">${(u.status||"").toLowerCase()==="active"?"إيقاف":"تفعيل"}</button>
+        <button class="btn-action" data-id="${u.id}" data-act="switchRole">تحويل دور</button>
+        <button class="btn-action" data-id="${u.id}" data-act="edit">تعديل</button>
+      </td>
+    `;
+    els.usersList.appendChild(tr);
+  });
+
+  els.usersList.querySelectorAll("button").forEach(btn=>{
+    btn.addEventListener("click",()=> userAction(btn.dataset.id, btn.dataset.act));
+  });
+}
+
+async function userAction(uid, act) {
+  try {
+    const ref = doc(db, "users", uid);
+    if (act === "toggleStatus") {
+      const snap = await getDoc(ref); if(!snap.exists()) return;
+      const current = (snap.data().status || "").toLowerCase() === "active";
+      await updateDoc(ref, { status: current ? "inactive" : "active", updatedAt: serverTimestamp() });
+      toast("success", current ? "تم إيقاف الحساب" : "تم تفعيل الحساب");
+      await refreshUsersRow(uid);
+      return;
+    }
+    if (act === "switchRole") {
+      const snap = await getDoc(ref); if(!snap.exists()) return;
+      const role = (snap.data().role || "").toLowerCase();
+      const next = role === "teacher" ? "admin" : "teacher";
+      if(!confirm(`تأكيد تحويل الدور إلى: ${next}?`)) return;
+      await updateDoc(ref, { role: next, updatedAt: serverTimestamp() });
+      toast("success", "تم تحديث الدور");
+      await refreshUsersRow(uid);
+      return;
+    }
+    if (act === "edit") {
+      openUserModal(uid);
       return;
     }
   } catch (err) {
     console.error(err);
-    toast("error", "خطأ في العملية");
+    toast("error","فشل تنفيذ العملية");
   }
 }
 
-// ===== Institute Info in header =====
+async function refreshUsersRow(uid){
+  // حدّث الكاش وصفّح من جديد
+  const snap = await getDoc(doc(db,"users",uid));
+  const idx = _usersCache.findIndex(u=>u.id===uid);
+  if (snap.exists() && idx>=0) _usersCache[idx] = { id: uid, ...(snap.data()||{}) };
+  renderUsers(_usersCache);
+}
+
+/* ---- Modal ---- */
+function openUserModal(uid){
+  const u = _usersCache.find(x=>x.id===uid);
+  if(!u) return;
+  els.uId.value = u.id;
+  els.uNameAr.value = u.nameAr || "";
+  els.uNameEn.value = u.nameEn || "";
+  els.uRole.value = (u.role || "teacher");
+  els.uStatus.value = (u.status || "active");
+  els.uHomeroom.value = u.homeroomClassId || "";
+  // tracks
+  [...els.uTracks.options].forEach(opt=>{
+    opt.selected = Array.isArray(u.trackCodes) ? u.trackCodes.includes(opt.value) : false;
+  });
+
+  els.userModal?.showModal();
+}
+els.userModal?.addEventListener("close", ()=>{/* no-op */});
+
+els.btnSaveUser?.addEventListener("click", async (e)=>{
+  e.preventDefault();
+  try{
+    showLoader();
+    const uid = els.uId.value;
+    const payload = {
+      nameAr: els.uNameAr.value.trim() || null,
+      nameEn: els.uNameEn.value.trim() || null,
+      role: els.uRole.value,
+      status: els.uStatus.value,
+      homeroomClassId: els.uHomeroom.value || null,
+      trackCodes: [...els.uTracks.options].filter(o=>o.selected).map(o=>o.value),
+      updatedAt: serverTimestamp(),
+    };
+    await updateDoc(doc(db,"users",uid), payload);
+    toast("success","تم حفظ التعديلات");
+    els.userModal.close();
+    await refreshUsersRow(uid);
+  }catch(err){
+    console.error(err);
+    toast("error","تعذّر حفظ التعديلات");
+  }finally{ hideLoader(); }
+});
+
+/* ---------------- Header branding ---------------- */
 async function hydrateInstitute() {
   const inst = await getInstituteInfo();
-  document
-    .querySelectorAll(".institute-name")
-    .forEach((n) => (n.textContent = inst?.name || "اسم المعهد"));
+  document.querySelectorAll(".institute-name").forEach(n => n.textContent = inst?.name || "اسم المعهد");
   if (inst?.logoUrl) document.querySelector(".logo").src = inst.logoUrl;
 }
