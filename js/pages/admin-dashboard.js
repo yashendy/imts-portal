@@ -208,7 +208,11 @@ async function hydrateUsers(){
     _usersCache.sort((a,b)=>(b?.createdAt?.seconds||0)-(a?.createdAt?.seconds||0));
 
     renderUsers(_usersCache); bindUserFilters();
-  }catch(err){ console.error(err); toast("error","فشل تحميل المستخدمين"); els.usersList.innerHTML=`<tr><td colspan="7">تعذّر التحميل.</td></tr>`; }
+ } catch(err){
+  console.error("hydrateClasses failed:", err);
+  els.classesList.innerHTML = `<tr><td colspan="10">تعذّر التحميل: ${err?.code || err?.message}</td></tr>`;
+}
+
   finally{ hideLoader(); }
 }
 function fillHomeroomSelect(classes=[]){
