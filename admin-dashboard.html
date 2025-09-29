@@ -1,257 +1,150 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>لوحة الإدارة — بوابة المعهد</title>
-  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Cairo:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/admin.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة الإدارة</title>
+  <link rel="stylesheet" href="CSS/admin.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <img class="logo" src="assets/logo.png" alt="شعار" />
-      <h1 class="institute-name">اسم المعهد</h1>
-    </div>
-    <button id="btnLogout" class="btn-secondary">خروج</button>
+  <header>
+    <h1>لوحة الإدارة</h1>
   </header>
 
-  <main class="dashboard">
-    <nav class="tabs">
-      <button class="tab active" data-tab="overview">نظرة عامة</button>
-      <button class="tab" data-tab="invites">أكواد الدعوات</button>
-      <button class="tab" data-tab="users">المستخدمون</button>
-      <button class="tab" data-tab="classes">الصفوف</button>
-    </nav>
-
-    <!-- Overview -->
-    <section id="overview" class="tab-content active">
-      <h2>نظرة عامة</h2>
-      <div class="cards">
-        <div class="card"><h3>الفصول</h3><p id="countClasses">—</p></div>
-        <div class="card"><h3>المعلّمون</h3><p id="countTeachers">—</p></div>
-        <div class="card"><h3>الدعوات النشطة</h3><p id="countInvites">—</p></div>
-        <div class="card"><h3>السنة الدراسية</h3><p id="currentYear">—</p></div>
+  <main>
+    <section>
+      <h2>إدارة الصفوف</h2>
+      <div>
+        <label>بحث: <input type="text" id="txtSearch" /></label>
+        <select id="fGrade"><option value="">كل الصفوف</option></select>
+        <select id="fTrack"><option value="">كل المسارات</option></select>
       </div>
-    </section>
-
-    <!-- Invites -->
-    <section id="invites" class="tab-content">
-      <h2>أكواد الدعوات</h2>
-      <form id="inviteForm" class="invite-form">
-        <input id="role" type="text" placeholder="الدور (teacher)" value="teacher" />
-        <input id="usageLimit" type="number" placeholder="عدد الاستخدامات (افتراضي 1)" />
-        <input id="expiresAt" type="date" />
-        <input id="allowedEmail" type="email" placeholder="بريد معيّن (اختياري)" />
-        <button class="btn-primary" type="submit">إنشاء كود جديد</button>
-      </form>
-      <table class="table">
+      <table id="tblClasses">
         <thead>
           <tr>
-            <th>الكود</th><th>الدور</th><th>الحالة</th><th>المستخدم</th><th>انتهاء</th><th>إجراءات</th>
+            <th>المعرف</th>
+            <th>الاسم بالعربية</th>
+            <th>الاسم بالإنجليزية</th>
+            <th>المسار</th>
+            <th>القالب</th>
+            <th>الإجراءات</th>
           </tr>
         </thead>
-        <tbody id="inviteList"><tr><td colspan="6">لا توجد بيانات بعد…</td></tr></tbody>
+        <tbody></tbody>
       </table>
+      <button id="btnNewClass">إضافة صف جديد</button>
     </section>
 
-    <!-- Users -->
-    <section id="users" class="tab-content">
-      <h2>المستخدمون</h2>
-      <div class="filters">
-        <select id="fRole">
-          <option value="">كل الأدوار</option>
-          <option value="owner">المالك</option>
-          <option value="admin">أدمن</option>
-          <option value="teacher">معلّم</option>
-        </select>
-        <select id="fStatus">
-          <option value="">كل الحالات</option>
-          <option value="active">نشِط</option>
-          <option value="inactive">موقوف</option>
-        </select>
-        <input id="fSearch" type="search" placeholder="بحث: اسم أو بريد…" />
-      </div>
-      <table class="table">
+    <section>
+      <h2>إدارة المستخدمين</h2>
+      <table id="tblUsers">
         <thead>
           <tr>
-            <th>الاسم</th><th>البريد</th><th>الدور</th><th>الحالة</th><th>مربي صف</th><th>مسارات</th><th>إجراءات</th>
+            <th>المعرف</th>
+            <th>الاسم بالعربية</th>
+            <th>الاسم بالإنجليزية</th>
+            <th>الدور</th>
+            <th>الحالة</th>
+            <th>الإجراءات</th>
           </tr>
         </thead>
-        <tbody id="usersList"><tr><td colspan="7">تحميل…</td></tr></tbody>
-      </table>
-    </section>
-
-    <!-- Classes -->
-    <section id="classes" class="tab-content">
-      <h2>الصفوف</h2>
-
-      <div class="filters">
-        <select id="cGradeFilter">
-          <option value="">كل الصفوف</option>
-          <option value="g1">الأول ابتدائي</option><option value="g2">الثاني ابتدائي</option>
-          <option value="g3">الثالث ابتدائي</option><option value="g4">الرابع ابتدائي</option>
-          <option value="g5">الخامس ابتدائي</option><option value="g6">السادس ابتدائي</option>
-          <option value="g7">الأول إعدادي</option><option value="g8">الثاني إعدادي</option><option value="g9">الثالث إعدادي</option>
-          <option value="g10">الأول ثانوي</option><option value="g11">الثاني ثانوي</option><option value="g12">الثالث ثانوي</option>
-        </select>
-        <select id="cTrackFilter">
-          <option value="">كل المسارات</option>
-          <option value="ar">عربي</option><option value="lang">لغات</option>
-        </select>
-        <input id="cSearch" type="search" placeholder="بحث بالاسم/المعرف…" />
-      </div>
-
-      <details class="box">
-        <summary><b>إضافة صف جديد</b></summary>
-        <form id="classForm" class="grid-3">
-          <div>
-            <label>الصف</label>
-            <select id="gradeId" required>
-              <option value="">— اختر —</option>
-              <option value="g1">الأول ابتدائي</option><option value="g2">الثاني ابتدائي</option>
-              <option value="g3">الثالث ابتدائي</option><option value="g4">الرابع ابتدائي</option>
-              <option value="g5">الخامس ابتدائي</option><option value="g6">السادس ابتدائي</option>
-              <option value="g7">الأول إعدادي</option><option value="g8">الثاني إعدادي</option><option value="g9">الثالث إعدادي</option>
-              <option value="g10">الأول ثانوي</option><option value="g11">الثاني ثانوي</option><option value="g12">الثالث ثانوي</option>
-            </select>
-          </div>
-          <div>
-            <label>المسار</label>
-            <select id="trackCode" required>
-              <option value="">— اختر —</option>
-              <option value="ar">عربي</option><option value="lang">لغات</option>
-            </select>
-          </div>
-          <div>
-            <label>القسم</label>
-            <select id="section" required>
-              <option value="A">A (أ)</option><option value="B">B (ب)</option><option value="C">C (ج)</option>
-              <option value="D">D (د)</option><option value="E">E (هـ)</option><option value="F">F (و)</option>
-            </select>
-          </div>
-
-          <div>
-            <label>قالب الحصص</label>
-            <select id="periodTemplateId" required>
-              <option value="">— تحميل القوالب… —</option>
-            </select>
-          </div>
-          <div>
-            <label>سعة الفصل</label>
-            <input id="capacity" type="number" min="1" placeholder="مثال: 35" />
-          </div>
-          <div>
-            <label>مربي الصف</label>
-            <select id="homeroomTeacherId">
-              <option value="">— لا شيء —</option>
-            </select>
-          </div>
-
-          <div class="wide">
-            <label>الاسم (عربي) — اختياري</label>
-            <input id="nameAr" type="text" placeholder="لو تركته فاضي سيتولّد تلقائيًا" />
-          </div>
-          <div class="wide">
-            <label class="inline"><input id="active" type="checkbox" checked /> نشط؟</label>
-          </div>
-
-          <div class="wide">
-            <button class="btn-primary" type="submit">حفظ الصف</button>
-          </div>
-        </form>
-      </details>
-
-      <table class="table">
-        <thead>
-          <tr>
-            <th>الاسم</th><th>المعرف</th><th>الصف</th><th>المسار</th><th>القسم</th><th>القالب</th><th>السعة</th><th>مربي الصف</th><th>نشط</th><th>إجراءات</th>
-          </tr>
-        </thead>
-        <tbody id="classesList"><tr><td colspan="10">تحميل…</td></tr></tbody>
+        <tbody></tbody>
       </table>
     </section>
   </main>
 
+  <!-- Modal تعديل الصف -->
+  <dialog id="classModal">
+    <form method="dialog" class="modal">
+      <header class="modal-head">
+        <h3>تعديل الصف</h3>
+        <button class="close" value="close">×</button>
+      </header>
+      <div class="modal-body">
+        <input type="hidden" id="cId" />
+        <div>
+          <label>الاسم بالعربية</label>
+          <input id="cNameAr" type="text" />
+        </div>
+        <div>
+          <label>الاسم بالإنجليزية</label>
+          <input id="cNameEn" type="text" />
+        </div>
+        <div>
+          <label>القالب</label>
+          <select id="cTemplate"></select>
+        </div>
+        <div>
+          <label>مربي الصف</label>
+          <select id="cHomeroom"></select>
+        </div>
+      </div>
+      <footer class="modal-foot">
+        <button value="close">إلغاء</button>
+        <button id="btnSaveClass" value="confirm">حفظ</button>
+      </footer>
+    </form>
+  </dialog>
+
   <!-- Modal تعديل المستخدم -->
   <dialog id="userModal">
-    <form class="modal">
+    <form method="dialog" class="modal">
       <header class="modal-head">
         <h3>تعديل المستخدم</h3>
-        <button class="close" type="button" value="close" aria-label="إغلاق" onclick="document.getElementById('userModal').close()">×</button>
+        <button class="close" value="close" aria-label="إغلاق">×</button>
       </header>
       <div class="modal-body">
         <input type="hidden" id="uId" />
         <div class="grid">
-          <div><label>الاسم (عربي)</label><input id="uNameAr" type="text" /></div>
-          <div><label>الاسم (إنجليزي)</label><input id="uNameEn" type="text" /></div>
+          <div>
+            <label>الاسم (عربي)</label>
+            <input id="uNameAr" type="text" />
+          </div>
+          <div>
+            <label>الاسم (إنجليزي)</label>
+            <input id="uNameEn" type="text" />
+          </div>
         </div>
         <div class="grid">
           <div>
             <label>الدور</label>
             <select id="uRole">
-              <option value="teacher">معلّم</option><option value="admin">أدمن</option><option value="owner">المالك</option>
+              <option value="teacher">معلّم</option>
+              <option value="admin">أدمن</option>
+              <option value="owner">المالك</option>
             </select>
           </div>
           <div>
             <label>الحالة</label>
             <select id="uStatus">
-              <option value="active">نشِط</option><option value="inactive">موقوف</option>
+              <option value="active">نشِط</option>
+              <option value="inactive">موقوف</option>
             </select>
           </div>
         </div>
         <div class="grid">
           <div>
             <label>مربي صف</label>
-            <select id="uHomeroom"><option value="">— لا شيء —</option></select>
+            <select id="uHomeroom">
+              <option value="">— لا شيء —</option>
+            </select>
           </div>
           <div>
             <label>المسارات</label>
-            <select id="uTracks" multiple size="3">
-              <option value="ar">عربي</option><option value="lang">لغات</option>
+            <select id="uTracks" multiple size="4">
+              <option value="ar">عربي</option>
+              <option value="lang">لغات</option>
             </select>
           </div>
         </div>
       </div>
       <footer class="modal-foot">
-        <button class="btn-secondary" type="button" onclick="document.getElementById('userModal').close()">إلغاء</button>
-        <button id="btnSaveUser" class="btn-primary" type="button">حفظ</button>
+        <button class="btn-secondary" value="close">إلغاء</button>
+        <button id="btnSaveUser" class="btn-primary" value="confirm">حفظ</button>
       </footer>
     </form>
   </dialog>
 
-  <!-- Modal تعديل الصف -->
-  <dialog id="classModal">
-    <form class="modal">
-      <header class="modal-head">
-        <h3>تعديل الصف</h3>
-        <button class="close" type="button" value="close" aria-label="إغلاق" onclick="document.getElementById('classModal').close()">×</button>
-      </header>
-      <div class="modal-body">
-        <input type="hidden" id="cId" />
-        <div class="grid">
-          <div><label>الاسم (عربي)</label><input id="cNameAr" type="text" /></div>
-          <div><label>الاسم (إنجليزي)</label><input id="cNameEn" type="text" /></div>
-        </div>
-        <div class="grid">
-          <div><label>قالب الحصص</label><select id="cTemplate"></select></div>
-          <div><label>سعة الفصل</label><input id="cCapacity" type="number" min="1" /></div>
-        </div>
-        <div class="grid">
-          <div><label>مربي الصف</label><select id="cHomeroom"></select></div>
-          <div>
-            <label>الحالة</label>
-            <select id="cActive"><option value="true">نشط</option><option value="false">مغلق</option></select>
-          </div>
-        </div>
-      </div>
-      <footer class="modal-foot">
-        <button class="btn-secondary" type="button" onclick="document.getElementById('classModal').close()">إلغاء</button>
-        <button id="btnSaveClass" class="btn-primary" type="button">حفظ</button>
-      </footer>
-    </form>
-  </dialog>
-
-  <script type="module" src="js/pages/admin-dashboard.js"></script>
+  <script type="module" src="js/pages/pagesadmin-dashboard.js"></script>
 </body>
 </html>
