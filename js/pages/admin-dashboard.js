@@ -1,12 +1,12 @@
-// js/pages/admin-dashboard.js
+// js/pages/admin-dashboard.js — step1 (class-teachers + excel/csv)
 import { auth, db, serverTimestamp } from "../core/firebase.js";
 import {
   requireRole, toast, showLoader, hideLoader, signOutSafe,
-  getInstituteInfo, getCurrentYearId
+  getInstituteInfo, getCurrentYearId, displayClassName
 } from "../core/app.js";
 import {
   collection, getDocs, setDoc, doc, updateDoc, deleteDoc,
-  query, where, getDoc, orderBy
+  query, where, getDoc, orderBy, writeBatch
 } from "https://www.gstatic.com/firebasejs/12.2.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.0/firebase-auth.js";
 
@@ -26,6 +26,7 @@ function displayClassNameLocal({ gradeId, trackCode, section, nameAr }) {
 function sectionToAr(section=""){ return ({A:"أ",B:"ب",C:"ج",D:"د",E:"هـ",F:"و"}[section]||section); }
 function fmtDateMaybe(ts){ try{ if(!ts) return "—"; if(ts.seconds) return new Date(ts.seconds*1000).toLocaleDateString("ar-EG"); const d=new Date(ts); if(!isNaN(d)) return d.toLocaleDateString("ar-EG"); }catch{} return "—"; }
 function genCode(prefix="INV"){ return `${prefix}-${Math.random().toString(36).slice(2,8).toUpperCase()}`; }
+function nowStamp(){ const d=new Date(); const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`; }
 
 /* ---------- Elements ---------- */
 const els = {
@@ -77,6 +78,15 @@ const els = {
   cCapacity: document.getElementById("cCapacity"),
   cHomeroom: document.getElementById("cHomeroom"),
   cActive: document.getElementById("cActive"),
+  // class teachers modal
+  classTeachersModal: document.getElementById("classTeachersModal"),
+  ctClassId: document.getElementById("ctClassId"),
+  ctSearch: document.getElementById("ctSearch"),
+  ctTeachers: document.getElementById("ctTeachers"),
+  btnSaveClassTeachers: document.getElementById("btnSaveClassTeachers"),
+  // export
+  btnExportExcel: document.getElementById("btnExportExcel"),
+  btnExportCSV: document.getElementById("btnExportCSV"),
 };
 
 /* ---------- Tabs ---------- */
@@ -98,7 +108,7 @@ onAuthStateChanged(auth, async (user) => {
     hydrateOverview();
     loadInvites();
     hydrateUsers();
-    hydrateClasses();   // ← هنا المشكلة كانت بتظهر
+    hydrateClasses();
     hydrateInstitute();
   }
 });
@@ -266,7 +276,7 @@ async function userAction(uid,act){
       const role=(snap.data().role||"").toLowerCase();
       const next= role==="teacher" ? "admin" : "teacher";
       if(!confirm(`تأكيد تحويل الدور إلى: ${next}?`)) return;
-      await updateDoc(ref,{ role: next, updatedAt:serverTimestamp() });
+      await updateDoc(ref,{ role: next, updatedAt: serverTimestamp() });
       toast("success","تم تحديث الدور"); await refreshUsersRow(uid); return;
     }
     if(act==="edit"){ openUserModal(uid); return; }
@@ -278,38 +288,18 @@ async function refreshUsersRow(uid){
   if(snap.exists() && idx>=0) _usersCache[idx]={ id:uid, ...(snap.data()||{}) };
   renderUsers(_usersCache);
 }
-/* modal */
 function openUserModal(uid){
   const u=_usersCache.find(x=>x.id===uid); if(!u) return;
   els.uId.value=u.id; els.uNameAr.value=u.nameAr||""; els.uNameEn.value=u.nameEn||"";
   els.uRole.value=(u.role||"teacher"); els.uStatus.value=(u.status||"active");
   els.uHomeroom.value=u.homeroomClassId||"";
   [...els.uTracks.options].forEach(opt=> opt.selected=Array.isArray(u.trackCodes)?u.trackCodes.includes(opt.value):false );
-  els.userModal?.showModal();
+  els.userModal?.showModal?.(); // لو <dialog>
 }
-els.btnSaveUser?.addEventListener("click", async ()=>{
-  try{
-    showLoader();
-    const uid=els.uId.value;
-    const payload={
-      nameAr: els.uNameAr.value.trim()||null,
-      nameEn: els.uNameEn.value.trim()||null,
-      role: els.uRole.value,
-      status: els.uStatus.value,
-      homeroomClassId: els.uHomeroom.value || null,
-      trackCodes: [...els.uTracks.options].filter(o=>o.selected).map(o=>o.value),
-      updatedAt: serverTimestamp(),
-    };
-    await updateDoc(doc(db,"users",uid), payload);
-    toast("success","تم حفظ التعديلات"); els.userModal.close(); await refreshUsersRow(uid);
-  }catch(err){ console.error(err); toast("error", `تعذّر حفظ التعديلات: ${err?.code||""}`); }
-  finally{ hideLoader(); }
-});
 
 /* ============= Classes ============= */
 let _classesAll=[]; let _templatesCache=[]; let _teachersActive=[];
 
-/* ✅ المهم: لا تفشل الصفحة لو جزء فرعي وقع */
 async function hydrateClasses(){
   showLoader();
   let step = "init";
@@ -321,7 +311,7 @@ async function hydrateClasses(){
       _templatesCache=ptSnap.docs.map(d=>({id:d.id, ...(d.data()||{})}));
     }catch(e){
       console.warn("[warn] فشل تحميل قوالب الحصص:", e?.code || e?.message || e);
-      _templatesCache=[];  // نكمل بدون قوالب
+      _templatesCache=[];
     }
     fillTemplateSelects();
 
@@ -337,19 +327,19 @@ async function hydrateClasses(){
     }
     fillHomeroomTeachers();
 
-    // 3) classes (أساسي)
+    // 3) classes
     step = "classes";
     const cSnap=await getDocs(collection(db,"classes"));
     _classesAll=cSnap.docs.map(d=>({id:d.id, ...(d.data()||{})}));
-    renderClasses(_classesAll);
+    renderClasses();
     bindClassFilters();
     bindClassForm();
+    bindExports();
   }catch(err){
     console.error(`hydrateClasses failed @${step}:`, err);
     els.classesList.innerHTML=`<tr><td colspan="10">تعذّر التحميل: ${err?.code || err?.message || err}</td></tr>`;
   }finally{ hideLoader(); }
 }
-
 function fillTemplateSelects(){
   const labelOf=(t)=> (t.name || t.nameAr || t.id || "قالب بدون اسم");
   if(els.periodTemplateId){
@@ -379,30 +369,34 @@ function fillHomeroomTeachers(){
     });
   }
 }
-function bindClassFilters(){ [els.cGradeFilter,els.cTrackFilter,els.cSearch].forEach(el=>el?.addEventListener("input",()=>renderClasses(_classesAll))); }
-function renderClasses(data=[]){
-  if(!els.classesList) return;
+function bindClassFilters(){ [els.cGradeFilter,els.cTrackFilter,els.cSearch].forEach(el=>el?.addEventListener("input",()=>renderClasses())); }
+function filterClasses(){
   const g=(els.cGradeFilter?.value||"").toLowerCase(); const t=(els.cTrackFilter?.value||"").toLowerCase(); const q=(els.cSearch?.value||"").toLowerCase();
-  let rows=data.filter(c=>{
+  return _classesAll.filter(c=>{
     const okG=!g || String(c.gradeId||"").toLowerCase()===g;
     const okT=!t || String(c.trackCode||"").toLowerCase()===t;
     const text=`${c.nameAr||""} ${c.nameEn||""} ${c.id||""}`.toLowerCase();
     const okQ=!q || text.includes(q);
     return okG && okT && okQ;
   });
+}
+function renderClasses(){
+  if(!els.classesList) return;
+  let rows=filterClasses();
   if(!rows.length){ els.classesList.innerHTML=`<tr><td colspan="10">لا نتائج مطابقة…</td></tr>`; return; }
   rows.sort((a,b)=> String(a.gradeId||"").localeCompare(String(b.gradeId||""),"ar") || String(a.id).localeCompare(String(b.id),"ar"));
   els.classesList.innerHTML="";
   rows.forEach(c=>{
     const tr=document.createElement("tr");
     tr.innerHTML=`
-      <td>${c.nameAr || displayClassNameLocal({gradeId:c.gradeId, trackCode:c.trackCode, section:c.section, nameAr:c.nameAr})}</td>
+      <td>${c.nameAr || displayClassName?.(c) || displayClassNameLocal({gradeId:c.gradeId, trackCode:c.trackCode, section:c.section, nameAr:c.nameAr})}</td>
       <td>${c.id}</td><td>${c.gradeId||"—"}</td><td>${c.trackCode||"—"}</td>
       <td>${c.section?`${c.section} (${sectionToAr(c.section)})`:"—"}</td>
       <td>${c.periodTemplateId||"—"}</td><td>${c.capacity??"—"}</td>
       <td>${c.homeroomTeacherId||"—"}</td><td>${c.active===false?"مغلق":"نشط"}</td>
       <td>
         <button class="btn-action" data-id="${c.id}" data-act="editClass">تعديل</button>
+        <button class="btn-action" data-id="${c.id}" data-act="classTeachers">معلمو الفصل</button>
         <button class="btn-action danger" data-id="${c.id}" data-act="deleteClass">حذف</button>
       </td>`;
     els.classesList.appendChild(tr);
@@ -433,7 +427,7 @@ function bindClassForm(){
       };
       await setDoc(classRef,payload);
       toast("success","تم حفظ الصف"); els.classForm.reset();
-      _classesAll.push(payload); renderClasses(_classesAll);
+      _classesAll.push(payload); renderClasses();
     }catch(err){ console.error(err); toast("error",`تعذّر حفظ الصف: ${err?.code||""}`); }
     finally{ hideLoader(); }
   });
@@ -444,13 +438,14 @@ function openClassModal(cId){
   els.cCapacity.value=c.capacity??""; els.cActive.value=(c.active===false)?"false":"true";
   els.cTemplate.innerHTML=""; _templatesCache.forEach(t=>{ const opt=document.createElement("option"); opt.value=t.id; opt.textContent=(t.name||t.nameAr||t.id); if(t.id===c.periodTemplateId) opt.selected=true; els.cTemplate.appendChild(opt); });
   els.cHomeroom.innerHTML=`<option value="">— لا شيء —</option>`; _teachersActive.forEach(t=>{ const opt=document.createElement("option"); opt.value=t.id; opt.textContent=(t.nameAr||t.nameEn||t.email||t.id); if(t.id===c.homeroomTeacherId) opt.selected=true; els.cHomeroom.appendChild(opt); });
-  els.classModal?.showModal();
+  els.classModal?.showModal?.();
 }
 async function classAction(cId,act){
   if(act==="editClass"){ openClassModal(cId); return; }
+  if(act==="classTeachers"){ openClassTeachersModal(cId); return; }
   if(act==="deleteClass"){
     if(!confirm("تأكيد حذف الصف؟")) return;
-    try{ showLoader(); await deleteDoc(doc(db,"classes",cId)); toast("success","تم حذف الصف"); _classesAll=_classesAll.filter(x=>x.id!==cId); renderClasses(_classesAll); }
+    try{ showLoader(); await deleteDoc(doc(db,"classes",cId)); toast("success","تم حذف الصف"); _classesAll=_classesAll.filter(x=>x.id!==cId); renderClasses(); }
     catch(err){ console.error(err); toast("error","تعذّر الحذف"); }
     finally{ hideLoader(); }
   }
@@ -465,10 +460,150 @@ document.getElementById("btnSaveClass")?.addEventListener("click", async ()=>{
   };
   try{
     showLoader(); await updateDoc(ref,payload); toast("success","تم حفظ التعديلات"); document.getElementById("classModal").close();
-    const i=_classesAll.findIndex(x=>x.id===id); if(i>=0) _classesAll[i]={..._classesAll[i], ...payload}; renderClasses(_classesAll);
+    const i=_classesAll.findIndex(x=>x.id===id); if(i>=0) _classesAll[i]={..._classesAll[i], ...payload}; renderClasses();
   }catch(err){ console.error(err); toast("error",`تعذّر حفظ التعديلات: ${err?.code||""}`); }
   finally{ hideLoader(); }
 });
+
+/* -------- Class ⇄ Teachers (modal) -------- */
+async function openClassTeachersModal(classId){
+  try{
+    showLoader();
+    els.ctClassId.value = classId;
+
+    if(!_teachersActive || !_teachersActive.length){
+      const qT=query(collection(db,"users"), where("role","==","teacher"), where("status","==","active"));
+      const tSnap=await getDocs(qT);
+      _teachersActive=tSnap.docs.map(d=>({id:d.id, ...(d.data()||{})}));
+    }
+
+    const yearId = await getCurrentYearId();
+    const linksSnap = await getDocs(query(collection(db,"classTeachers"), where("classId","==",classId), where("yearId","==",yearId), where("active","==",true)));
+    const assigned = new Set();
+    const docByTeacher = new Map();
+    linksSnap.forEach(d=>{ const v=d.data(); assigned.add(v.teacherId); docByTeacher.set(v.teacherId, d.id); });
+
+    const c = _classesAll.find(x=>x.id===classId);
+    const currentHomeroom = c?.homeroomTeacherId || "";
+
+    renderClassTeachersList(_teachersActive, assigned, currentHomeroom);
+    els.ctSearch.oninput = ()=>filterCtList(els.ctSearch.value);
+    els.btnSaveClassTeachers.onclick = ()=>saveClassTeachersChanges({ classId, yearId, assigned, docByTeacher, currentHomeroom });
+
+    els.classTeachersModal.showModal?.();
+  }catch(err){ console.error(err); toast("error","تعذّر فتح معلمو الفصل"); }
+  finally{ hideLoader(); }
+}
+function renderClassTeachersList(teachers=[], assignedSet=new Set(), currentHomeroom=""){
+  const cont = els.ctTeachers; cont.innerHTML="";
+  const list=[...teachers].sort((a,b)=> (a.nameAr||a.nameEn||a.email||a.id||"").localeCompare(b.nameAr||b.nameEn||b.email||b.id||"","ar"));
+  list.forEach(t=>{
+    const row=document.createElement("div"); row.className="row teacher-row"; row.dataset.teacherId=t.id; row.dataset.search=`${t.nameAr||""} ${t.nameEn||""} ${t.email||""}`.toLowerCase();
+    const checked = assignedSet.has(t.id) ? "checked" : "";
+    const selected = currentHomeroom===t.id ? "checked" : "";
+    row.innerHTML = `
+      <label class="ct-item">
+        <input class="ct-check" type="checkbox" data-id="${t.id}" ${checked} />
+        <span class="ct-name">${t.nameAr || t.nameEn || t.email || t.id}</span>
+      </label>
+      <label class="ct-homeroom">
+        <input name="ct-homeroom" class="ct-radio" type="radio" value="${t.id}" ${selected} /> مربي الصف
+      </label>`;
+    cont.appendChild(row);
+  });
+}
+function filterCtList(q){
+  q=(q||"").toLowerCase();
+  els.ctTeachers.querySelectorAll(".teacher-row").forEach(r=>{
+    const hit = r.dataset.search.includes(q);
+    r.style.display = hit?"flex":"none";
+  });
+}
+async function saveClassTeachersChanges({ classId, yearId, assigned, docByTeacher, currentHomeroom }){
+  try{
+    showLoader();
+    const checks=[...els.ctTeachers.querySelectorAll(".ct-check")];
+    const chosen = new Set(checks.filter(c=>c.checked).map(c=>c.dataset.id));
+
+    const radio = els.ctTeachers.querySelector(".ct-radio:checked");
+    const nextHomeroom = radio ? radio.value : "";
+
+    const toAdd = [...chosen].filter(tid=>!assigned.has(tid));
+    const toRemove = [...assigned].filter(tid=>!chosen.has(tid));
+
+    const batch = writeBatch(db);
+    const mkId = (cid,tid,y)=> `${y}_${cid}_${tid}`;
+
+    for(const tid of toAdd){
+      const id = mkId(classId, tid, yearId);
+      batch.set(doc(db,"classTeachers", id), { classId, teacherId: tid, yearId, active: true, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+    }
+    for(const tid of toRemove){
+      const known = docByTeacher.get(tid);
+      if(known){ batch.delete(doc(db,"classTeachers", known)); }
+      else { batch.set(doc(db,"classTeachers", mkId(classId,tid,yearId)), { classId, teacherId: tid, yearId, active:false, updatedAt: serverTimestamp() }); }
+    }
+
+    if(nextHomeroom !== currentHomeroom){
+      batch.update(doc(db,"classes", classId), { homeroomTeacherId: nextHomeroom || null, updatedAt: serverTimestamp() });
+    }
+
+    await batch.commit();
+    toast("success","تم حفظ معلمي الفصل");
+
+    const idx=_classesAll.findIndex(c=>c.id===classId);
+    if(idx>=0){ _classesAll[idx].homeroomTeacherId = nextHomeroom || null; }
+    renderClasses();
+    els.classTeachersModal.close?.();
+  }catch(err){ console.error(err); toast("error","تعذّر الحفظ"); }
+  finally{ hideLoader(); }
+}
+
+/* -------- Export: Excel (.xls) + CSV -------- */
+function bindExports(){
+  els.btnExportExcel?.addEventListener("click", exportExcel);
+  els.btnExportCSV?.addEventListener("click", exportCSV);
+}
+function classesForExport(){
+  const rows = filterClasses();
+  return rows.map(c=>({
+    name: c.nameAr || displayClassName?.(c) || displayClassNameLocal({gradeId:c.gradeId, trackCode:c.trackCode, section:c.section, nameAr:c.nameAr}),
+    id: c.id,
+    grade: c.gradeId||"",
+    track: c.trackCode||"",
+    section: c.section?`${c.section} (${sectionToAr(c.section)})`:"",
+    template: c.periodTemplateId||"",
+    capacity: c.capacity??"",
+    homeroom: c.homeroomTeacherId||"",
+    active: (c.active===false?"مغلق":"نشط"),
+  }));
+}
+async function exportCSV(){
+  const yearId = await getCurrentYearId();
+  const data = classesForExport();
+  const headers = ["الاسم","المعرف","الصف","المسار","القسم","قالب الحصص","السعة","مربي الصف","الحالة"];
+  const lines = [headers.join(",")];
+  data.forEach(r=>{
+    const row=[r.name,r.id,r.grade,r.track,r.section,r.template,r.capacity,r.homeroom,r.active]
+      .map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",");
+    lines.push(row);
+  });
+  const blob = new Blob(["\ufeff"+lines.join("\r\n")], {type:"text/csv;charset=utf-8;"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=`classes-${yearId}-${nowStamp()}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+async function exportExcel(){
+  const yearId = await getCurrentYearId();
+  const data = classesForExport();
+  const headers = ["الاسم","المعرف","الصف","المسار","القسم","قالب الحصص","السعة","مربي الصف","الحالة"];
+  const rowsHtml = data.map(r=>`<tr><td>${r.name}</td><td>${r.id}</td><td>${r.grade}</td><td>${r.track}</td><td>${r.section}</td><td>${r.template}</td><td>${r.capacity}</td><td>${r.homeroom}</td><td>${r.active}</td></tr>`).join("");
+  const html = `\uFEFF<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8" /></head><body><table border="1"><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rowsHtml}</tbody></table></body></html>`;
+  const blob = new Blob([html], { type: "application/vnd.ms-excel" });
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`classes-${yearId}-${nowStamp()}.xls`;
+  document.body.appendChild(a); a.click(); a.remove();
+}
 
 /* ============= Branding Header ============= */
 async function hydrateInstitute() {
