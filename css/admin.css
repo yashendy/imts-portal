@@ -60,4 +60,54 @@ body{
 }
 .btn-action:hover{ background:#f3f4f6; }
 .btn-action.danger{ border-color:#fecaca; color:#7f1d1d; }
+:root{
+  --primary:#2962FF; --surface:#fff; --border:#e5e7eb;
+  --text:#111; --muted:#6b7280; --radius:12px; --shadow:0 6px 18px rgba(0,0,0,.08);
+}
+
+body{ margin:0; font-family:"Cairo",sans-serif; background:#f9fafb; color:var(--text); }
+.topbar{ display:flex; justify-content:space-between; align-items:center; padding:10px 20px; background:#fff; border-bottom:1px solid var(--border); }
+.topbar .brand{ display:flex; align-items:center; gap:10px; }
+.topbar .brand .logo{ width:40px; height:40px; }
+.btn-secondary{ background:#fff; border:1px solid var(--border); padding:6px 12px; border-radius:var(--radius); cursor:pointer; }
+
+.dashboard{ padding:20px; }
+.tabs{ display:flex; gap:10px; margin-bottom:20px; }
+.tab{ border:none; padding:8px 16px; border-radius:var(--radius); cursor:pointer; background:var(--border); color:var(--text); }
+.tab.active{ background:var(--primary); color:#fff; }
+.tab-content{ display:none; }
+.tab-content.active{ display:block; }
+
+.cards{ display:grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap:14px; }
+.card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); text-align:center; }
+.card h3{ margin:0 0 6px; font-size:16px; color:var(--muted); }
+.card p{ margin:0; font-size:22px; font-weight:bold; }
+
+.invite-form{ display:grid; gap:10px; margin-bottom:20px; }
+.invite-form input, .invite-form button{ padding:10px; border-radius:var(--radius); border:1px solid var(--border); }
+.invite-form button{ background:var(--primary); color:#fff; border:none; cursor:pointer; }
+
+.table{ width:100%; border-collapse:collapse; background:var(--surface); }
+.table th,.table td{ border:1px solid var(--border); padding:10px; text-align:center; }
+.table thead th{ background:#f3f4f6; font-weight:700; }
+
+.btn-action{ padding:6px 10px; border-radius:10px; border:1px solid var(--border); background:#fff; cursor:pointer; margin-inline:2px; }
+.btn-action:hover{ background:#f3f4f6; }
+.btn-action.danger{ border-color:#fecaca; color:#7f1d1d; }
+
+/* Users */
+.filters{ display:flex; gap:10px; margin:0 0 12px; }
+.filters select, .filters input{ padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:#fff; }
+
+/* Modal */
+dialog{ border:none; padding:0; width:min(620px,95vw); border-radius:14px; box-shadow:0 24px 60px rgba(0,0,0,.25); }
+.modal{ background:#fff; border-radius:14px; }
+.modal-head{ display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--border); }
+.modal-head .close{ border:none; background:#fff; font-size:22px; cursor:pointer; }
+.modal-body{ padding:16px; display:grid; gap:12px; }
+.modal-foot{ padding:12px 16px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; }
+.grid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+.modal input, .modal select{ width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; }
+.btn-primary{ background:var(--primary); color:#fff; border:none; padding:10px 16px; border-radius:12px; cursor:pointer; }
+@media (max-width: 700px){ .grid{ grid-template-columns:1fr; } }
 
