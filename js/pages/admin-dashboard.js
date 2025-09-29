@@ -1,15 +1,24 @@
+// js/pages/admin-dashboard.js
 import { auth, db, serverTimestamp } from "../core/firebase.js";
-import { 
-  requireRole, 
-  toast, 
-  showLoader, 
-  hideLoader, 
-  signOutSafe, 
-  getInstituteInfo, 
-  getCurrentYearId 
+import {
+  requireRole,
+  toast,
+  showLoader,
+  hideLoader,
+  signOutSafe,
+  getInstituteInfo,
+  getCurrentYearId,
 } from "../core/app.js";
 import {
-  collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query, where
+  collection,
+  getDocs,
+  setDoc,
+  doc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+  getDoc,
 } from "https://www.gstatic.com/firebasejs/12.2.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.0/firebase-auth.js";
 
@@ -26,150 +35,213 @@ const els = {
 };
 
 // ===== تبويبات =====
-els.tabs.forEach(tab=>{
-  tab.addEventListener("click",()=>{
-    els.tabs.forEach(t=>t.classList.remove("active"));
-    els.contents.forEach(c=>c.classList.remove("active"));
+els.tabs.forEach((tab) => {
+  tab.addEventListener("click", () => {
+    els.tabs.forEach((t) => t.classList.remove("active"));
+    els.contents.forEach((c) => c.classList.remove("active"));
     tab.classList.add("active");
     document.getElementById(tab.dataset.tab).classList.add("active");
   });
 });
 
 // ===== حماية الدور =====
-onAuthStateChanged(auth, async (user)=>{
-  if(!user){ location.href="index.html"; return; }
-  const ok = await requireRole(["owner","admin"]);
-  if(!ok){ 
-    toast("error","صلاحيات غير كافية"); 
-    location.href="index.html"; 
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    location.href = "index.html";
+    return;
   }
-  else{
+  const ok = await requireRole(["owner", "admin"]);
+  if (!ok) {
+    toast("error", "صلاحيات غير كافية");
+    location.href = "index.html";
+  } else {
     hydrateOverview();
     loadInvites();
     hydrateInstitute();
   }
 });
 
-els.btnLogout?.addEventListener("click",()=>signOutSafe(true));
+els.btnLogout?.addEventListener("click", () => signOutSafe(true));
 
 // ===== Overview =====
-async function hydrateOverview(){
-  try{
+async function hydrateOverview() {
+  try {
     showLoader();
     // classes count
-    const cSnap = await getDocs(collection(db,"classes"));
+    const cSnap = await getDocs(collection(db, "classes"));
     els.countClasses.textContent = cSnap.size;
 
     // teachers count
-    const qT = query(collection(db,"users"), where("role","==","teacher"), where("status","==","active"));
+    const qT = query(
+      collection(db, "users"),
+      where("role", "==", "teacher"),
+      where("status", "==", "active")
+    );
     const tSnap = await getDocs(qT);
     els.countTeachers.textContent = tSnap.size;
 
     // invites count
-    const qI = query(collection(db,"invites"), where("active","==",true));
+    const qI = query(collection(db, "invites"), where("active", "==", true));
     const iSnap = await getDocs(qI);
     els.countInvites.textContent = iSnap.size;
 
     // current year (من settings/global)
     const yearId = await getCurrentYearId();
     els.currentYear.textContent = yearId || "—";
-
-  }catch(err){
+  } catch (err) {
     console.error(err);
-    toast("error","تعذّر تحميل البيانات");
-  }finally{ hideLoader(); }
+    toast("error", "تعذّر تحميل البيانات");
+  } finally {
+    hideLoader();
+  }
 }
 
-// ===== Invites =====
-els.inviteForm?.addEventListener("submit",async(e)=>{
+// ===== Utilities =====
+function genCode(prefix = "INV") {
+  // كود قصير ثابت الشكل
+  return `${prefix}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+}
+
+function fmtDateMaybe(ts) {
+  if (!ts) return "—";
+  try {
+    // Firestore Timestamp
+    if (ts.seconds) return new Date(ts.seconds * 1000).toLocaleDateString("ar-EG");
+    // JS Date or ISO
+    const d = typeof ts === "string" ? new Date(ts) : ts;
+    if (!isNaN(d)) return d.toLocaleDateString("ar-EG");
+  } catch {}
+  return "—";
+}
+
+// ===== Invites: Create =====
+els.inviteForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const role = document.getElementById("role").value.trim()||"teacher";
-  const usageLimit = Number(document.getElementById("usageLimit").value||1);
-  const expiresAt = document.getElementById("expiresAt").value;
-  const allowedEmail = document.getElementById("allowedEmail").value.trim();
+  const role = (document.getElementById("role").value || "teacher").trim().toLowerCase();
+  const usageLimit = Number(document.getElementById("usageLimit").value || 1);
+  const expiresAtRaw = document.getElementById("expiresAt").value;
+  const allowedEmail = (document.getElementById("allowedEmail").value || "").trim();
 
-  try{
+  if (!role) return toast("warning", "من فضلك حدِّد الدور.");
+  if (usageLimit < 1 || !Number.isFinite(usageLimit)) {
+    return toast("warning", "عدد الاستخدامات يجب أن يكون رقمًا موجبًا.");
+  }
+
+  try {
     showLoader();
-    const code = `INV-${Math.random().toString(36).substring(2,8).toUpperCase()}`;
-    const payload = {
-      code,
-      role,
-      active:true,
-      usageLimit,
-      usedCount:0,
-      createdAt:serverTimestamp(),
-      updatedAt:serverTimestamp()
-    };
-    if(expiresAt) payload.expiresAt = new Date(expiresAt);
-    if(allowedEmail) payload.allowedEmail = allowedEmail;
+    // ⚠️ مهم: نخلي docId = code عشان صفحة activate تلاقي الدعوة بالـ ID
+    const code = genCode("INV");
+    const ref = doc(db, "invites", code);
 
-    await addDoc(collection(db,"invites"),payload);
-    toast("success","تم إنشاء الدعوة");
+    const payload = {
+      code,                 // نخزّنه أيضًا كحقل داخلي لعرضه بسهولة
+      role,                 // teacher | admin (للداخلية فقط)
+      active: true,
+      usageLimit,
+      usedCount: 0,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+    if (expiresAtRaw) payload.expiresAt = new Date(expiresAtRaw);
+    if (allowedEmail) payload.allowedEmail = allowedEmail.toLowerCase();
+
+    await setDoc(ref, payload);
+    toast("success", "تم إنشاء الدعوة");
     els.inviteForm.reset();
-    loadInvites();
-  }catch(err){
+    await loadInvites();
+  } catch (err) {
     console.error(err);
-    toast("error","فشل إنشاء الدعوة");
-  }finally{ hideLoader(); }
+    toast("error", "فشل إنشاء الدعوة");
+  } finally {
+    hideLoader();
+  }
 });
 
-async function loadInvites(){
-  try{
+// ===== Invites: List & actions =====
+async function loadInvites() {
+  try {
     els.inviteList.innerHTML = "<tr><td colspan='7'>تحميل...</td></tr>";
-    const snap = await getDocs(collection(db,"invites"));
-    if(snap.empty){
+    const snap = await getDocs(collection(db, "invites"));
+    if (snap.empty) {
       els.inviteList.innerHTML = "<tr><td colspan='7'>لا توجد دعوات</td></tr>";
       return;
     }
     els.inviteList.innerHTML = "";
-    snap.forEach(docu=>{
+    snap.forEach((docu) => {
       const inv = docu.data();
+      const id = docu.id; // يساوي code في إنشائنا الجديد
+      const stateTxt = inv.active ? "نشط" : "مغلق";
+      const usedVsLimit = `${inv.usedCount || 0}/${inv.usageLimit || 1}`;
+      const expiresTxt = fmtDateMaybe(inv.expiresAt);
+
       const tr = document.createElement("tr");
-      tr.innerHTML=`
-        <td>${inv.code||docu.id}</td>
-        <td>${inv.role}</td>
-        <td>${inv.active?"نشط":"مغلق"}</td>
-        <td>${inv.usedCount||0}/${inv.usageLimit||1}</td>
-        <td>${inv.expiresAt? new Date(inv.expiresAt.seconds*1000).toLocaleDateString("ar-EG"):"—"}</td>
+      tr.innerHTML = `
+        <td>${inv.code || id}</td>
+        <td>${inv.role || "—"}</td>
+        <td>${stateTxt}</td>
+        <td>${usedVsLimit}</td>
+        <td>${expiresTxt}</td>
         <td>
-          <button data-id="${docu.id}" data-action="toggle">${inv.active?"تعطيل":"تفعيل"}</button>
-          <button data-id="${docu.id}" data-action="delete">حذف</button>
+          <button class="btn-action" data-id="${id}" data-action="copy">نسخ</button>
+          <button class="btn-action" data-id="${id}" data-action="toggle">${inv.active ? "تعطيل" : "تفعيل"}</button>
+          <button class="btn-action danger" data-id="${id}" data-action="delete">حذف</button>
         </td>
       `;
       els.inviteList.appendChild(tr);
     });
 
-    // actions
-    els.inviteList.querySelectorAll("button").forEach(btn=>{
-      btn.addEventListener("click",()=>inviteAction(btn.dataset.id,btn.dataset.action));
+    els.inviteList.querySelectorAll("button.btn-action").forEach((btn) => {
+      btn.addEventListener("click", () =>
+        inviteAction(btn.dataset.id, btn.dataset.action)
+      );
     });
-
-  }catch(err){
+  } catch (err) {
     console.error(err);
-    toast("error","فشل تحميل الدعوات");
+    toast("error", "فشل تحميل الدعوات");
   }
 }
 
-async function inviteAction(id,action){
-  try{
-    const ref = doc(db,"invites",id);
-    if(action==="delete"){
-      await deleteDoc(ref);
-      toast("success","تم الحذف");
-    }else if(action==="toggle"){
-      await updateDoc(ref,{ active:true });
-      toast("success","تم التحديث");
+async function inviteAction(id, action) {
+  try {
+    const ref = doc(db, "invites", id);
+
+    if (action === "copy") {
+      await navigator.clipboard.writeText(id);
+      toast("success", "تم نسخ الكود للحافظة");
+      return;
     }
-    loadInvites();
-  }catch(err){
+
+    if (action === "delete") {
+      if (!confirm("متأكد من حذف الدعوة؟")) return;
+      await deleteDoc(ref);
+      toast("success", "تم الحذف");
+      loadInvites();
+      return;
+    }
+
+    if (action === "toggle") {
+      const snap = await getDoc(ref);
+      if (!snap.exists()) return toast("error", "الدعوة غير موجودة");
+      const current = !!snap.data().active;
+      await updateDoc(ref, {
+        active: !current,
+        updatedAt: serverTimestamp(),
+      });
+      toast("success", current ? "تم التعطيل" : "تم التفعيل");
+      loadInvites();
+      return;
+    }
+  } catch (err) {
     console.error(err);
-    toast("error","خطأ في العملية");
+    toast("error", "خطأ في العملية");
   }
 }
 
 // ===== Institute Info in header =====
-async function hydrateInstitute(){
+async function hydrateInstitute() {
   const inst = await getInstituteInfo();
-  document.querySelectorAll(".institute-name").forEach(n=>n.textContent = inst?.name || "اسم المعهد");
-  if(inst?.logoUrl) document.querySelector(".logo").src = inst.logoUrl;
+  document
+    .querySelectorAll(".institute-name")
+    .forEach((n) => (n.textContent = inst?.name || "اسم المعهد"));
+  if (inst?.logoUrl) document.querySelector(".logo").src = inst.logoUrl;
 }
