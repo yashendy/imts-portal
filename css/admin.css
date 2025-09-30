@@ -53,7 +53,7 @@ dialog{ border:none; border-radius:16px; box-shadow:var(--shadow); max-width:780
   .grid-3, .grid{ grid-template-columns: 1fr; }
 }
 
-/* === إضافات: قائمة معلمي الفصل داخل المودال === */
+/* إضافات لقائمة "معلمو الفصل" داخل المودال */
 .list .row{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 8px; border:1px solid var(--border); border-radius:10px; margin-bottom:8px; background:#fff; }
 .list .row .ct-item{ display:flex; align-items:center; gap:8px; }
 .list .row .ct-name{ font-weight:500; }
