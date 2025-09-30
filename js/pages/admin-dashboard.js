@@ -1,4 +1,4 @@
-// js/pages/admin-dashboard.js — step1 (class-teachers + excel/csv)
+// js/pages/admin-dashboard.js — ready
 import { auth, db, serverTimestamp } from "../core/firebase.js";
 import {
   requireRole, toast, showLoader, hideLoader, signOutSafe,
@@ -290,12 +290,45 @@ async function refreshUsersRow(uid){
 }
 function openUserModal(uid){
   const u=_usersCache.find(x=>x.id===uid); if(!u) return;
+
+  // وقائي: لو المودال غير موجود ما ننهارش
+  if (!els.userModal || !els.uId || !els.uNameAr || !els.uNameEn || !els.uRole || !els.uStatus) {
+    toast("warning", "نافذة تعديل المستخدم غير موجودة في الصفحة.");
+    console.warn("[users] userModal markup missing");
+    return;
+  }
+
   els.uId.value=u.id; els.uNameAr.value=u.nameAr||""; els.uNameEn.value=u.nameEn||"";
   els.uRole.value=(u.role||"teacher"); els.uStatus.value=(u.status||"active");
-  els.uHomeroom.value=u.homeroomClassId||"";
-  [...els.uTracks.options].forEach(opt=> opt.selected=Array.isArray(u.trackCodes)?u.trackCodes.includes(opt.value):false );
-  els.userModal?.showModal?.(); // لو <dialog>
+  if (els.uHomeroom) els.uHomeroom.value=u.homeroomClassId||"";
+  if (els.uTracks) {
+    [...els.uTracks.options].forEach(opt => {
+      opt.selected = Array.isArray(u.trackCodes) ? u.trackCodes.includes(opt.value) : false;
+    });
+  }
+  els.userModal.showModal?.();
 }
+els.btnSaveUser?.addEventListener("click", async ()=>{
+  try{
+    showLoader();
+    const uid=els.uId?.value;
+    if(!uid) return;
+    const payload={
+      nameAr: els.uNameAr?.value.trim()||null,
+      nameEn: els.uNameEn?.value.trim()||null,
+      role: els.uRole?.value||"teacher",
+      status: els.uStatus?.value||"active",
+      homeroomClassId: els.uHomeroom?.value || null,
+      trackCodes: els.uTracks ? [...els.uTracks.options].filter(o=>o.selected).map(o=>o.value) : [],
+      updatedAt: serverTimestamp(),
+    };
+    await updateDoc(doc(db,"users",uid), payload);
+    toast("success","تم حفظ التعديلات");
+    els.userModal?.close?.();
+    await refreshUsersRow(uid);
+  }catch(err){ console.error(err); toast("error", `تعذّر حفظ التعديلات: ${err?.code||""}`); }
+  finally{ hideLoader(); }
+});
 
 /* ============= Classes ============= */
 let _classesAll=[]; let _templatesCache=[]; let _teachersActive=[];
@@ -465,7 +498,7 @@ document.getElementById("btnSaveClass")?.addEventListener("click", async ()=>{
   finally{ hideLoader(); }
 });
 
-/* -------- Class ⇄ Teachers (modal) -------- */
+/* -------- Class ⇄ Teachers -------- */
 async function openClassTeachersModal(classId){
   try{
     showLoader();
@@ -559,7 +592,7 @@ async function saveClassTeachersChanges({ classId, yearId, assigned, docByTeache
   finally{ hideLoader(); }
 }
 
-/* -------- Export: Excel (.xls) + CSV -------- */
+/* -------- Export -------- */
 function bindExports(){
   els.btnExportExcel?.addEventListener("click", exportExcel);
   els.btnExportCSV?.addEventListener("click", exportCSV);
@@ -605,7 +638,7 @@ async function exportExcel(){
   document.body.appendChild(a); a.click(); a.remove();
 }
 
-/* ============= Branding Header ============= */
+/* ============= Branding ============= */
 async function hydrateInstitute() {
   const inst = await getInstituteInfo();
   document.querySelectorAll(".institute-name").forEach(n => n.textContent = inst?.name || "اسم المعهد");
