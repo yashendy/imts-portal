@@ -1,5 +1,5 @@
 // js/index.js
-import { auth, db } from "js/core/firebase.js";
+import { auth, db, serverTimestamp } from "../core/firebase.js";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
