@@ -3,85 +3,54 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>تسجيل الدخول — بوابة المعهد</title>
+  <title>IMTS Portal — تسجيل الدخول</title>
 
-  <!-- خطوطك وأساسياتك -->
+  <!-- خطوط/ستايل (اختياري) -->
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/index.css" />
 </head>
 <body>
   <main class="auth-layout">
-    <!-- اللوحة اليمنى (بطاقة المعهد) — نحافظ عليها كما هي -->
-    <aside class="brand-card">
-      <div class="brand-card__inner">
-        <img src="assets/logo.png" alt="شعار المعهد" class="brand-card__logo" />
-        <h2 class="brand-card__title">معهد الدراسات الإدارية والفنية</h2>
-        <p class="brand-card__desc">
-          نقدّم تعليمًا مهنيًا عالي الجودة، ونبني بيئة تعلّم فعّالة ترتكز على القيم والكفاءة والتميّز.
-        </p>
-        <ul class="brand-card__links">
-          <li><a href="mailto:yashendy@gmail.com">yashendy@gmail.com</a> :البريد</li>
-          <li><a href="tel:50534441">50534441</a> :واتساب</li>
-        </ul>
-        <div class="brand-card__footer">
-          <a href="#">سياسة الخصوصية</a>
-          <span>•</span>
-          <a href="#">شروط الاستخدام</a>
-          <span>•</span>
-          <a href="#">نتائج الطلبة</a>
-        </div>
-      </div>
-    </aside>
-
-    <!-- اللوحة اليسرى (نموذج الدخول) -->
     <section class="auth-card">
       <h1 class="auth-card__title">تسجيل الدخول</h1>
 
-      <!-- رسائل صغيرة -->
-      <div id="msg" class="msg" aria-live="polite"></div>
+      <!-- صندوق رسائل -->
+      <div id="alertBox" class="alert" style="display:none"></div>
 
-      <form id="authForm" class="auth-form">
-        <label class="field">
-          <span class="field__label">البريد الإلكتروني</span>
-          <input id="email" type="email" class="field__input" autocomplete="email" required />
-        </label>
-
-        <label class="field">
-          <span class="field__label">كلمة المرور</span>
-          <input id="password" type="password" class="field__input" autocomplete="current-password" required />
-        </label>
-
-        <button id="btnSubmit" type="submit" class="btn btn-primary">دخول</button>
-
-        <!-- فاصل بسيط -->
-        <div class="sep"><span>أو</span></div>
-
-        <!-- زر الدخول بجوجل (جديد) -->
-        <button id="btnGoogle" type="button" class="btn btn-google">
-          <svg viewBox="0 0 48 48" class="gicon" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.5 32.5 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.7 1.1 7.8 3l5.7-5.7C33.5 6.1 28.9 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16.1 18.9 12 24 12c3 0 5.7 1.1 7.8 3l5.7-5.7C33.5 6.1 28.9 4 24 4 16 4 9.1 8.5 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5 0 9.5-1.9 12.9-5l-6-4.9C29 35.3 26.6 36 24 36c-5.2 0-9.6-3.5-11.2-8.3l-6.6 5.1C9 39.6 15.9 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-1.1 3.2-3.6 5.7-7.2 6.7l6 4.9C38.6 36.9 40 31.8 40 27c0-2.2-.2-4.3-.4-6.5z"/></svg>
-          الدخول بجوجل
-        </button>
-
-        <!-- روابط ثانوية -->
-        <div class="auth-links">
-          <a id="lnkForgot" href="#" class="link">نسيت كلمة المرور</a>
-          <a id="lnkInvite" href="activate.html" class="link">عندي كود دعوة؟</a>
+      <!-- فورم الدخول -->
+      <form id="formLogin" class="auth-form">
+        <div class="field">
+          <label class="field__label" for="email">البريد الإلكتروني</label>
+          <input class="field__input" id="email" type="email" placeholder="name@example.com" required />
         </div>
 
-        <!-- تبديل وضع إنشاء حساب (جديد) -->
-        <div class="auth-toggle">
-          <span id="toggleText">مستخدم جديد؟</span>
-          <button id="btnToggleMode" type="button" class="btn btn-link">إنشاء حساب</button>
+        <div class="field">
+          <label class="field__label" for="password">كلمة المرور</label>
+          <input class="field__input" id="password" type="password" placeholder="••••••••" required />
+        </div>
+
+        <button class="btn btn-primary" type="submit">دخول</button>
+
+        <div class="auth-form__links">
+          <a id="linkForgot" href="#">هل نسيت كلمة المرور؟</a>
         </div>
       </form>
 
+      <div class="auth-divider"><span>أو</span></div>
+
+      <!-- زر جوجل -->
+      <button id="btnLoginGoogle" class="btn btn-google" type="button">
+        <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5h-1.9v-.1H24v7.2h11.3c-1.6 4.5-5.9 7.7-11.3 7.7-6.5 0-11.8-5.3-11.8-11.8S17.5 11.7 24 11.7c3 0 5.7 1.1 7.7 3l5.1-5.1C33.5 6.6 28.9 4.8 24 4.8 12.4 4.8 3 14.2 3 25.8S12.4 46.8 24 46.8c11.6 0 21-9.4 21-21 0-1.7-.2-3.4-.6-5.3z"/><path fill="#FF3D00" d="M6.3 14.7l5.9 4.3C14 14.8 18.6 11.7 24 11.7c3 0 5.7 1.1 7.7 3l5.1-5.1C33.5 6.6 28.9 4.8 24 4.8c-7.5 0-14 4.3-17.7 10z"/><path fill="#4CAF50" d="M24 46.8c5.2 0 9.9-1.9 13.5-5.2l-6.2-5c-2 1.4-4.6 2.2-7.3 2.2-5.4 0-9.9-3.2-11.5-7.7l-5.9 4.6c3.6 6.7 10.6 11.1 18.4 11.1z"/><path fill="#1976D2" d="M43.6 20.5H24v7.2h11.3c-.8 2.6-2.3 4.7-4.4 6.1l6.2 5c3.6-3.3 5.9-8.1 5.9-13.9 0-1.7-.2-3.4-.6-5.3z"/></svg>
+        الدخول باستخدام Google
+      </button>
+
       <footer class="auth-card__footer">
-        <small>© 2025 — معهد الدراسات الإدارية والفنية</small>
+        <p>بمجرد تسجيل الدخول، لو حسابك غير مُفعّل هتتحوّل لصفحة التفعيل لإدخال كود الدعوة.</p>
       </footer>
     </section>
   </main>
 
-  <!-- سكربت الدخول -->
+  <!-- مهم: موديول واحد فقط، والباقي Import داخله -->
   <script type="module" src="js/pages/index.js"></script>
 </body>
 </html>
