@@ -5,7 +5,7 @@
 // 3) تحويل لصفحة التفعيل إذا role غير موجود
 // 4) تمرير كود الدعوة من URL إلى activate.html?code=...
 
-import { auth, db, serverTimestamp } from "../firebase.js";
+import { auth, db, serverTimestamp } from "../core/firebase.js";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
