@@ -2,117 +2,165 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>لوحة الإدارة</title>
+
+  <!-- خط جميل -->
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- ستايل اللوحة -->
   <link rel="stylesheet" href="css/admin.css" />
+
 </head>
 <body>
+
   <header class="topbar">
-    <div class="topbar__left"><h1 class="brand">لوحة الإدارة</h1></div>
-    <div class="topbar__right">
-      <span id="currentUserName" class="user-chip">...</span>
+    <div class="brand">
+      <img src="assets/logo.png" alt="" onerror="this.style.display='none'">
+      <span>لوحة الإدارة</span>
+    </div>
+    <div class="top-actions">
       <button id="btnSignOut" class="btn btn-ghost">تسجيل الخروج</button>
     </div>
   </header>
 
   <main class="container">
-    <!-- Overview -->
-    <section class="grid">
-      <article class="card">
-        <h2 class="card__title">نظرة عامة</h2>
-        <div class="table-wrapper">
+
+    <!-- نظرة عامة -->
+    <section class="card">
+      <div class="card-head">
+        <h2>نظرة عامة</h2>
+      </div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-title">إجمالي المستخدمين</div>
+          <div class="stat-number" id="statTotalUsers">-</div>
+        </div>
+        <div class="stat">
+          <div class="stat-title">المعلّمون</div>
+          <div class="stat-number" id="statTeachers">-</div>
+        </div>
+        <div class="stat">
+          <div class="stat-title">الصفوف</div>
+          <div class="stat-number" id="statClasses">-</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- إنشاء دعوة + قائمة الدعوات (قائمة للمالك فقط) -->
+    <section class="grid-2">
+      <div class="card">
+        <div class="card-head">
+          <h2>إنشاء دعوة</h2>
+        </div>
+        <div class="form-grid">
+          <label>الدور
+            <select id="inviteRole">
+              <option value="teacher">معلّم</option>
+              <option value="admin">أدمن</option>
+              <option value="owner">مالك</option>
+            </select>
+          </label>
+
+          <label>عدد الاستخدامات
+            <input type="number" id="inviteUsageLimit" min="1" value="1" />
+          </label>
+
+          <label>تاريخ الانتهاء (اختياري)
+            <input type="datetime-local" id="inviteExpiresAt">
+          </label>
+
+          <label>الكود
+            <div class="row">
+              <input type="text" id="inviteCode" class="grow" placeholder="INV-XXXXXX">
+              <button type="button" class="btn btn-ghost" id="btnGen">توليد</button>
+            </div>
+          </label>
+
+          <label class="row">
+            <input type="checkbox" id="inviteActive" checked>
+            <span>تفعيل الدعوة</span>
+          </label>
+
+          <div class="actions">
+            <button class="btn btn-primary" id="btnCreateInvite">إنشاء</button>
+            <small id="roleHint" class="muted" style="display:none"></small>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="invitesListCard">
+        <div class="card-head">
+          <h2>الدعوات</h2>
+        </div>
+        <div class="table-wrap">
           <table class="table">
-            <tbody>
-              <tr><th>إجمالي المستخدمين</th><td id="overviewUsers">-</td></tr>
-              <tr><th>المعلّمون</th><td id="overviewTeachers">-</td></tr>
-              <tr><th>الصفوف</th><td id="overviewClasses">-</td></tr>
+            <thead>
+              <tr>
+                <th>الكود</th>
+                <th>الدور</th>
+                <th>الحد</th>
+                <th>مُستخدم</th>
+                <th>الحالة</th>
+                <th>إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="invitesBody">
+              <!-- يتم تعبئته من JS -->
             </tbody>
           </table>
         </div>
-      </article>
-
-      <!-- Create Invite -->
-      <article class="card">
-        <h2 class="card__title">إنشاء دعوة</h2>
-        <div id="inviteAlert" class="alert" style="display:none"></div>
-        <form id="formInvite" class="form">
-          <div class="form__row">
-            <label class="label">الدور</label>
-            <select id="inviteRole" class="input">
-              <option value="teacher">معلم</option>
-              <option value="admin">أدمن</option>
-            </select>
-            <small id="roleHint" class="hint" style="display:none">مسموح للأدمن إنشاء دعوات “معلم” فقط.</small>
-          </div>
-          <div class="form__row">
-            <label class="label">عدد الاستخدامات</label>
-            <input id="usageLimit" class="input" type="number" min="1" value="1" />
-          </div>
-          <div class="form__row">
-            <label class="label">تاريخ الانتهاء (اختياري)</label>
-            <input id="expiresAt" class="input" type="datetime-local" />
-          </div>
-          <div class="form__row">
-            <label class="label">الكود</label>
-            <div class="inline">
-              <input id="inviteCode" class="input" type="text" placeholder="INV-XXXXXX" />
-              <button id="btnGenCode" class="btn btn-secondary" type="button">توليد</button>
-            </div>
-          </div>
-          <div class="form__row">
-            <label class="switch">
-              <input id="inviteActive" type="checkbox" checked />
-              <span>تفعيل الدعوة</span>
-            </label>
-          </div>
-          <div class="form__actions">
-            <button class="btn btn-primary" type="submit">إنشاء</button>
-          </div>
-        </form>
-      </article>
-
-      <!-- Users -->
-      <article class="card">
-        <h2 class="card__title">المستخدمون</h2>
-        <div class="table-wrapper">
-          <table class="table" id="tblUsers">
-            <thead>
-              <tr><th>الاسم</th><th>البريد</th><th>الدور</th><th>الحالة</th><th>إنشاء</th></tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </article>
-
-      <!-- Classes -->
-      <article class="card">
-        <h2 class="card__title">الصفوف</h2>
-        <div class="table-wrapper">
-          <table class="table" id="tblClasses">
-            <thead>
-              <tr><th>الصف</th><th>المسار</th><th>المستوى</th><th>عدد المعلمين</th><th>إنشاء</th></tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </article>
-
-      <!-- Invites (list) -->
-      <article class="card">
-        <h2 class="card__title">الدعوات</h2>
-        <div class="table-wrapper">
-          <table class="table" id="tblInvites">
-            <thead>
-              <tr><th>الكود</th><th>الدور</th><th>الحالة</th><th>المستخدم</th><th>الحد</th><th>إنشاء</th><th>إجراءات</th></tr>
-            </thead>
-            <tbody id="inviteList"></tbody>
-          </table>
-        </div>
-      </article>
+      </div>
     </section>
+
+    <!-- المستخدمون -->
+    <section class="card">
+      <div class="card-head">
+        <h2>المستخدمون</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+          <tr>
+            <th>الاسم</th>
+            <th>البريد</th>
+            <th>الدور</th>
+            <th>الحالة</th>
+            <th>الصف (مربي)</th>
+          </tr>
+          </thead>
+          <tbody id="usersBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- الصفوف -->
+    <section class="card">
+      <div class="card-head">
+        <h2>الصفوف</h2>
+      </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+          <tr>
+            <th>الصف</th>
+            <th>قالب الحصص</th>
+            <th>مربي الصف</th>
+            <th>السعة</th>
+          </tr>
+          </thead>
+          <tbody id="classesBody"></tbody>
+        </table>
+      </div>
+    </section>
+
   </main>
 
+  <!-- Toast + Loader -->
+  <div id="toast" class="toast"></div>
+  <div id="loader"></div>
+
+  <!-- سكربت الداشبورد (ESM) -->
   <script type="module" src="js/pages/admin-dashboard.js"></script>
 </body>
 </html>
