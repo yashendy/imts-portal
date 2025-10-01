@@ -1,201 +1,66 @@
-// js/pages/activate.js
-// يعتمد على js/core/firebase.js + js/core/app.js
-import { auth, db, serverTimestamp } from "../core/firebase.js";
-import { getInstituteInfo, toast, showLoader, hideLoader } from "../core/app.js";
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.2.0/firebase-auth.js";
-import {
-  doc, getDoc, setDoc, updateDoc, runTransaction
-} from "https://www.gstatic.com/firebasejs/12.2.0/firebase-firestore.js";
+// /js/pages/activate.js
+import { auth, db, functions, httpsCallable } from "../core/firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const els = {
-  logo: document.querySelector("img.logo"),
-  names: document.querySelectorAll(".institute-name"),
-  contactEmail: document.getElementById("contactEmail"),
-  contactWhats: document.getElementById("contactWhats"),
-  inviteCode: document.getElementById("inviteCode"),
-  form: document.getElementById("activateForm"),
-  btnActivate: document.getElementById("btnActivate"),
-  yearNow: document.getElementById("yearNow"),
+  alertBox: document.getElementById("alertBox"),
+  form: document.getElementById("formActivate"),
+  input: document.getElementById("inviteCode"),
 };
 
-function setYear() {
-  if (els.yearNow) els.yearNow.textContent = new Date().getFullYear();
+function msg(text, type = "error") {
+  els.alertBox.textContent = text || (type === "ok" ? "تم." : "حدث خطأ.");
+  els.alertBox.style.display = "block";
+  els.alertBox.style.background = type === "ok" ? "#ecfdf5" : "#fee2e2";
+  els.alertBox.style.color = type === "ok" ? "#065f46" : "#7f1d1d";
 }
+function clearMsg() { els.alertBox.style.display = "none"; }
 
-async function hydrateInstitute() {
+// املأ الكود من الـ URL إن وجد
+const urlCode = new URLSearchParams(location.search).get("code");
+if (urlCode) els.input.value = urlCode;
+
+let currentUser = null;
+onAuthStateChanged(auth, (u) => {
+  if (!u) { location.href = "index.html"; return; }
+  currentUser = u;
+});
+
+els.form?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  clearMsg();
   try {
-    const institute = await getInstituteInfo();
-    els.names?.forEach(n => n.textContent = institute?.name || "اسم المعهد");
-    if (els.logo && institute?.logoUrl) {
-      els.logo.src = institute.logoUrl;
-      els.logo.alt = institute?.name || "شعار المعهد";
-    }
-    const email = institute?.contact?.email || "";
-    const whats = institute?.contact?.whatsapp || "";
-    if (els.contactEmail) {
-      if (email) {
-        els.contactEmail.textContent = email;
-        els.contactEmail.href = `mailto:${email}`;
-      } else {
-        els.contactEmail.textContent = "—";
-        els.contactEmail.removeAttribute("href");
-      }
-    }
-    if (els.contactWhats) {
-      if (whats) {
-        const clean = String(whats).replace(/\D+/g, "");
-        els.contactWhats.textContent = whats;
-        els.contactWhats.href = `https://wa.me/${clean}`;
-      } else {
-        els.contactWhats.textContent = "—";
-        els.contactWhats.removeAttribute("href");
-      }
-    }
-  } catch {
-    toast("warning", "تعذّر تحميل بيانات المعهد.");
-  }
-}
+    const code = (els.input.value || "").trim();
+    if (!code) return msg("من فضلك أدخل كود الدعوة.");
 
-function getQueryCode() {
-  const params = new URLSearchParams(location.search);
-  const c = params.get("code");
-  return c ? String(c).trim() : "";
-}
+    const acceptInvite = httpsCallable(functions, "acceptInvite");
+    await acceptInvite({ code });
 
-function normCode(raw) {
-  return String(raw || "")
-    .trim()
-    .toUpperCase()
-    .replace(/\s+/g, "-");
-}
+    // ريفريش للتوكن ثم اقرأ الدور
+    await currentUser.getIdToken(true);
+    const snap = await getDoc(doc(db, "users", currentUser.uid));
+    const role = snap.exists() ? (snap.data().role || null) : null;
 
-async function ensureSignedIn() {
-  return new Promise((resolve) => {
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        toast("warning", "الرجاء تسجيل الدخول أولًا.");
-        location.href = "index.html";
-        return;
-      }
-      resolve(user);
-    });
-  });
-}
-
-async function activateInvite(user, code) {
-  const inviteRef = doc(db, "invites", code);
-  const userRef = doc(db, "users", user.uid);
-
-  await runTransaction(db, async (tx) => {
-    const snap = await tx.get(inviteRef);
-    if (!snap.exists()) throw new Error("inv_not_found");
-
-    const inv = snap.data();
-    if (inv.active === false) throw new Error("inv_inactive");
-
-    // قيود الاستخدام
-    const limit = Number(inv.usageLimit ?? 1);
-    const used = Number(inv.usedCount ?? 0);
-    if (limit > 0 && used >= limit) throw new Error("inv_exhausted");
-
-    // انتهاء الصلاحية
-    if (inv.expiresAt?.toMillis) {
-      const now = Date.now();
-      if (now > inv.expiresAt.toMillis()) throw new Error("inv_expired");
-    }
-
-    // (اختياري) ربط بريد محدد
-    if (inv.allowedEmail) {
-      const allowed = String(inv.allowedEmail).trim().toLowerCase();
-      if ((user.email || "").toLowerCase() !== allowed) {
-        throw new Error("inv_email_mismatch");
-      }
-    }
-
-    // إعدادات الدور/الحقول
-    const role = String(inv.role || "teacher").toLowerCase();
-    const payload = {
-      role,
-      status: "active",
-      // حقول اختيارية يمكن أن تحملها الدعوة:
-      subjects: inv.subjects || null,
-      trackCodes: inv.trackCodes || null,
-      homeroomClassId: inv.homeroomClassId || null,
-      updatedAt: serverTimestamp(),
-      createdAt: serverTimestamp(), // إذا كانت الوثيقة جديدة
-    };
-
-    // إنشاء/تحديث المستخدم
-    const userSnap = await tx.get(userRef);
-    if (userSnap.exists()) {
-      tx.update(userRef, payload);
+    if (role) {
+      msg("تم تفعيل حسابك! سيتم توجيهك…", "ok");
+      setTimeout(() => {
+        if (role === "admin") location.href = "admin-dashboard.html";
+        else if (role === "teacher") location.href = "teacher-dashboard.html";
+        else location.href = "admin-dashboard.html";
+      }, 900);
     } else {
-      tx.set(userRef, {
-        uid: user.uid,
-        email: user.email || "",
-        nameAr: user.displayName || "",
-        ...payload,
-      });
+      msg("تمت العملية لكن لم يُحدّث الدور. أعد تحميل الصفحة.");
     }
-
-    // تحديث الدعوة
-    const nextUsed = used + 1;
-    const deactivate =
-      (limit > 0 && nextUsed >= limit) || inv.deactivateOnUse === true;
-
-    tx.update(inviteRef, {
-      usedCount: nextUsed,
-      active: deactivate ? false : true,
-      lastUsedAt: serverTimestamp(),
-      lastUsedBy: user.uid,
-    });
-  });
-}
-
-async function handleActivate(e) {
-  e?.preventDefault?.();
-  const codeRaw = els.inviteCode?.value || "";
-  const code = normCode(codeRaw);
-  if (!code) {
-    toast("warning", "من فضلك أدخل كود الدعوة.");
-    return;
-  }
-  const user = await ensureSignedIn();
-  try {
-    showLoader();
-    els.btnActivate.disabled = true;
-
-    await activateInvite(user, code);
-    toast("success", "تم تفعيل حسابك بنجاح!");
-    setTimeout(() => (location.href = "index.html"), 1600);
   } catch (err) {
-    console.error(err);
-    const map = {
-      inv_not_found: "الرمز غير موجود.",
-      inv_inactive: "الرمز غير نشِط.",
-      inv_exhausted: "تم استهلاك الرمز.",
-      inv_expired: "انتهت صلاحية الرمز.",
-      inv_email_mismatch: "هذا الرمز غير مخصّص لهذا البريد.",
-    };
-    const msg = map[err.message] || "تعذّر تفعيل الرمز. حاول مرة أخرى.";
-    toast("error", msg);
-  } finally {
-    hideLoader();
-    els.btnActivate.disabled = false;
+    const code = (err.code || "").toLowerCase();
+    if (code.includes("failed-precondition")) return msg("يرجى تسجيل الدخول أولًا.");
+    if (code.includes("permission-denied")) return msg("غير مسموح باستخدام هذا الكود.");
+    const m = String(err?.message || "");
+    if (m.includes("INVALID_CODE")) return msg("كود الدعوة غير صحيح.");
+    if (m.includes("EXPIRED_CODE")) return msg("انتهت صلاحية الكود.");
+    if (m.includes("ALREADY_USED")) return msg("تم استخدام الكود من قبل.");
+    msg("تعذر التفعيل. حاول مرة أخرى.");
+    console.warn(err);
   }
-}
-
-function boot() {
-  setYear();
-  hydrateInstitute();
-
-  // تعبئة الكود من العنوان إذا وُجد
-  const qCode = getQueryCode();
-  if (qCode && els.inviteCode) els.inviteCode.value = qCode;
-
-  els.form?.addEventListener("submit", handleActivate);
-}
-
-boot();
+});
