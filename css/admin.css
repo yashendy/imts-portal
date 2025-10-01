@@ -1,60 +1,35 @@
-:root{
-  --primary:#2962FF; --surface:#fff; --border:#e5e7eb;
-  --text:#111; --muted:#6b7280; --radius:12px; --shadow:0 6px 18px rgba(0,0,0,.08);
+:root {
+  --bg: #0f172a; --card:#111827; --muted:#9ca3af; --text:#e5e7eb;
+  --primary:#2563eb; --primary-600:#1d4ed8; --danger:#ef4444;
+  --radius:16px; --mono:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
 }
-
-body{ margin:0; font-family:"Cairo",sans-serif; background:#f9fafb; color:var(--text); }
-.topbar{ display:flex; justify-content:space-between; align-items:center; gap:20px; padding:12px 20px; background:#fff; border-bottom:1px solid var(--border); }
-.topbar .brand{ display:flex; align-items:center; gap:10px; }
-.topbar .brand .logo{ width:40px; height:40px; }
-.btn-secondary{ background:#fff; border:1px solid var(--border); padding:6px 12px; border-radius:var(--radius); cursor:pointer; }
-
-.dashboard{ padding:20px; }
-.tabs{ display:flex; gap:10px; margin-bottom:20px; flex-wrap: wrap; }
-.tab{ border:none; padding:8px 16px; border-radius:var(--radius); cursor:pointer; background:var(--border); color:var(--text); }
-.tab.active{ background:var(--primary); color:#fff; }
-.tab-content{ display:none; }
-.tab-content.active{ display:block; }
-
-.cards{ display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; }
-.card{ background:#fff; padding:16px; border-radius:14px; box-shadow:var(--shadow); }
-.card h3{ margin:0 0 8px; }
-.card p{ margin:0; font-weight:700; font-size:20px; }
-
-.filters{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:10px 0 14px; }
-.filters input, .filters select{ padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:#fff; }
-
-.box{ background:#fff; padding:12px; border-radius:12px; margin:10px 0 14px; border:1px solid var(--border); }
-.grid-3{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; }
-.grid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
-.grid .wide{ grid-column: 1 / -1; }
-label.inline{ display:inline-flex; gap:6px; align-items:center; }
-
-.table{ width:100%; border-collapse:collapse; background:#fff; border-radius:14px; overflow:hidden; box-shadow:var(--shadow); }
-.table th, .table td{ padding:10px 12px; border-bottom:1px solid var(--border); text-align:right; }
-.table thead th{ background:#f3f4f6; font-weight:700; }
-.table tr:last-child td{ border-bottom:none; }
-.btn-action{ background:#fff; border:1px solid var(--border); padding:6px 10px; border-radius:10px; cursor:pointer; }
-.btn-action.danger{ border-color:#ef4444; color:#ef4444; }
-.btn-primary{ background:var(--primary); color:#fff; border:none; padding:10px 16px; border-radius:12px; cursor:pointer; }
-
-dialog{ border:none; border-radius:16px; box-shadow:var(--shadow); max-width:780px; width:90vw; }
-.modal{ background:#fff; border-radius:14px; }
-.modal-head{ display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--border); }
-.modal-head .close{ border:none; background:#fff; font-size:22px; cursor:pointer; }
-.modal-body{ padding:16px; display:grid; gap:12px; }
-.modal-foot{ padding:12px 16px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; }
-.modal input, .modal select{ width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; }
-
-@media (max-width: 900px){
-  .grid-3{ grid-template-columns: 1fr 1fr; }
-}
-@media (max-width: 640px){
-  .grid-3, .grid{ grid-template-columns: 1fr; }
-}
-
-/* إضافات لقائمة "معلمو الفصل" داخل المودال */
-.list .row{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 8px; border:1px solid var(--border); border-radius:10px; margin-bottom:8px; background:#fff; }
-.list .row .ct-item{ display:flex; align-items:center; gap:8px; }
-.list .row .ct-name{ font-weight:500; }
-.list .row .ct-homeroom{ display:flex; align-items:center; gap:6px; color:var(--muted); }
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:"Cairo",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(180deg,#0b1220,#0a1020);color:var(--text)}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:rgba(17,24,39,.6);border-bottom:1px solid rgba(255,255,255,.08);backdrop-filter:blur(6px);position:sticky;top:0;z-index:10}
+.brand{margin:0;font-size:22px;font-weight:700}
+.user-chip{margin-inline-end:10px;color:var(--muted)}
+.container{max-width:1200px;margin:24px auto;padding:0 12px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+.card{grid-column:span 12;background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+@media (min-width:900px){.card:nth-child(1){grid-column:span 4}.card:nth-child(2){grid-column:span 8}.card:nth-child(3){grid-column:span 12}.card:nth-child(4){grid-column:span 12}.card:nth-child(5){grid-column:span 12}}
+.card__title{margin:0 0 12px;font-size:18px}
+.form .form__row{margin:10px 0}
+.label{display:block;margin-bottom:6px;color:var(--muted);font-size:13px}
+.input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:#0b1220;color:var(--text)}
+.inline{display:flex;gap:8px;align-items:center}
+.switch{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.btn{border:0;border-radius:10px;padding:10px 14px;cursor:pointer;background:var(--primary);color:#fff;font-weight:700}
+.btn:hover{background:var(--primary-600)}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,.14);color:var(--text)}
+.btn-secondary{background:#374151}
+.btn-xs{padding:6px 10px;font-size:12px}
+.btn-danger{background:var(--danger)}
+.table-wrapper{overflow:auto}
+.table{width:100%;border-collapse:collapse;font-size:14px}
+.table th,.table td{border-bottom:1px solid rgba(255,255,255,.08);padding:10px}
+.table th{text-align:right;color:var(--muted);font-weight:600}
+.table td .tag{display:inline-block;padding:2px 8px;border-radius:999px;background:rgba(37,99,235,.12);color:#bfdbfe;font-size:12px}
+.mono{font-family:var(--mono)}
+.actions{display:flex;gap:8px;align-items:center}
+.alert{margin:6px 0 12px;padding:10px 12px;border-radius:10px;background:#1f2937;color:#f3f4f6}
