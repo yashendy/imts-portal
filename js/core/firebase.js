@@ -1,19 +1,19 @@
-// /js/firebase.js
+// /js/core/firebase.js
 // Firebase bootstrap (ESM) — SDK v12.2.0
-// يعمل على GitHub Pages بدون أي سكربتات إضافية
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.2.0/firebase-app.js";
 import {
-  getAuth,
-  setPersistence,
-  browserSessionPersistence,
-  GoogleAuthProvider
+  getAuth, setPersistence, browserSessionPersistence, GoogleAuthProvider,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.2.0/firebase-auth.js";
-import { getFirestore, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.0/firebase-firestore.js";
-import { getStorage } from "https://www.gstatic.com/firebasejs/12.2.0/firebase-storage.js";
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.2.0/firebase-functions.js";
+import {
+  getFirestore, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.2.0/firebase-firestore.js";
+import {
+  getFunctions, httpsCallable
+} from "https://www.gstatic.com/firebasejs/12.2.0/firebase-functions.js";
 
-// ⬇️ إعدادات مشروعك (imts-4b827)
+// مشروعك: imts-4b827
 const firebaseConfig = {
   apiKey: "AIzaSyCoZ19SWabidrkmrX8SWy4rFbpWnuYtSSM",
   authDomain: "imts-4b827.firebaseapp.com",
@@ -24,26 +24,19 @@ const firebaseConfig = {
   measurementId: "G-3YVBHGWJ9V"
 };
 
-// ✅ تهيئة آمنة (لو الملف اتحمّل مرتين ما يعيدش التهيئة)
+// تهيئة آمنة
 export const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-
-// Core services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-export const storage = getStorage(app);
 export const functions = getFunctions(app);
-
-// Providers & helpers
 export const googleProvider = new GoogleAuthProvider();
-export { serverTimestamp, httpsCallable };
 
-// اجعل الجلسة محفوظة على مستوى التبويب فقط (يوافق استخدام sessionStorage)
-setPersistence(auth, browserSessionPersistence).catch(() => { /* no-op */ });
+export { serverTimestamp, httpsCallable, onAuthStateChanged };
 
-// (اختياري) تعريض الخدمات لـ window لاستخدام سكربتات غير module
+// جلسة على مستوى التبويب
+setPersistence(auth, browserSessionPersistence).catch(() => {});
+
+// (اختياري) كشف الخدمات لسكريبتات غير module
 if (typeof window !== "undefined") {
-  window.firebaseServices = Object.freeze({
-    app, auth, db, storage, functions,
-    googleProvider, serverTimestamp, httpsCallable
-  });
+  window.firebaseServices = Object.freeze({ app, auth, db, functions, googleProvider, serverTimestamp, httpsCallable, onAuthStateChanged });
 }
