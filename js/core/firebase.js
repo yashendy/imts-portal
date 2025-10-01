@@ -1,13 +1,19 @@
-// /js/core/firebase.js
-// ✅ نسخة نهائية متوافقة مع بقية الملفات (ESM + v10.12.0)
+// /js/firebase.js
+// Firebase bootstrap (ESM) — SDK v12.2.0
+// يعمل على GitHub Pages بدون أي سكربتات إضافية
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.2.0/firebase-app.js";
+import {
+  getAuth,
+  setPersistence,
+  browserSessionPersistence,
+  GoogleAuthProvider
+} from "https://www.gstatic.com/firebasejs/12.2.0/firebase-auth.js";
+import { getFirestore, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.0/firebase-firestore.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/12.2.0/firebase-storage.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.2.0/firebase-functions.js";
 
-// 👇 استبدل القيم بإعدادات مشروعك من Firebase Console
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// ⬇️ إعدادات مشروعك (imts-4b827)
 const firebaseConfig = {
   apiKey: "AIzaSyCoZ19SWabidrkmrX8SWy4rFbpWnuYtSSM",
   authDomain: "imts-4b827.firebaseapp.com",
@@ -18,18 +24,26 @@ const firebaseConfig = {
   measurementId: "G-3YVBHGWJ9V"
 };
 
-// Initialize
-export const app = initializeApp(firebaseConfig);
+// ✅ تهيئة آمنة (لو الملف اتحمّل مرتين ما يعيدش التهيئة)
+export const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-// Auth
+// Core services
 export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
-
-// Firestore
 export const db = getFirestore(app);
-// نصدّرها عشان لو ملفك بيستوردها (سبب توقف index.js قبل كده)
-export { serverTimestamp };
-
-// Cloud Functions (لـ acceptInvite)
+export const storage = getStorage(app);
 export const functions = getFunctions(app);
-export { httpsCallable };
+
+// Providers & helpers
+export const googleProvider = new GoogleAuthProvider();
+export { serverTimestamp, httpsCallable };
+
+// اجعل الجلسة محفوظة على مستوى التبويب فقط (يوافق استخدام sessionStorage)
+setPersistence(auth, browserSessionPersistence).catch(() => { /* no-op */ });
+
+// (اختياري) تعريض الخدمات لـ window لاستخدام سكربتات غير module
+if (typeof window !== "undefined") {
+  window.firebaseServices = Object.freeze({
+    app, auth, db, storage, functions,
+    googleProvider, serverTimestamp, httpsCallable
+  });
+}
