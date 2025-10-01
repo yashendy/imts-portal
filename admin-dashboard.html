@@ -112,6 +112,69 @@
         </div>
       </div>
     </section>
+    <!-- إدارة الصفوف -->
+<section class="grid-2">
+  <!-- إنشاء صف -->
+  <div class="card">
+    <div class="card-head">
+      <h2>إنشاء صف</h2>
+    </div>
+
+    <div class="form-grid">
+      <label>الصف الدراسي
+        <select id="clsGrade"></select>
+      </label>
+
+      <label>المسار
+        <select id="clsTrack"></select>
+      </label>
+
+      <label>القالب الزمني
+        <select id="clsTemplate"></select>
+      </label>
+
+      <label>القسم (حرف/رمز)
+        <input id="clsSection" type="text" placeholder="A" />
+      </label>
+
+      <label>السعة
+        <input id="clsCapacity" type="number" min="1" value="30" />
+      </label>
+
+      <label>مربي الصف (اختياري)
+        <select id="clsHomeroom">
+          <option value="">— بدون —</option>
+        </select>
+      </label>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="btnCreateClass">إنشاء الصف</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- قائمة الصفوف -->
+  <div class="card">
+    <div class="card-head">
+      <h2>الصفوف</h2>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>المعرف</th>
+            <th>الوصف</th>
+            <th>القالب</th>
+            <th>المربي</th>
+            <th>السعة</th>
+          </tr>
+        </thead>
+        <tbody id="classesBody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
 
     <!-- المستخدمون -->
     <section class="card">
