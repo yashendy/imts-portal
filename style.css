@@ -84,6 +84,7 @@ button:hover {
 
 .cert-header {
     display: flex;
+    flex-direction: row-reverse; /* هذا السطر يقلب الترتيب ليصبح الشعار على اليمين */
     justify-content: space-between;
     align-items: center;
     border-bottom: 2px solid var(--primary-blue);
@@ -91,6 +92,10 @@ button:hover {
     margin-bottom: 20px;
 }
 
+.logo-right {
+    width: 120px; /* يمكنك زيادة العرض لو أردتِ الشعار أكبر */
+    margin-right: 10px; /* مسافة بسيطة من الحافة اليمنى */
+}
 .logo-right { width: 110px; }
 
 .header-text { text-align: center; flex-grow: 1; }
@@ -119,7 +124,7 @@ button:hover {
 .info-item span {
     display: block;
     color: var(--primary-blue);
-    font-size: 22px;
+    font-size: 26px; /* كبّريه من 22 إلى 26 ليكون واضحاً جداً */
     font-weight: bold;
 }
 
