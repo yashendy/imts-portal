@@ -8,14 +8,7 @@ onAuthStateChanged(auth, (user) => {
 
 window.logout = () => signOut(auth);
 
-// وظيفة ذكية للتعامل مع "غ" أو الأرقام
-const formatValue = (val) => {
-    const trimmed = String(val).trim();
-    if (trimmed === "غ") return "غ";[cite: 6]
-    return trimmed === "" || isNaN(trimmed) ? 0 : Number(trimmed);[cite: 6]
-};
-
-// بحث واسترجاع البيانات للتعديل
+// بحث وتعديل البيانات
 document.getElementById("fetch-btn").addEventListener("click", async () => {
     const id = document.getElementById("quick-search").value.trim();
     const docSnap = await getDoc(doc(db, "students", id));
@@ -31,12 +24,12 @@ document.getElementById("fetch-btn").addEventListener("click", async () => {
         document.getElementById("m-highlevel").value = d.highlevel || 0;
         
         const fields = ["arabic", "math", "english", "science", "religion", "Social", "technology"];
-        fields.forEach(f => document.getElementById(`m-${f}`).value = d[f]);[cite: 5]
-        alert("تم جلب البيانات بنجاح");
+        fields.forEach(f => document.getElementById(`m-${f}`).value = d[f] || 0);
+        alert("تم استرجاع البيانات بنجاح");
     }
 });
 
-// حفظ البيانات المحدثة
+// حفظ البيانات (إضافة أو تعديل)
 document.getElementById("manual-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const id = document.getElementById("m-id").value.trim();
@@ -47,16 +40,16 @@ document.getElementById("manual-form").addEventListener("submit", async (e) => {
         rel_type: document.getElementById("m-religion-type").value,
         system: document.getElementById("m-system").value,
         isActive: document.getElementById("m-active").value === "true",
-        arabic: formatValue(document.getElementById("m-arabic").value),[cite: 6]
-        math: formatValue(document.getElementById("m-math").value),[cite: 6]
-        english: formatValue(document.getElementById("m-english").value),[cite: 6]
-        science: formatValue(document.getElementById("m-science").value),[cite: 6]
-        religion: formatValue(document.getElementById("m-religion").value),[cite: 6]
-        Social: formatValue(document.getElementById("m-Social").value),[cite: 6]
-        technology: formatValue(document.getElementById("m-technology").value),[cite: 6]
-        highlevel: formatValue(document.getElementById("m-highlevel").value),[cite: 6]
+        highlevel: Number(document.getElementById("m-highlevel").value) || 0,
+        arabic: Number(document.getElementById("m-arabic").value),
+        math: Number(document.getElementById("m-math").value),
+        english: Number(document.getElementById("m-english").value),
+        science: Number(document.getElementById("m-science").value),
+        religion: Number(document.getElementById("m-religion").value),
+        Social: Number(document.getElementById("m-Social").value),
+        technology: Number(document.getElementById("m-technology").value),
         lastUpdated: new Date().toISOString()
     };
     await setDoc(doc(db, "students", id), data);
-    alert("✅ تم الحفظ بنجاح (رقمياً أو غياب)");
+    alert("✅ تم حفظ البيانات بنجاح");
 });
