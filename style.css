@@ -1,10 +1,9 @@
-/* إعدادات الخطوط والألوان الرسمية (ألوان هادئة ومريحة للعين) */
 :root {
-    --primary-blue: #5C839F; /* أزرق هادئ جداً ومريح */
-    --accent-red: #B3393E; /* أحمر داكن هادئ */
-    --dark-slate: #2c3e50; /* كحلي غامق للكتابة */
-    --light-bg: #F4F7F9; /* خلفية الصفحة (رمادي مائل للأزرق الفاتح) */
-    --sidebar-bg: #E6EEF4; /* لون الكارت (أزرق باستيل فاتح جداً) */
+    --primary-blue: #5C839F;
+    --accent-red: #B3393E;
+    --dark-slate: #2c3e50;
+    --light-bg: #F4F7F9;
+    --sidebar-bg: #E6EEF4;
 }
 
 body {
@@ -15,18 +14,15 @@ body {
     direction: rtl;
 }
 
-/* الخطوط الفخمة */
 .title-thuluth { font-family: 'Amiri', serif; font-weight: 700; }
 .title-diwani { font-family: 'Reem Kufi', sans-serif; }
 
-/* حاوية الشهادة والبرواز */
 .certificate-wrapper {
     max-width: 1000px;
     margin: 20px auto;
     background: #fff;
     padding: 15px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-    position: relative;
 }
 
 .cert-border {
@@ -36,7 +32,6 @@ body {
     box-sizing: border-box;
 }
 
-/* الترويسة */
 .cert-header {
     display: flex;
     justify-content: center;
@@ -53,22 +48,15 @@ body {
     width: 110px;
 }
 
-.header-text { text-align: center; }
 .header-text h1 { font-size: 38px; margin: 0; color: var(--dark-slate); }
 .header-text h2 { font-size: 22px; color: var(--accent-red); margin-top: 10px; }
 
-/* جسم الشهادة */
-.cert-body { 
-    display: flex; 
-    width: 100%; 
-    gap: 20px; 
-}
+.cert-body { display: flex; width: 100%; gap: 20px; }
 
-/* الشريط الجانبي (الكارت - 1/3 المساحة) */
 .sidebar {
     width: 33.33%;
     background-color: var(--sidebar-bg);
-    color: var(--dark-slate); /* لون الكتابة داكن عشان يقرأ بوضوح على الخلفية الفاتحة */
+    color: var(--dark-slate);
     padding: 30px 15px;
     border-radius: 8px;
     text-align: center;
@@ -82,178 +70,61 @@ body {
     border: 4px solid #fff;
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.student-img { width: 100%; height: 100%; object-fit: cover; }
-
-.prof-title {
-    color: #555;
-    font-size: 16px;
-    margin-bottom: 20px;
-}
-
-/* صندوق البيانات داخل الكارت (توسيط وتكبير الخط) */
 .info-box {
-    text-align: center; /* توسيط الكلام */
+    text-align: center;
     margin-top: 20px;
-    font-size: 18px; /* تكبير الخط الأساسي */
+    font-size: 18px;
     font-weight: bold;
     line-height: 2.2;
-    background: #ffffff; /* خلفية بيضاء للصندوق لتوضيح الكلام */
+    background: #ffffff;
     padding: 20px 15px;
     border-radius: 8px;
-    color: var(--dark-slate);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
 }
 
-/* تكبير وتلوين البيانات المتغيرة (زي رقم الجلوس والصف) */
 .info-box span {
     font-size: 20px;
     color: var(--primary-blue);
-    display: block; /* عشان كل معلومة تنزل في سطر لوحدها بشكل أشيك */
+    display: block;
     margin-bottom: 10px;
 }
 
-/* المحتوى الأساسي (جدول الدرجات - 2/3 المساحة) */
 .main-content { width: 66.67%; padding: 10px; }
 
 .grades-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 
-.grades-table th {
-    background-color: var(--primary-blue);
-    color: white;
-    padding: 12px;
-    font-weight: normal;
-    font-size: 17px;
-}
+.grades-table th { background-color: var(--primary-blue); color: white; padding: 12px; }
+.grades-table td { border: 1px solid #dee2e6; padding: 12px; text-align: center; }
 
-.grades-table td {
-    border: 1px solid #dee2e6;
-    padding: 12px;
-    text-align: center;
-    font-size: 16px;
+.result-statement {
+    text-align: right;
+    margin: 25px 10px;
+    font-size: 20px;
     color: var(--dark-slate);
-}
-
-.grades-table tr:nth-child(even) { background-color: #F8FAFC; }
-
-.total-row {
-    background-color: #E6EEF4 !important;
     font-weight: bold;
-    color: var(--accent-red);
-    font-size: 18px;
 }
 
-/* قسم الختم والتوقيع */
-.footer-section {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 30px;
-}
+.result-statement span { color: var(--primary-blue); }
 
-.signature-box {
-    text-align: center;
-    width: 250px;
-}
+.footer-section { display: flex; justify-content: flex-end; margin-top: 20px; }
+.signature-box { text-align: center; width: 250px; }
+.signature-img { width: 200px; margin-top: 10px; }
 
-.signature-box p {
-    margin: 0;
-    font-weight: bold;
-    font-size: 18px;
-    border-bottom: 1px solid #ccc;
-    padding-bottom: 5px;
-    color: var(--dark-slate);
-}
-
-.signature-img {
-    width: 200px;
-    margin-top: 10px;
-}
-
-/* أزرار البحث والطباعة */
 .search-container {
-    background: #fff;
-    max-width: 450px;
-    margin: 40px auto;
-    padding: 30px;
-    text-align: center;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    background: #fff; max-width: 450px; margin: 40px auto; padding: 30px; text-align: center; border-radius: 8px;
 }
 
-.search-container input {
-    width: 80%;
-    padding: 12px;
-    margin: 15px 0;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
+button { background: var(--accent-red); color: #fff; border: none; padding: 12px 25px; cursor: pointer; font-weight: bold; border-radius: 4px; font-family: inherit; }
 
-button {
-    background: var(--accent-red);
-    color: #fff;
-    border: none;
-    padding: 12px 25px;
-    cursor: pointer;
-    font-weight: bold;
-    border-radius: 4px;
-    font-family: inherit;
-    font-size: 16px;
-}
-
-button:hover { background: #9c2e32; }
-
-.print-action { text-align: center; margin-top: 20px; }
-
-/* =========================================
-   إعدادات الطباعة الإجبارية (A4 - صفحة واحدة)
-   ========================================= */
 @media print {
-    @page {
-        size: A4; /* إجبار الطابعة على مقاس A4 */
-        margin: 10mm; /* هوامش صغيرة عشان المحتوى يكفي */
-    }
-    
-    body { 
-        background: #fff; 
-        padding: 0; 
-        margin: 0; 
-        -webkit-print-color-adjust: exact; /* إجبار المتصفح على طباعة الألوان */
-        print-color-adjust: exact;
-    }
-    
-    .search-container, .print-action { 
-        display: none !important; /* إخفاء الأزرار في الطباعة */
-    }
-    
-    .certificate-wrapper { 
-        box-shadow: none; 
-        border: none; 
-        width: 100%; 
-        margin: 0; 
-        padding: 0;
-        /* منع الصفحة من الانقسام */
-        page-break-after: avoid; 
-        page-break-inside: avoid;
-    }
-    
-    .cert-border { 
-        border: 4px double var(--primary-blue); 
-        min-height: auto; /* إلغاء الطول الثابت عشان يظبط على مقاس الورقة */
-        height: 96%; 
-        padding: 15px;
-    }
-    
-    .sidebar {
-        padding: 20px 10px;
-    }
-    
-    .grades-table {
-        margin-bottom: 20px;
-    }
+    @page { size: A4; margin: 10mm; }
+    body { background: #fff; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .search-container, .print-action { display: none !important; }
+    .certificate-wrapper { box-shadow: none; border: none; width: 100%; margin: 0; }
+    .cert-border { border: 4px double var(--primary-blue); min-height: auto; height: 96%; }
 }
