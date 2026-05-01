@@ -1,6 +1,53 @@
-<div class="login-card">
-    <h2 class="title-diwani">تسجيل دخول الإدارة</h2>
-    <input type="email" id="admin-email" placeholder="البريد الإلكتروني">
-    <input type="password" id="admin-password" placeholder="كلمة المرور">
-    <button id="login-btn">دخول لوحة التحكم</button>
-</div>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تسجيل دخول الإدارة - IMTS</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-card {
+            background: #fff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            margin: 100px auto;
+        }
+        .login-card input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h2 class="title-diwani">دخول لوحة التحكم</h2>
+        <input type="email" id="email" placeholder="البريد الإلكتروني">
+        <input type="password" id="password" placeholder="كلمة المرور">
+        <button id="login-btn">تسجيل الدخول</button>
+        <p id="login-error" style="color: red; margin-top: 10px;"></p>
+    </div>
+
+    <script type="module">
+        import { auth } from "./firebase-config.js";
+        import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+
+        document.getElementById("login-btn").onclick = async () => {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                window.location.href = "admin.html"; // التحويل للوحة التحكم بعد النجاح
+            } catch (error) {
+                document.getElementById("login-error").innerText = "بيانات الدخول غير صحيحة";
+            }
+        };
+    </script>
+</body>
+</html>
