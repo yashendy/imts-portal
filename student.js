@@ -1,7 +1,13 @@
 import { db } from "./firebase-config.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
-function getEval(score) { return score >= 18 ? "ممتاز" : "جيد جداً"; }
+// تعديل دالة التقييم لتتعامل مع الغياب
+function getEval(score) { 
+    if (score === "غ") return "ـ"; 
+    const s = Number(score);
+    if (isNaN(s)) return "ـ";
+    return s >= 18 ? "ممتاز" : "جيد جداً"; 
+}
 
 document.getElementById("search-btn").addEventListener("click", async () => {
     const id = document.getElementById("student-id-input").value.trim();
@@ -21,7 +27,6 @@ document.getElementById("search-btn").addEventListener("click", async () => {
             document.getElementById("certificate-section").style.display = "block";
             document.getElementById("search-section").style.display = "none";
 
-            // تحديث البيانات مع التأكد من وجود العناصر (حل مشكلة الخطأ في الصورة)
             const elements = {
                 "cert-name": d.name,
                 "cert-name-footer": d.name,
@@ -32,10 +37,9 @@ document.getElementById("search-btn").addEventListener("click", async () => {
 
             for (let id in elements) {
                 const el = document.getElementById(id);
-                if (el) el.textContent = elements[id]; // التأكد أن العنصر موجود قبل التعديل
+                if (el) el.textContent = elements[id];
             }
 
-            // بناء جدول المواد
             let subjects = [
                 { n: "اللغة العربية", v: d.arabic },
                 { n: isLang ? "Math" : "الرياضيات", v: d.math },
@@ -46,29 +50,37 @@ document.getElementById("search-btn").addEventListener("click", async () => {
                 { n: isLang ? "ICT" : "تكنولوجيا المعلومات", v: d.technology }
             ];
 
-            if (isLang && d.highlevel > 0) {
+            if (isLang && d.highlevel !== undefined) {
                 subjects.push({ n: "High Level", v: d.highlevel });
             }
 
             let total = 0;
             let html = "";
+            let hasAbsence = false;
+
             subjects.forEach(s => {
-                const v = Number(s.v) || 0;
-                total += v;
-                html += `<tr><td>${s.n}</td><td>${v}</td><td>${getEval(v)}</td></tr>`;
+                const val = s.v;
+                // إذا كانت القيمة رقمية تضاف للمجموع، إذا كانت "غ" لا تضاف
+                if (val !== "غ") {
+                    total += Number(val) || 0;
+                } else {
+                    hasAbsence = true; 
+                }
+                html += `<tr><td>${s.n}</td><td>${val}</td><td>${getEval(val)}</td></tr>`;
             });
 
             document.getElementById("grades-body").innerHTML = html;
             const maxScore = subjects.length * 20;
             
-            // تحديث المجموع الكلي
             const totalScoreEl = document.getElementById("total-score");
             if (totalScoreEl) {
                 totalScoreEl.textContent = total;
                 totalScoreEl.parentElement.innerHTML = `<td><strong>المجموع الكلي</strong></td><td><strong>${total}</strong> / ${maxScore}</td><td id="total-eval"></td>`;
             }
 
+            // التقييم العام (يمكنك تعديل منطقه إذا كان الغياب يؤثر على التقييم الكلي)
             const finalEval = total >= (maxScore * 0.9) ? "ممتاز" : "جيد جداً";
+            
             if (document.getElementById("total-eval")) document.getElementById("total-eval").textContent = finalEval;
             if (document.getElementById("cert-total-eval")) document.getElementById("cert-total-eval").textContent = finalEval;
             if (document.getElementById("statement")) {
