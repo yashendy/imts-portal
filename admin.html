@@ -13,13 +13,15 @@
         <header class="admin-header">
             <h1>لوحة إدارة النتائج الرسمية</h1>
             <p>معهد الدراسات الإدارية والفنية</p>
+            <button onclick="logout()" class="logout-btn">تسجيل الخروج</button>
         </header>
 
         <div class="tabs">
             <button class="tab-btn active" onclick="openTab('excel-tab')">رفع ملف أكسيل</button>
-            <button class="tab-btn" onclick="openTab('manual-tab')">إدخال يدوي فردي</button>
+            <button class="tab-btn" onclick="openTab('manual-tab')">إدخال وبحث يدوي</button>
         </div>
 
+        <!-- تبويب الأكسيل -->
         <div id="excel-tab" class="tab-content active">
             <div class="upload-box" id="drop-zone">
                 <div class="icon">📊</div>
@@ -32,12 +34,26 @@
                 <div class="table-scroll">
                     <table id="preview-table"></table>
                 </div>
-                <button id="upload-all-btn" class="main-btn">اعتماد ورفع كافة البيانات إلى قاعدة البيانات</button>
+                <button id="upload-all-btn" class="main-btn">اعتماد ورفع كافة البيانات</button>
             </div>
         </div>
 
+        <!-- تبويب الإدخال والبحث اليدوي -->
         <div id="manual-tab" class="tab-content">
+            <!-- شريط البحث المطور -->
+            <div class="admin-search-bar">
+                <input type="text" id="quick-search" placeholder="ابحث برقم الجلوس للتعديل...">
+                <button id="fetch-btn">بحث وتعديل</button>
+            </div>
+
             <form id="manual-form" class="grid-form">
+                <div class="input-group full">
+                    <label>حالة الطالب (ظهور النتيجة)</label>
+                    <select id="m-active" class="status-select">
+                        <option value="true">فعال (تظهر النتيجة للطالب)</option>
+                        <option value="false">غير فعال (حجب النتيجة)</option>
+                    </select>
+                </div>
                 <div class="input-group full">
                     <label>اسم الطالب الرباعي</label>
                     <input type="text" id="m-name" required>
@@ -51,15 +67,15 @@
                     <input type="text" id="m-level" placeholder="مثلاً: الرابع الابتدائي">
                 </div>
                 <div class="grades-grid">
-                    <div class="grade-input"><label>عربي</label><input type="number" id="m-arabic" max="20"></div>
-                    <div class="grade-input"><label>رياضيات</label><input type="number" id="m-math" max="20"></div>
-                    <div class="grade-input"><label>إنجليزي</label><input type="number" id="m-english" max="20"></div>
-                    <div class="grade-input"><label>علوم</label><input type="number" id="m-science" max="20"></div>
-                    <div class="grade-input"><label>دين</label><input type="number" id="m-religion" max="20"></div>
-                    <div class="grade-input"><label>دراسات</label><input type="number" id="m-Social" max="20"></div>
-                    <div class="grade-input"><label>تكنولوجيا</label><input type="number" id="m-technology" max="20"></div>
+                    <div class="grade-input"><label>عربي</label><input type="number" id="m-arabic"></div>
+                    <div class="grade-input"><label>رياضيات</label><input type="number" id="m-math"></div>
+                    <div class="grade-input"><label>إنجليزي</label><input type="number" id="m-english"></div>
+                    <div class="grade-input"><label>علوم</label><input type="number" id="m-science"></div>
+                    <div class="grade-input"><label>دين</label><input type="number" id="m-religion"></div>
+                    <div class="grade-input"><label>دراسات</label><input type="number" id="m-Social"></div>
+                    <div class="grade-input"><label>تكنولوجيا</label><input type="number" id="m-technology"></div>
                 </div>
-                <button type="submit" class="main-btn">حفظ بيانات الطالب</button>
+                <button type="submit" class="main-btn">حفظ التعديلات / إضافة طالب</button>
             </form>
         </div>
     </div>
