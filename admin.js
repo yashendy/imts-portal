@@ -8,6 +8,12 @@ onAuthStateChanged(auth, (user) => {
 
 window.logout = () => signOut(auth);
 
+// دالة لمعالجة المدخلات: إذا كانت "غ" تبقى نص، وإذا كانت أرقام تتحول لـ Number
+const processGrade = (val) => {
+    const trimmed = val.trim();
+    return trimmed === "غ" ? "غ" : (Number(trimmed) || 0);
+};
+
 // بحث وتعديل البيانات
 document.getElementById("fetch-btn").addEventListener("click", async () => {
     const id = document.getElementById("quick-search").value.trim();
@@ -24,7 +30,7 @@ document.getElementById("fetch-btn").addEventListener("click", async () => {
         document.getElementById("m-highlevel").value = d.highlevel || 0;
         
         const fields = ["arabic", "math", "english", "science", "religion", "Social", "technology"];
-        fields.forEach(f => document.getElementById(`m-${f}`).value = d[f] || 0);
+        fields.forEach(f => document.getElementById(`m-${f}`).value = d[f] ?? 0);
         alert("تم استرجاع البيانات بنجاح");
     }
 });
@@ -40,14 +46,14 @@ document.getElementById("manual-form").addEventListener("submit", async (e) => {
         rel_type: document.getElementById("m-religion-type").value,
         system: document.getElementById("m-system").value,
         isActive: document.getElementById("m-active").value === "true",
-        highlevel: Number(document.getElementById("m-highlevel").value) || 0,
-        arabic: Number(document.getElementById("m-arabic").value),
-        math: Number(document.getElementById("m-math").value),
-        english: Number(document.getElementById("m-english").value),
-        science: Number(document.getElementById("m-science").value),
-        religion: Number(document.getElementById("m-religion").value),
-        Social: Number(document.getElementById("m-Social").value),
-        technology: Number(document.getElementById("m-technology").value),
+        highlevel: processGrade(document.getElementById("m-highlevel").value),
+        arabic: processGrade(document.getElementById("m-arabic").value),
+        math: processGrade(document.getElementById("m-math").value),
+        english: processGrade(document.getElementById("m-english").value),
+        science: processGrade(document.getElementById("m-science").value),
+        religion: processGrade(document.getElementById("m-religion").value),
+        Social: processGrade(document.getElementById("m-Social").value),
+        technology: processGrade(document.getElementById("m-technology").value),
         lastUpdated: new Date().toISOString()
     };
     await setDoc(doc(db, "students", id), data);
