@@ -17,27 +17,29 @@ document.getElementById("search-btn").addEventListener("click", async () => {
         const docSnap = await getDoc(doc(db, "students", id));
         if (docSnap.exists()) {
             const d = docSnap.data();
+            
+            // التحقق من حجب النتيجة
             if (d.isActive === false) { 
                 alert("النتيجة محجوبة مؤقتاً"); 
                 return; 
             }
 
-            const isFemale = d.gender === "أنثى";
-            const isChristian = d.rel_type === "مسيحي";
-            const isLang = d.system === "لغات";
+            const isFemale = d.gender === "أنثى";[cite: 6]
+            const isChristian = d.rel_type === "مسيحي";[cite: 6]
+            const isLang = d.system === "لغات";[cite: 6]
 
-            // إظهار صفحة الشهادة وإخفاء البحث
+            // إظهار صفحة الشهادة وإخفاء البحث[cite: 6]
             document.getElementById("certificate-section").style.display = "block";
             document.getElementById("search-section").style.display = "none";
 
-            // البيانات الشخصية
+            // تحديد صياغة النصوص[cite: 6]
             const sTitle = isFemale ? "الطالبة" : "الطالب";[cite: 6]
             document.getElementById("cert-name").textContent = `${sTitle}/ ${d.name}`;
             document.getElementById("cert-level").textContent = d.level || "غير محدد";
             document.getElementById("cert-system").textContent = d.system || "عربي";
             document.getElementById("cert-id").textContent = id;
 
-            // قائمة المواد
+            // قائمة المواد[cite: 6]
             let subjects = [
                 { n: "اللغة العربية", v: d.arabic },
                 { n: isLang ? "Math" : "الرياضيات", v: d.math },
@@ -50,13 +52,13 @@ document.getElementById("search-btn").addEventListener("click", async () => {
             if (!isChristian) subjects.push({ n: "التربية الدينية", v: d.religion });[cite: 6]
             if (isLang && d.highlevel > 0) subjects.push({ n: "High Level", v: d.highlevel });[cite: 6]
 
-            // الحسابات وعرض الجدول (منع NaN)
+            // الحسابات وعرض الجدول[cite: 6]
             let totalScore = 0;
             let html = "";
             subjects.forEach(s => {
                 const isAbsent = s.v === "غ";[cite: 6]
                 const valToDisplay = isAbsent ? "غ" : (Number(s.v) || 0);[cite: 6]
-                const evaluation = getEval(s.v);
+                const evaluation = getEval(s.v);[cite: 6]
 
                 if (!isAbsent) totalScore += Number(s.v) || 0;[cite: 6]
                 html += `<tr><td>${s.n}</td><td>${valToDisplay}</td><td>${evaluation}</td></tr>`;[cite: 6]
@@ -65,7 +67,7 @@ document.getElementById("search-btn").addEventListener("click", async () => {
             document.getElementById("grades-body").innerHTML = html;
             const maxScore = subjects.length * 20;[cite: 6]
             
-            // تحديث سطر المجموع
+            // تحديث سطر المجموع[cite: 6]
             const totalScoreEl = document.getElementById("total-score");
             if (totalScoreEl) {
                 totalScoreEl.parentElement.innerHTML = `<td><strong>المجموع الكلي</strong></td><td><strong>${totalScore}</strong> / ${maxScore}</td><td id="total-eval"></td>`;
@@ -74,7 +76,7 @@ document.getElementById("search-btn").addEventListener("click", async () => {
             const finalEval = totalScore >= (maxScore * 0.9) ? "ممتاز" : "جيد جداً";[cite: 6]
             if (document.getElementById("total-eval")) document.getElementById("total-eval").textContent = finalEval;
             
-            // البيان الختامي
+            // البيان الختامي[cite: 6]
             const sPassed = isFemale ? "تمت اجتياز" : "تم اجتياز";[cite: 6]
             const sObtained = isFemale ? "وحصلت على" : "وحصل على";[cite: 6]
             document.getElementById("statement").innerHTML = 
@@ -88,7 +90,7 @@ document.getElementById("search-btn").addEventListener("click", async () => {
     }
 });
 
-// زر الإغلاق
+// تفعيل زر الإغلاق[cite: 6]
 document.getElementById("close-cert-btn").addEventListener("click", () => {
     document.getElementById("certificate-section").style.display = "none";
     document.getElementById("search-section").style.display = "block";
