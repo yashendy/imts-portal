@@ -165,6 +165,24 @@ button:hover {
     width: auto;
     padding: 15px 50px;
 }
+.admin-login-link {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+.admin-btn-small {
+    text-decoration: none;
+    color: var(--primary-blue);
+    border: 1px solid var(--primary-blue);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    transition: 0.3s;
+}
+.admin-btn-small:hover {
+    background: var(--primary-blue);
+    color: #fff;
+}
 
 /* ضبط الطباعة */
 @media print {
