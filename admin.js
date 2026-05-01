@@ -8,7 +8,7 @@ onAuthStateChanged(auth, (user) => {
 
 window.logout = () => signOut(auth);
 
-// بحث وتعديل
+// بحث وتعديل البيانات
 document.getElementById("fetch-btn").addEventListener("click", async () => {
     const id = document.getElementById("quick-search").value.trim();
     const docSnap = await getDoc(doc(db, "students", id));
@@ -16,24 +16,28 @@ document.getElementById("fetch-btn").addEventListener("click", async () => {
         const d = docSnap.data();
         document.getElementById("m-id").value = id;
         document.getElementById("m-name").value = d.name;
-        document.getElementById("m-level").value = d.level;
+        document.getElementById("m-level").value = d.level || "";
         document.getElementById("m-system").value = d.system || "عربي";
+        document.getElementById("m-gender").value = d.gender || "ذكر";
+        document.getElementById("m-religion-type").value = d.rel_type || "مسلم";
         document.getElementById("m-active").value = String(d.isActive !== false);
         document.getElementById("m-highlevel").value = d.highlevel || 0;
         
         const fields = ["arabic", "math", "english", "science", "religion", "Social", "technology"];
         fields.forEach(f => document.getElementById(`m-${f}`).value = d[f] || 0);
-        alert("تم جلب البيانات");
+        alert("تم استرجاع البيانات بنجاح");
     }
 });
 
-// حفظ يدوي
+// حفظ البيانات (إضافة أو تعديل)
 document.getElementById("manual-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const id = document.getElementById("m-id").value.trim();
     const data = {
         name: document.getElementById("m-name").value.trim(),
         level: document.getElementById("m-level").value.trim(),
+        gender: document.getElementById("m-gender").value,
+        rel_type: document.getElementById("m-religion-type").value,
         system: document.getElementById("m-system").value,
         isActive: document.getElementById("m-active").value === "true",
         highlevel: Number(document.getElementById("m-highlevel").value) || 0,
@@ -43,8 +47,9 @@ document.getElementById("manual-form").addEventListener("submit", async (e) => {
         science: Number(document.getElementById("m-science").value),
         religion: Number(document.getElementById("m-religion").value),
         Social: Number(document.getElementById("m-Social").value),
-        technology: Number(document.getElementById("m-technology").value)
+        technology: Number(document.getElementById("m-technology").value),
+        lastUpdated: new Date().toISOString()
     };
     await setDoc(doc(db, "students", id), data);
-    alert("✅ تم الحفظ بنجاح");
+    alert("✅ تم حفظ البيانات بنجاح");
 });
