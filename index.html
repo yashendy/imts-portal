@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوابة معهد IMTS</title>
+    <title>بوابة نتائج معهد IMTS</title>
     <link rel="stylesheet" href="style.css">
+    <!-- استدعاء الخطوط العربية المطلوبة للشهادة -->
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- رابط دخول الإدارة في زاوية الصفحة -->
     <div class="admin-login-link">
-    <a href="login.html" class="admin-btn-small">دخول الإدارة</a>
-</div>
+        <a href="login.html" class="admin-btn-small">دخول الإدارة</a>
+    </div>
 
-    <!-- صفحة البحث المركزية -->
+    <!-- صفحة البحث المركزية: تظهر أولاً للبحث برقم الجلوس -->
     <div id="search-section" class="search-container">
         <h2 class="title-diwani">استعلام نتائج معهد IMTS</h2>
         <input type="text" id="student-id-input" placeholder="أدخل رقم الجلوس">
@@ -20,9 +22,16 @@
         <p id="error-msg" class="error"></p>
     </div>
 
-    <!-- قسم الشهادة -->
+    <!-- قسم الشهادة: يكون مخفياً ويظهر فقط عند العثور على نتيجة -->
     <div id="certificate-section" class="certificate-wrapper" style="display: none;">
+        
+        <!-- زر إغلاق الشهادة والعودة للبحث -->
+        <div class="close-cert-container">
+            <button id="close-cert-btn" class="close-btn">× إغلاق الشهادة والعودة للبحث</button>
+        </div>
+
         <div class="cert-border">
+            <!-- رأس الشهادة: يضم الشعار والعناوين الرسمية -->
             <div class="cert-header">
                 <div class="header-text">
                     <h1 class="title-thuluth">معهد الدراسات الإدارية والفنية</h1>
@@ -32,37 +41,45 @@
             </div>
 
             <div class="cert-body">
+                <!-- الشريط الجانبي: يضم صورة الطالب وبياناته الشخصية -->
                 <div class="sidebar">
-    <div class="image-frame">
-        <img src="https://via.placeholder.com/120" id="cert-img" class="student-img">
-    </div>
-    <h3 id="cert-name" class="title-diwani">اسم الطالب</h3>
-    <div class="info-box">
-        <div class="info-item"><strong>الصف الدراسي:</strong> <span id="cert-level"></span></div>
-        <div class="info-item"><strong></strong> <span id="cert-system"></span></div>
-        <div class="info-item"><strong>رقم الجلوس:</strong> <span id="cert-id"></span></div>
-    </div>
-</div>
+                    <div class="image-frame">
+                        <img src="https://via.placeholder.com/120" id="cert-img" class="student-img">
+                    </div>
+                    <h3 id="cert-name" class="title-diwani">اسم الطالب</h3>
+                    <div class="info-box">
+                        <div class="info-item"><strong>الصف الدراسي:</strong> <span id="cert-level"></span></div>
+                        <div class="info-item"><strong>النظام التعليمي:</strong> <span id="cert-system"></span></div>
+                        <div class="info-item"><strong>رقم الجلوس:</strong> <span id="cert-id"></span></div>
+                    </div>
+                </div>
 
+                <!-- المحتوى الرئيسي: يضم جدول الدرجات والبيان الختامي -->
                 <div class="main-content">
                     <table class="grades-table">
                         <thead>
-                            <tr><th>المادة الدراسية</th><th>الدرجة</th><th>التقدير</th></tr>
+                            <tr>
+                                <th>المادة الدراسية</th>
+                                <th>الدرجة</th>
+                                <th>التقدير</th>
+                            </tr>
                         </thead>
                         <tbody id="grades-body">
-                            <!-- تعبئة الدرجات برمجياً -->
+                            <!-- يتم تعبئة هذا الجدول برمجياً عبر ملف student.js -->
                         </tbody>
                         <tfoot>
                             <tr class="total-row">
-                                <td>المجموع الكلي</td>
+                                <td><strong>المجموع الكلي</strong></td>
                                 <td id="total-score"></td>
                                 <td id="total-eval"></td>
                             </tr>
                         </tfoot>
                     </table>
 
+                    <!-- جملة النجاح والتقدير العام -->
                     <div class="result-statement" id="statement"></div>
 
+                    <!-- قسم التوقيع والختم -->
                     <div class="footer-section">
                         <div class="signature-box">
                             <p style="margin:0; font-weight:bold;">مديرة المعهد</p>
@@ -71,10 +88,13 @@
                     </div>
                 </div>
             </div>
-            <button id="print-btn" onclick="window.print()">طباعة الشهادة الآن</button>
+
+            <!-- زر الطباعة: يظهر أسفل الشهادة ويختفي تلقائياً عند أمر الطباعة -->
+            <button id="print-btn" onclick="window.print()" class="main-btn-print">طباعة الشهادة الآن</button>
         </div>
     </div>
 
+    <!-- ربط ملفات البرمجة والتهيئة -->
     <script type="module" src="firebase-config.js"></script>
     <script type="module" src="student.js"></script>
 </body>
