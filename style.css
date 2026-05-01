@@ -1,73 +1,170 @@
+/* الألوان والهوية */
 :root {
-    --primary-blue: #5C839F; /* أزرق هادئ */
+    --primary-blue: #5C839F;
     --accent-red: #B3393E;
+    --hover-red: #8e2d31;
     --dark-text: #2c3e50;
-    --sidebar-bg: #E6EEF4; /* لون الكارت هادئ */
+    --card-bg: #E6EEF4;
 }
 
 body {
     font-family: 'Amiri', serif;
-    background-color: #F4F7F9;
-    margin: 0; padding: 20px; direction: rtl;
+    background-color: #F0F2F5;
+    margin: 0;
+    display: flex;
+    justify-content: center; /* توسيط محتوى الصفحة بالكامل */
+    align-items: center;
+    min-height: 100vh;
+    direction: rtl;
 }
 
+/* تصميم صندوق البحث في منتصف الشاشة */
+.search-container {
+    background: #fff;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    text-align: center;
+    width: 100%;
+    max-width: 450px;
+    transition: all 0.3s ease;
+}
+
+.search-container input {
+    width: 90%;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 18px;
+    text-align: center;
+}
+
+/* زراير مجسمة وتفاعلية */
+button {
+    background: linear-gradient(to bottom, var(--accent-red), #9c2e32); /* تأثير مجسم */
+    color: #fff;
+    border: none;
+    padding: 15px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #6e1f22; /* الظل السفلي للمجسم */
+    transition: all 0.1s ease;
+    width: 100%;
+}
+
+button:active {
+    box-shadow: 0 0 0 #6e1f22; /* تأثير الضغط */
+    transform: translateY(4px);
+}
+
+button:hover {
+    background: var(--hover-red);
+}
+
+/* تنسيق الشهادة */
 .certificate-wrapper {
-    max-width: 900px; /* مقاس مثالي للشاشة */
-    margin: auto; background: #fff; padding: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    background: #fff;
+    padding: 10px;
+    width: 210mm; /* مقاس A4 عرضي */
+    min-height: 290mm; /* مقاس A4 طولي */
+    margin: 20px auto;
+    position: relative;
 }
 
 .cert-border {
-    border: 4px double var(--primary-blue);
-    padding: 15px; min-height: 1050px; /* ليناسب طول A4 */
-    display: flex; flex-direction: column;
+    border: 6px double var(--primary-blue);
+    padding: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .cert-header {
-    display: flex; align-items: center; justify-content: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     border-bottom: 2px solid var(--primary-blue);
-    padding-bottom: 10px; margin-bottom: 20px; position: relative;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
 }
 
-.logo-right { position: absolute; right: 0; width: 100px; }
-.header-text h1 { font-size: 32px; margin: 0; color: var(--dark-text); }
-.header-text h2 { font-size: 18px; color: var(--accent-red); margin: 5px 0 0 0; }
+.logo-right { width: 110px; }
 
-.cert-body { display: flex; flex: 1; gap: 15px; }
+.header-text { text-align: center; flex-grow: 1; }
+.header-text h1 { font-size: 35px; margin: 0; color: var(--dark-text); }
+.header-text h2 { font-size: 20px; color: var(--accent-red); margin: 5px 0; }
 
-/* الكارت الجانبي */
+.cert-body { display: flex; gap: 20px; flex-grow: 1; }
+
+/* الكارت الجانبي المطور */
 .sidebar {
-    width: 30%; background-color: var(--sidebar-bg);
-    padding: 20px 10px; border-radius: 5px; text-align: center;
+    width: 30%;
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
 }
 
-.image-frame { width: 110px; height: 110px; margin: 0 auto 15px; border: 3px solid #fff; border-radius: 8px; overflow: hidden; }
-.student-img { width: 100%; height: 100%; object-fit: cover; }
+.info-item {
+    background: #fff;
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
 
-.info-box { text-align: center; font-size: 18px; line-height: 2; margin-top: 20px; color: var(--dark-text); }
-.info-item { margin-bottom: 15px; background: #fff; padding: 5px; border-radius: 4px; }
-.info-item span { display: block; color: var(--primary-blue); font-weight: bold; font-size: 20px; }
+.info-item span {
+    display: block;
+    color: var(--primary-blue);
+    font-size: 22px;
+    font-weight: bold;
+}
 
-/* المحتوى الرئيسي */
-.main-content { width: 70%; padding: 5px; }
+/* الجدول والجملة الختامية */
+.main-content { width: 70%; }
 
-.grades-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-.grades-table th { background: var(--primary-blue); color: #fff; padding: 10px; font-weight: normal; }
-.grades-table td { border: 1px solid #dee2e6; padding: 8px; text-align: center; color: var(--dark-text); }
-.total-row { font-weight: bold; background: #f8f9fa; color: var(--accent-red); }
+.grades-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
 
-.result-statement { font-size: 19px; font-weight: bold; color: var(--dark-text); margin: 20px 0; }
-.result-statement span { color: var(--primary-blue); }
+.grades-table th { background: var(--primary-blue); color: #fff; padding: 12px; }
+.grades-table td { border: 1px solid #dee2e6; padding: 10px; text-align: center; }
 
-.footer-section { display: flex; justify-content: flex-end; margin-top: auto; }
-.signature-box { text-align: center; width: 200px; }
-.signature-img { width: 180px; }
+.result-statement {
+    font-size: 22px;
+    font-weight: bold;
+    margin: 20px 0;
+    color: var(--dark-text);
+}
 
-/* إعدادات الطباعة الإجبارية لصفحة واحدة A4 */
+/* إلغاء الفراغ الكبير بعد الختم */
+.footer-section {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px; /* تقليل المسافة */
+}
+
+.signature-box { text-align: center; }
+.signature-img { width: 220px; }
+
+/* زر الطباعة الواضح */
+#print-btn {
+    margin-top: 20px;
+    background: linear-gradient(to bottom, #2ecc71, #27ae60);
+    box-shadow: 0 4px 0 #1e8449;
+    width: auto;
+    padding: 15px 50px;
+}
+
+/* ضبط الطباعة */
 @media print {
-    @page { size: A4; margin: 5mm; }
-    body { background: #fff; padding: 0; margin: 0; -webkit-print-color-adjust: exact; }
-    .search-container, .print-action { display: none; }
-    .certificate-wrapper { width: 100%; max-width: 100%; margin: 0; box-shadow: none; }
-    .cert-border { min-height: 280mm; height: 280mm; padding: 10mm; }
+    @page { size: A4; margin: 0; }
+    body { background: #fff; padding: 0; align-items: flex-start; }
+    .search-container, #print-btn { display: none !important; }
+    .certificate-wrapper { margin: 0; border: none; width: 100%; }
 }
