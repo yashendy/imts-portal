@@ -17,18 +17,21 @@ document.getElementById("search-btn").addEventListener("click", async () => {
         const docSnap = await getDoc(doc(db, "students", id));
         if (docSnap.exists()) {
             const d = docSnap.data();
-            if (d.isActive === false) { alert("النتيجة محجوبة"); return; }
+            if (d.isActive === false) { 
+                alert("النتيجة محجوبة مؤقتاً"); 
+                return; 
+            }
 
             const isFemale = d.gender === "أنثى";
             const isChristian = d.rel_type === "مسيحي";
             const isLang = d.system === "لغات";
 
-            // إظهار صفحة الشهادة
+            // إظهار صفحة الشهادة وإخفاء البحث
             document.getElementById("certificate-section").style.display = "block";
             document.getElementById("search-section").style.display = "none";
 
             // البيانات الشخصية
-            const sTitle = isFemale ? "الطالبة" : "الطالب";
+            const sTitle = isFemale ? "الطالبة" : "الطالب";[cite: 6]
             document.getElementById("cert-name").textContent = `${sTitle}/ ${d.name}`;
             document.getElementById("cert-level").textContent = d.level || "غير محدد";
             document.getElementById("cert-system").textContent = d.system || "عربي";
@@ -44,8 +47,8 @@ document.getElementById("search-btn").addEventListener("click", async () => {
                 { n: isLang ? "ICT" : "تكنولوجيا المعلومات", v: d.technology }
             ];
 
-            if (!isChristian) subjects.push({ n: "التربية الدينية", v: d.religion });
-            if (isLang && d.highlevel > 0) subjects.push({ n: "High Level", v: d.highlevel });
+            if (!isChristian) subjects.push({ n: "التربية الدينية", v: d.religion });[cite: 6]
+            if (isLang && d.highlevel > 0) subjects.push({ n: "High Level", v: d.highlevel });[cite: 6]
 
             // الحسابات وعرض الجدول (منع NaN)
             let totalScore = 0;
@@ -60,23 +63,29 @@ document.getElementById("search-btn").addEventListener("click", async () => {
             });
 
             document.getElementById("grades-body").innerHTML = html;
-            const maxScore = subjects.length * 20;
+            const maxScore = subjects.length * 20;[cite: 6]
             
             // تحديث سطر المجموع
             const totalScoreEl = document.getElementById("total-score");
-            totalScoreEl.parentElement.innerHTML = `<td><strong>المجموع الكلي</strong></td><td><strong>${totalScore}</strong> / ${maxScore}</td><td id="total-eval"></td>`;
+            if (totalScoreEl) {
+                totalScoreEl.parentElement.innerHTML = `<td><strong>المجموع الكلي</strong></td><td><strong>${totalScore}</strong> / ${maxScore}</td><td id="total-eval"></td>`;
+            }
 
-            const finalEval = totalScore >= (maxScore * 0.9) ? "ممتاز" : "جيد جداً";
-            document.getElementById("total-eval").textContent = finalEval;
+            const finalEval = totalScore >= (maxScore * 0.9) ? "ممتاز" : "جيد جداً";[cite: 6]
+            if (document.getElementById("total-eval")) document.getElementById("total-eval").textContent = finalEval;
             
             // البيان الختامي
-            const sPassed = isFemale ? "تمت اجتياز" : "تم اجتياز";
-            const sObtained = isFemale ? "وحصلت على" : "وحصل على";
+            const sPassed = isFemale ? "تمت اجتياز" : "تم اجتياز";[cite: 6]
+            const sObtained = isFemale ? "وحصلت على" : "وحصل على";[cite: 6]
             document.getElementById("statement").innerHTML = 
                 `${sTitle}/ ${d.name} ${sPassed} الاختبارات بنجاح ${sObtained} تقدير عام: ${finalEval}`;
 
-        } else { alert("رقم الجلوس غير موجود"); }
-    } catch (err) { console.error(err); }
+        } else { 
+            alert("رقم الجلوس غير موجود"); 
+        }
+    } catch (err) { 
+        console.error("حدث خطأ:", err); 
+    }
 });
 
 // زر الإغلاق
