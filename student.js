@@ -1,45 +1,40 @@
 import { db } from "./firebase-config.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
-function getTotalEval(score) {
-    if (score === 140) return "ممتاز مع الشكر";
-    if (score >= 133) return "ممتاز";
-    if (score >= 126) return "جيد جداً";
-    return "جيد";
-}
+function getEval(score) { return score >= 18 ? "ممتاز" : "جيد جداً"; }
 
 document.getElementById("search-btn").addEventListener("click", async () => {
     const id = document.getElementById("student-id-input").value.trim();
-    if (!id) return;
-
     const docSnap = await getDoc(doc(db, "students", id));
+
     if (docSnap.exists()) {
-        const data = docSnap.data();
+        const d = docSnap.data();
+        document.getElementById("search-section").style.display = "none";
         document.getElementById("certificate-section").style.display = "block";
-        
-        // تعبئة الكارت
-        document.getElementById("cert-name").textContent = data.name;
-        document.getElementById("cert-level").textContent = data.level;
-        document.getElementById("cert-system").textContent = data.system;
+        document.body.style.alignItems = "flex-start"; // لضبط شكل الشهادة الطولي
+
+        document.getElementById("cert-name").textContent = d.name;
+        document.getElementById("cert-level").textContent = d.level;
+        document.getElementById("cert-system").textContent = d.system;
         document.getElementById("cert-id").textContent = id;
 
-        // حساب الدرجات
-        let total = Number(data.arabic) + Number(data.math) + Number(data.english) + 
-                    Number(data.science) + Number(data.religion) + Number(data.Social) + Number(data.technology);
-        
-        document.getElementById("total-score").textContent = total;
-        const evalText = getTotalEval(total);
-        document.getElementById("total-eval").textContent = evalText;
+        const subjects = [
+            {n: "اللغة العربية", v: d.arabic}, {n: "الرياضيات", v: d.math},
+            {n: "اللغة الإنجليزية", v: d.english}, {n: "العلوم", v: d.science},
+            {n: "التربية الدينية", v: d.religion}, {n: "الدراسات", v: d.Social},
+            {n: "تكنولوجيا", v: d.technology}
+        ];
 
-        // تعبئة الجملة الختامية
-        document.getElementById("cert-name-footer").textContent = data.name;
-        document.getElementById("cert-total-eval").textContent = evalText;
-
-        // ملء الجدول (اختصاراً)
-        const fields = ["arabic", "math", "english", "science", "religion", "Social", "technology"];
-        fields.forEach(f => {
-            document.getElementById(`grade-${f}`).textContent = data[f];
-            document.getElementById(`eval-${f}`).textContent = (data[f] >= 18 ? "ممتاز" : "جيد");
+        let total = 0;
+        let html = "";
+        subjects.forEach(s => {
+            total += Number(s.v);
+            html += `<tr><td>${s.n}</td><td>${s.v}</td><td>${getEval(s.v)}</td></tr>`;
         });
+
+        document.getElementById("grades-body").innerHTML = html;
+        document.getElementById("total-score").textContent = total + " / 140";
+        document.getElementById("total-eval").textContent = total >= 126 ? "ممتاز" : "جيد جداً";
+        document.getElementById("statement").innerHTML = `الطالب/ ${d.name} تم اجتياز الاختبارات الفصلية بنجاح وحصل على تقدير عام: ${total >= 126 ? "ممتاز" : "جيد جداً"}`;
     }
 });
