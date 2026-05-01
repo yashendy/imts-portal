@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة التحكم - معهد IMTS</title>
+    <title>لوحة التحكم المطورة - معهد IMTS</title>
     <link rel="stylesheet" href="admin-style.css">
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Cairo:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -11,13 +11,13 @@
 
     <div class="admin-container">
         <header class="admin-header">
-            <h1>لوحة إدارة النتائج الرسمية</h1>
+            <h1>إدارة النتائج (عربي / لغات)</h1>
             <p>معهد الدراسات الإدارية والفنية</p>
             <button onclick="logout()" class="logout-btn">تسجيل الخروج</button>
         </header>
 
         <div class="tabs">
-            <button class="tab-btn active" onclick="openTab('excel-tab')">رفع ملف أكسيل</button>
+            <button class="tab-btn active" onclick="openTab('excel-tab')">رفع أكسيل</button>
             <button class="tab-btn" onclick="openTab('manual-tab')">إدخال وبحث يدوي</button>
         </div>
 
@@ -25,37 +25,40 @@
         <div id="excel-tab" class="tab-content active">
             <div class="upload-box" id="drop-zone">
                 <div class="icon">📊</div>
-                <p>اسحب ملف الأكسيل هنا أو اضغط للاختيار</p>
+                <p>اسحب ملف الأكسيل (يجب شمول عمود القسم والمادة الرفيعة)</p>
                 <input type="file" id="excel-file" accept=".xlsx, .xls" hidden>
                 <button class="select-btn" onclick="document.getElementById('excel-file').click()">اختر الملف</button>
             </div>
             <div id="preview-section" style="display:none;">
-                <h3>معاينة البيانات (أول 5 طلاب)</h3>
-                <div class="table-scroll">
-                    <table id="preview-table"></table>
-                </div>
-                <button id="upload-all-btn" class="main-btn">اعتماد ورفع كافة البيانات</button>
+                <table id="preview-table"></table>
+                <button id="upload-all-btn" class="main-btn">اعتماد ورفع البيانات</button>
             </div>
         </div>
 
-        <!-- تبويب الإدخال والبحث اليدوي -->
+        <!-- تبويب الإدخال اليدوي -->
         <div id="manual-tab" class="tab-content">
-            <!-- شريط البحث المطور -->
             <div class="admin-search-bar">
-                <input type="text" id="quick-search" placeholder="ابحث برقم الجلوس للتعديل...">
+                <input type="text" id="quick-search" placeholder="ابحث برقم الجلوس...">
                 <button id="fetch-btn">بحث وتعديل</button>
             </div>
 
             <form id="manual-form" class="grid-form">
-                <div class="input-group full">
-                    <label>حالة الطالب (ظهور النتيجة)</label>
+                <div class="input-group">
+                    <label>حالة النتيجة</label>
                     <select id="m-active" class="status-select">
-                        <option value="true">فعال (تظهر النتيجة للطالب)</option>
-                        <option value="false">غير فعال (حجب النتيجة)</option>
+                        <option value="true">فعال (ظاهرة)</option>
+                        <option value="false">غير فعال (محجوبة)</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>القسم التعليمي</label>
+                    <select id="m-system" class="status-select">
+                        <option value="عربي">قسم العربي</option>
+                        <option value="لغات">قسم اللغات</option>
                     </select>
                 </div>
                 <div class="input-group full">
-                    <label>اسم الطالب الرباعي</label>
+                    <label>اسم الطالب</label>
                     <input type="text" id="m-name" required>
                 </div>
                 <div class="input-group">
@@ -64,18 +67,19 @@
                 </div>
                 <div class="input-group">
                     <label>الصف الدراسي</label>
-                    <input type="text" id="m-level" placeholder="مثلاً: الرابع الابتدائي">
+                    <input type="text" id="m-level">
                 </div>
                 <div class="grades-grid">
                     <div class="grade-input"><label>عربي</label><input type="number" id="m-arabic"></div>
-                    <div class="grade-input"><label>رياضيات</label><input type="number" id="m-math"></div>
+                    <div class="grade-input"><label>رياضيات/Math</label><input type="number" id="m-math"></div>
                     <div class="grade-input"><label>إنجليزي</label><input type="number" id="m-english"></div>
-                    <div class="grade-input"><label>علوم</label><input type="number" id="m-science"></div>
+                    <div class="grade-input"><label>علوم/Science</label><input type="number" id="m-science"></div>
                     <div class="grade-input"><label>دين</label><input type="number" id="m-religion"></div>
                     <div class="grade-input"><label>دراسات</label><input type="number" id="m-Social"></div>
-                    <div class="grade-input"><label>تكنولوجيا</label><input type="number" id="m-technology"></div>
+                    <div class="grade-input"><label>تكنولوجيا/ICT</label><input type="number" id="m-technology"></div>
+                    <div class="grade-input" style="background: #fff3f3;"><label>مستوى رفيع</label><input type="number" id="m-highlevel"></div>
                 </div>
-                <button type="submit" class="main-btn">حفظ التعديلات / إضافة طالب</button>
+                <button type="submit" class="main-btn">حفظ البيانات</button>
             </form>
         </div>
     </div>
