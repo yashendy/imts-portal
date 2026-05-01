@@ -3,31 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IMTS Academy - بوابة النتائج</title>
+    <title>IMTS Academy - نتيجة الطلاب</title>
     <link rel="stylesheet" href="style.css">
+    <!-- استدعاء خطوط عربية فخمة -->
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
+    <!-- قسم البحث -->
     <div id="search-section" class="search-container">
         <h2 class="title-diwani">بوابة الاستعلام عن النتائج</h2>
-        <input type="text" id="student-id-input" placeholder="أدخل رقم الجلوس">
+        <input type="text" id="student-id-input" placeholder="أدخل رقم الجلوس (مثال: 2641001)">
         <button id="search-btn">عرض الشهادة</button>
         <p id="error-msg" class="error"></p>
     </div>
 
+    <!-- قسم الشهادة -->
     <div id="certificate-section" class="certificate-wrapper" style="display: none;">
         <div class="cert-border">
             
+            <!-- الترويسة العلوية -->
             <div class="cert-header">
                 <img src="logo.png" alt="شعار المعهد" class="logo-right">
                 <div class="header-text">
                     <h1 class="title-thuluth">معهد الدراسات الإدارية والفنية</h1>
-                    <h2 class="title-diwani">استعلام عن نتيجة الفصل الدراسي الثاني - 2026</h2>
+                    <h2 class="title-diwani">التقييم التحصيلي للفصل الدراسي الثاني - 2026</h2>
                 </div>
             </div>
 
             <div class="cert-body">
+                <!-- الشريط الجانبي (الكارت - 1/3) -->
                 <div class="sidebar">
                     <div class="image-frame">
                         <img src="https://via.placeholder.com/120" alt="صورة الطالب" class="student-img">
@@ -35,18 +40,22 @@
                     <h3 id="cert-name" class="title-diwani">اسم الطالب</h3>
                     <p class="prof-title">طالب مسجل بالمعهد</p>
                     <div class="info-box">
-                        <p><strong>الصف :</strong> <span id="cert-level"></span></p>
-                        <p><strong></strong> <span id="cert-system"></span></p>
-                        <p><strong>رقم الطالب:</strong> <span id="cert-id"></span></p>
+                        <strong>الصف الدراسي:</strong>
+                        <span id="cert-level"></span>
+                        <strong>النظام التعليمي:</strong>
+                        <span id="cert-system"></span>
+                        <strong>رقم الجلوس:</strong>
+                        <span id="cert-id"></span>
                     </div>
                 </div>
 
+                <!-- محتوى الدرجات (2/3) -->
                 <div class="main-content">
                     <table class="grades-table">
                         <thead>
                             <tr>
                                 <th>المادة الدراسية</th>
-                                <th>الدرجة</th>
+                                <th>الدرجة (من 20)</th>
                                 <th>التقدير العام</th>
                             </tr>
                         </thead>
@@ -67,16 +76,13 @@
                             </tr>
                         </tfoot>
                     </table>
-                    <!-- الجملة الختامية الجديدة -->
-            <div class="result-statement">
-                <p>الطالب/ <span id="cert-name-footer"></span> تم اجتياز الاختبارات الفصلية الثانية وحصل على تقدير عام: <span id="cert-total-eval"></span></p>
-            </div>
 
-            <!-- قسم التوقيع والختم -->
-            <div class="footer-section">
-                <!-- ... كود الختم ... -->
-            </div>
+                    <!-- الجملة الختامية -->
+                    <div class="result-statement">
+                        <p>الطالب/ <span id="cert-name-footer"></span> تم اجتياز الاختبارات الفصلية الثانية وحصل على تقدير عام: <span id="cert-total-eval"></span></p>
+                    </div>
 
+                    <!-- قسم التوقيع والختم -->
                     <div class="footer-section">
                         <div class="signature-box">
                             <p>يعتمد،، مديرة المعهد</p>
