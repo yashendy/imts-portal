@@ -1,0 +1,159 @@
+/* إعدادات الخطوط الأساسية والخطوط الرسمية */
+body {
+    font-family: Tahoma, Arial, sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 20px;
+    direction: rtl;
+}
+
+.title-thuluth { font-family: 'Thuluth', 'Aref Ruqaa', serif; }
+.title-diwani { font-family: 'Diwani', 'Aref Ruqaa', serif; }
+
+/* مربع البحث */
+.search-container {
+    background: #fff;
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 30px;
+    border-radius: 5px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.search-container input {
+    width: 80%;
+    padding: 10px;
+    margin: 15px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+button {
+    background-color: #C1272D;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover { background-color: #9e1d22; }
+.error { color: #C1272D; margin-top: 10px; font-weight: bold; }
+
+/* حاوية الشهادة */
+.certificate-wrapper {
+    max-width: 1000px;
+    margin: 20px auto;
+    background: #fff;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* الترويسة الجديدة */
+.cert-header {
+    position: relative;
+    padding: 30px 20px;
+    border-bottom: 3px solid #1A75BB;
+    text-align: center;
+}
+
+.logo-right {
+    position: absolute;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 140px;
+}
+
+.header-text h1 {
+    margin: 0;
+    font-size: 45px;
+    color: #000;
+}
+
+.header-text h2 {
+    margin: 10px 0 0 0;
+    font-size: 26px;
+    color: #C1272D;
+}
+
+/* جسم الشهادة وتقسيمه */
+.cert-body {
+    display: flex;
+    width: 100%;
+}
+
+/* الشريط الجانبي (1/3) */
+.sidebar {
+    width: 33.33%;
+    background-color: #1A75BB;
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.student-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin-bottom: 15px;
+    border: 4px solid #fff;
+    object-fit: cover;
+}
+
+.info-box {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 30px;
+    text-align: right;
+    line-height: 1.8;
+}
+
+/* محتوى الدرجات (2/3) */
+.main-content {
+    width: 66.67%;
+    padding: 40px;
+    box-sizing: border-box;
+}
+
+.grades-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    font-size: 16px;
+}
+
+.grades-table th, .grades-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+}
+
+.grades-table th {
+    background-color: #f8f9fa;
+    color: #1A75BB;
+}
+
+.total-row {
+    background-color: #eef2f5;
+    font-size: 18px;
+    color: #C1272D;
+    font-weight: bold;
+}
+
+.print-action { text-align: left; }
+
+/* إعدادات الطباعة */
+@media print {
+    body { background-color: white; margin: 0; padding: 0; }
+    .search-container, .print-action { display: none !important; }
+    .certificate-wrapper { box-shadow: none; border: none; width: 100%; margin: 0; }
+    .sidebar { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .grades-table th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

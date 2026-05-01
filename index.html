@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IMTS Academy - نتيجة الطلاب</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- قسم البحث -->
+    <div id="search-section" class="search-container">
+        <h2 class="title-diwani">بوابة الاستعلام عن النتائج</h2>
+        <input type="text" id="student-id-input" placeholder="أدخل رقم الجلوس (مثال: 2641001)">
+        <button id="search-btn">عرض النتيجة</button>
+        <p id="error-msg" class="error"></p>
+    </div>
+
+    <!-- قسم الشهادة (مخفي حتى يتم البحث) -->
+    <div id="certificate-section" class="certificate-wrapper" style="display: none;">
+        
+        <!-- الترويسة العلوية (الشعار يمين والاسم بالمنتصف) -->
+        <div class="cert-header">
+            <img src="logo.png" alt="شعار معهد IMTS" class="logo-right">
+            <div class="header-text">
+                <h1 class="title-thuluth">معهد الدراسات الإدارية والفنية</h1>
+                <h2 class="title-diwani">استعلام عن نتيجة الفصل الدراسي الثاني - 2026</h2>
+            </div>
+        </div>
+
+        <!-- جسم الشهادة (مقسم ثلث وثلثين) -->
+        <div class="cert-body">
+            <!-- الشريط الجانبي (1/3 المساحة) -->
+            <div class="sidebar">
+                <img src="https://via.placeholder.com/120" alt="صورة الطالب" class="student-img">
+                <h3 id="cert-name" class="title-diwani">اسم الطالب</h3>
+                <p class="prof-title">طالب بالمعهد</p>
+                <div class="info-box">
+                    <p><strong>الصف:</strong> <span id="cert-level"></span></p>
+                    <p><strong>النظام:</strong> <span id="cert-system"></span></p>
+                    <p><strong>رقم الجلوس:</strong> <span id="cert-id"></span></p>
+                </div>
+            </div>
+
+            <!-- جدول الدرجات (2/3 المساحة) -->
+            <div class="main-content">
+                <table class="grades-table">
+                    <thead>
+                        <tr>
+                            <th>المادة</th>
+                            <th>الدرجة (من 20)</th>
+                            <th>التقدير</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>التربية الدينية</td><td id="grade-religion"></td><td id="eval-religion"></td></tr>
+                        <tr><td>اللغة العربية</td><td id="grade-arabic"></td><td id="eval-arabic"></td></tr>
+                        <tr><td>اللغة الإنجليزية</td><td id="grade-english"></td><td id="eval-english"></td></tr>
+                        <tr><td>الرياضيات</td><td id="grade-math"></td><td id="eval-math"></td></tr>
+                        <tr><td>العلوم</td><td id="grade-science"></td><td id="eval-science"></td></tr>
+                        <tr><td>الدراسات</td><td id="grade-Social"></td><td id="eval-Social"></td></tr>
+                        <tr><td>التكنولوجيا</td><td id="grade-technology"></td><td id="eval-technology"></td></tr>
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td><strong>المجموع الكلي</strong></td>
+                            <td><strong id="total-score"></strong> (من 140)</td>
+                            <td><strong id="total-eval"></strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <div class="print-action">
+                    <button id="print-btn" onclick="window.print()">طباعة الشهادة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- استدعاء ملفات البرمجة -->
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="student.js"></script>
+</body>
+</html>
