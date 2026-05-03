@@ -15,9 +15,17 @@ const processGrade = (val) => {
     return trimmed === "غ" ? "غ" : (Number(trimmed) || 0);
 };
 
-let excelData = []; // لتخزين البيانات مؤقتاً قبل الرفع
+// دالة ذكية للبحث عن قيمة العمود بناءً على جزء من اسمه
+const getCellValue = (row, keywords) => {
+    const keys = Object.keys(row);
+    // البحث عن مفتاح يحتوي على أي من الكلمات الدليلية
+    const foundKey = keys.find(k => keywords.some(word => k.toLowerCase().includes(word.toLowerCase())));
+    return foundKey ? row[foundKey] : null;
+};
 
-// --- 1. قراءة ومعاينة ملف الإكسيل ---
+let excelData = [];
+
+// --- 1. معاينة ملف الإكسيل (Preview) ---
 document.getElementById("excel-file").addEventListener("change", function(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -29,15 +37,17 @@ document.getElementById("excel-file").addEventListener("change", function(e) {
         const sheetName = workbook.SheetNames[0];
         excelData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-        // إظهار قسم المعاينة
         document.getElementById("preview-section").style.display = "block";
         const table = document.getElementById("preview-table");
         table.innerHTML = `<tr><th>رقم الجلوس</th><th>الاسم</th><th>الحالة</th></tr>`;
         
-        excelData.slice(0, 5).forEach(row => { // عرض أول 5 طلاب فقط للتأكد
+        excelData.slice(0, 5).forEach(row => {
+            const studentId = getCellValue(row, ["id", "جلوس", "رقم"]);
+            const studentName = getCellValue(row, ["name", "اسم"]);
+            
             table.innerHTML += `<tr>
-                <td>${row["id"] || row["رقم الجلوس"] || "???"}</td>
-                <td>${row["name"] || row["اسم الطالب"] || "???"}</td>
+                <td>${studentId || "???"}</td>
+                <td>${studentName || "???"}</td>
                 <td>جاهز للرفع</td>
             </tr>`;
         });
@@ -45,33 +55,33 @@ document.getElementById("excel-file").addEventListener("change", function(e) {
     reader.readAsArrayBuffer(file);
 });
 
-// --- 2. اعتماد ورفع كافة البيانات ---
+// --- 2. اعتماد ورفع البيانات ---
 document.getElementById("upload-all-btn").addEventListener("click", async () => {
     if (excelData.length === 0) return;
-
     const batch = writeBatch(db);
     let count = 0;
 
     try {
         excelData.forEach((row) => {
-            const id = String(row["id"] || row["رقم الجلوس"]).trim();
-            if (!id || id === "undefined") return;
+            const idVal = getCellValue(row, ["id", "جلوس"]);
+            if (!idVal) return;
+            const id = String(idVal).trim();
 
             const studentData = {
-                name: String(row["name"] || row["اسم الطالب"] || "").trim(),
-                level: String(row["level"] || row["الصف"] || "").trim(),
-                gender: row["gender"] || row["النوع"] || "ذكر",
-                rel_type: row["rel_type"] || row["الديانة"] || "مسلم",
-                system: row["system"] || row["النظام"] || "عربي",
-                isActive: String(row["isActive"]).toLowerCase() !== "false",
-                arabic: processGrade(row["arabic"] || row["اللغة العربية"]),
-                math: processGrade(row["math"] || row["الرياضيات"]),
-                english: processGrade(row["english"] || row["اللغة الإنجليزية"]),
-                science: processGrade(row["science"] || row["العلوم"]),
-                religion: processGrade(row["religion"] || row["التربية الدينية"]),
-                Social: processGrade(row["Social"] || row["الدراسات الاجتماعية"]),
-                technology: processGrade(row["technology"] || row["التكنولوجيا"]),
-                highlevel: processGrade(row["highlevel"] || row["المادة الرفيعة"]),
+                name: String(getCellValue(row, ["name", "اسم"]) || "").trim(),
+                level: String(getCellValue(row, ["level", "الصف"]) || "").trim(),
+                gender: getCellValue(row, ["gender", "النوع"]) || "ذكر",
+                rel_type: getCellValue(row, ["rel_type", "الديانة"]) || "مسلم",
+                system: getCellValue(row, ["system", "النظام"]) || "عربي",
+                isActive: String(getCellValue(row, ["isActive"]) || "").toLowerCase() !== "false",
+                arabic: processGrade(getCellValue(row, ["arabic", "عربي"])),
+                math: processGrade(getCellValue(row, ["math", "رياضيات"])),
+                english: processGrade(getCellValue(row, ["english", "إنجليزي"])),
+                science: processGrade(getCellValue(row, ["science", "علوم"])),
+                religion: processGrade(getCellValue(row, ["religion", "دين"])),
+                Social: processGrade(getCellValue(row, ["social", "دراسات"])),
+                technology: processGrade(getCellValue(row, ["technology", "تكنولوجيا"])),
+                highlevel: processGrade(getCellValue(row, ["highlevel", "رفيعة", "مستوى"])),
                 lastUpdated: new Date().toISOString()
             };
 
@@ -86,15 +96,14 @@ document.getElementById("upload-all-btn").addEventListener("click", async () => 
         excelData = [];
     } catch (error) {
         console.error("Upload Error:", error);
-        alert("❌ فشل الرفع: تأكد من أن رقم الجلوس صحيح في جميع الصفوف.");
+        alert("❌ فشل الرفع: تأكد من صحة البيانات.");
     }
 });
 
-// --- 3. البحث والتعديل اليدوي ---
+// --- 3. البحث اليدوي ---
 document.getElementById("fetch-btn").addEventListener("click", async () => {
     const id = document.getElementById("quick-search").value.trim();
-    if(!id) return alert("يرجى إدخال رقم الجلوس");
-
+    if(!id) return;
     const docSnap = await getDoc(doc(db, "students", id));
     if (docSnap.exists()) {
         const d = docSnap.data();
@@ -113,8 +122,6 @@ document.getElementById("fetch-btn").addEventListener("click", async () => {
             if (el) el.value = d[f] ?? 0;
         });
         alert("تم استرجاع البيانات بنجاح");
-    } else {
-        alert("⚠️ رقم الجلوس غير موجود");
     }
 });
 
