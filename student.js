@@ -46,11 +46,11 @@ document.getElementById("search-btn").addEventListener("click", async () => {
             // يمكنك تغيير الـ m (الدرجة النهائية) لكل مادة بسهولة من هنا
             let subjects = [
                 { n: "اللغة العربية", v: d.arabic, m: 20 },
-                { n: isLang ? "Math" : "الرياضيات", v: d.math, m: 20 },
+                { n: isLang ? "Math" : "الرياضيات", v: d.math, m: 15 },
                 { n: isLang ? "English (AL)" : "اللغة الإنجليزية", v: d.english, m: 20 },
                 { n: isLang ? "Science" : "العلوم", v: d.science, m: 20 },
                 { n: "التربية الدينية", v: d.religion, m: 20 },
-                { n: "الدراسات الاجتماعية", v: d.Social, m: 15 }, // مثال: من 15
+                { n: "الدراسات الاجتماعية", v: d.Social, m: 20 }, // مثال: من 15
                 { n: isLang ? "ICT" : "تكنولوجيا المعلومات", v: d.technology, m: 15 } // من 15
             ];
 
