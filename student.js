@@ -1,16 +1,13 @@
 import { db } from "./firebase-config.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
-// دالة التقييم: أصبحت تأخذ اسم المادة لتحديد الدرجة النهائية (15 أو 20)
-function getEval(score, subjectName) { 
+// دالة تقييم مرنة تعتمد على القيمة الفعلية والدرجة النهائية للمادة
+function getEval(score, maxForThisSubject) { 
     if (score === "غ" || isNaN(score) || score === null || score === "") return "ـ"; 
     
     const s = Number(score);
-    // تحديد الدرجة النهائية للمادة
-    const limit = (subjectName === "تكنولوجيا المعلومات" || subjectName === "ICT") ? 15 : 20;
-    
-    // ممتاز إذا حصل على 90% من الدرجة النهائية للمادة (13.5 للتكنولوجيا، 18 للبقية)
-    return s >= (limit * 0.9) ? "ممتاز" : "جيد جداً"; 
+    // ممتاز إذا حصل على 90% أو أكثر من الدرجة النهائية للمادة
+    return s >= (maxForThisSubject * 0.9) ? "ممتاز" : "جيد جداً"; 
 }
 
 document.getElementById("search-btn").addEventListener("click", async () => {
@@ -31,6 +28,7 @@ document.getElementById("search-btn").addEventListener("click", async () => {
             document.getElementById("certificate-section").style.display = "block";
             document.getElementById("search-section").style.display = "none";
 
+            // تحديث البيانات الأساسية
             const elements = {
                 "cert-name": d.name,
                 "cert-name-footer": d.name,
@@ -44,42 +42,37 @@ document.getElementById("search-btn").addEventListener("click", async () => {
                 if (el) el.textContent = elements[elId];
             }
 
-            // بناء قائمة المواد
+            // --- الجزء الأهم: تحديد الدرجات النهائية هنا ---
+            // يمكنك تغيير الـ m (الدرجة النهائية) لكل مادة بسهولة من هنا
             let subjects = [
-                { n: "اللغة العربية", v: d.arabic },
-                { n: isLang ? "Math" : "الرياضيات", v: d.math },
-                { n: isLang ? "English (AL)" : "اللغة الإنجليزية", v: d.english },
-                { n: isLang ? "Science" : "العلوم", v: d.science },
-                { n: "التربية الدينية", v: d.religion },
-                { n: "الدراسات الاجتماعية", v: d.Social },
-                { n: isLang ? "ICT" : "تكنولوجيا المعلومات", v: d.technology }
+                { n: "اللغة العربية", v: d.arabic, m: 20 },
+                { n: isLang ? "Math" : "الرياضيات", v: d.math, m: 20 },
+                { n: isLang ? "English (AL)" : "اللغة الإنجليزية", v: d.english, m: 20 },
+                { n: isLang ? "Science" : "العلوم", v: d.science, m: 20 },
+                { n: "التربية الدينية", v: d.religion, m: 20 },
+                { n: "الدراسات الاجتماعية", v: d.Social, m: 15 }, // مثال: من 15
+                { n: isLang ? "ICT" : "تكنولوجيا المعلومات", v: d.technology, m: 15 } // من 15
             ];
 
             if (isLang && d.highlevel !== undefined) {
-                subjects.push({ n: "High Level", v: d.highlevel });
+                subjects.push({ n: "High Level", v: d.highlevel, m: 20 });
             }
 
-            let total = 0;
-            let maxScore = 0; // سنحسب المجموع الأقصى بدقة
+            let totalObtained = 0; // المجموع الذي حصل عليه الطالب
+            let totalMax = 0;      // المجموع الكلي النهائي (مجموع الـ 20 والـ 15)
             let html = "";
 
             subjects.forEach(s => {
                 let displayValue = s.v;
-                let displayEval = getEval(s.v, s.n);
+                let displayEval = getEval(s.v, s.m);
 
-                // حساب المجموع الأقصى لكل مادة حسب اسمها
-                if (s.n === "تكنولوجيا المعلومات" || s.n === "ICT") {
-                    maxScore += 15;
-                } else {
-                    maxScore += 20;
-                }
+                totalMax += s.m; // يجمع الدرجة النهائية للمادة (سواء 15 أو 20)
 
-                // فحص الغياب
                 if (s.v === "غ" || isNaN(s.v) || s.v === null || s.v === "") {
                     displayValue = "غ";
                     displayEval = "ـ";
                 } else {
-                    total += Number(s.v) || 0;
+                    totalObtained += Number(s.v) || 0;
                 }
                 
                 html += `<tr><td>${s.n}</td><td>${displayValue}</td><td>${displayEval}</td></tr>`;
@@ -87,14 +80,15 @@ document.getElementById("search-btn").addEventListener("click", async () => {
 
             document.getElementById("grades-body").innerHTML = html;
             
+            // تحديث عرض المجموع الكلي بدقة
             const totalScoreEl = document.getElementById("total-score");
             if (totalScoreEl) {
-                totalScoreEl.textContent = total;
-                totalScoreEl.parentElement.innerHTML = `<td><strong>المجموع الكلي</strong></td><td><strong>${total}</strong> / ${maxScore}</td><td id="total-eval"></td>`;
+                totalScoreEl.textContent = totalObtained;
+                totalScoreEl.parentElement.innerHTML = `<td><strong>المجموع الكلي</strong></td><td><strong>${totalObtained}</strong> / ${totalMax}</td><td id="total-eval"></td>`;
             }
 
-            // التقييم العام بناءً على المجموع الفعلي مقارنة بالمجموع الأقصى المحسوب
-            const finalEval = total >= (maxScore * 0.9) ? "ممتاز" : "جيد جداً";
+            // التقييم العام بناءً على النسبة من المجموع الكلي الجديد
+            const finalEval = totalObtained >= (totalMax * 0.9) ? "ممتاز" : "جيد جداً";
             
             if (document.getElementById("total-eval")) document.getElementById("total-eval").textContent = finalEval;
             if (document.getElementById("cert-total-eval")) document.getElementById("cert-total-eval").textContent = finalEval;
