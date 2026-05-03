@@ -1,11 +1,16 @@
 import { db } from "./firebase-config.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
-// دالة التقييم: تعالج الغياب وأي قيم غير رقمية
-function getEval(score) { 
-    if (score === "غ" || isNaN(score) || score === null) return "ـ"; 
+// دالة التقييم: أصبحت تأخذ اسم المادة لتحديد الدرجة النهائية (15 أو 20)
+function getEval(score, subjectName) { 
+    if (score === "غ" || isNaN(score) || score === null || score === "") return "ـ"; 
+    
     const s = Number(score);
-    return s >= 18 ? "ممتاز" : "جيد جداً"; 
+    // تحديد الدرجة النهائية للمادة
+    const limit = (subjectName === "تكنولوجيا المعلومات" || subjectName === "ICT") ? 15 : 20;
+    
+    // ممتاز إذا حصل على 90% من الدرجة النهائية للمادة (13.5 للتكنولوجيا، 18 للبقية)
+    return s >= (limit * 0.9) ? "ممتاز" : "جيد جداً"; 
 }
 
 document.getElementById("search-btn").addEventListener("click", async () => {
@@ -55,13 +60,21 @@ document.getElementById("search-btn").addEventListener("click", async () => {
             }
 
             let total = 0;
+            let maxScore = 0; // سنحسب المجموع الأقصى بدقة
             let html = "";
 
             subjects.forEach(s => {
                 let displayValue = s.v;
-                let displayEval = getEval(s.v);
+                let displayEval = getEval(s.v, s.n);
 
-                // فحص القيمة: إذا كانت "غ" أو NaN تظهر "غ" والتقييم "ـ"
+                // حساب المجموع الأقصى لكل مادة حسب اسمها
+                if (s.n === "تكنولوجيا المعلومات" || s.n === "ICT") {
+                    maxScore += 15;
+                } else {
+                    maxScore += 20;
+                }
+
+                // فحص الغياب
                 if (s.v === "غ" || isNaN(s.v) || s.v === null || s.v === "") {
                     displayValue = "غ";
                     displayEval = "ـ";
@@ -74,20 +87,13 @@ document.getElementById("search-btn").addEventListener("click", async () => {
 
             document.getElementById("grades-body").innerHTML = html;
             
-            // حساب المجموع الأقصى (عدد المواد * 20)
-            const maxScore = subjects.length * 20;
-            
-            // تحديث عرض المجموع الكلي (إصلاح الترتيب المقلوب في الصورة)
-            const totalRow = document.querySelector("#grades-body").parentElement.querySelector("tfoot") || document.createElement("tfoot");
             const totalScoreEl = document.getElementById("total-score");
-            
             if (totalScoreEl) {
                 totalScoreEl.textContent = total;
-                // تأكد من ظهور المجموع بشكل: المجموع الفعلي / المجموع الكلي
                 totalScoreEl.parentElement.innerHTML = `<td><strong>المجموع الكلي</strong></td><td><strong>${total}</strong> / ${maxScore}</td><td id="total-eval"></td>`;
             }
 
-            // التقييم العام بناءً على المجموع الفعلي
+            // التقييم العام بناءً على المجموع الفعلي مقارنة بالمجموع الأقصى المحسوب
             const finalEval = total >= (maxScore * 0.9) ? "ممتاز" : "جيد جداً";
             
             if (document.getElementById("total-eval")) document.getElementById("total-eval").textContent = finalEval;
