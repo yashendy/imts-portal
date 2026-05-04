@@ -1,7 +1,6 @@
 import { db, auth } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
-import { doc, getDoc, setDoc, writeBatch, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
-
+import { doc, getDoc, setDoc, deleteDoc, writeBatch, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 onAuthStateChanged(auth, (user) => {
     if (!user) window.location.href = "login.html";
 });
@@ -333,6 +332,50 @@ if (exportBtn) {
         } catch (error) {
             console.error("Export Error:", error);
             Swal.fire('خطأ', 'حدث خطأ أثناء تصدير البيانات', 'error');
+        }
+    });
+}
+
+// --- 7. حذف الطالب ---
+const deleteBtn = document.getElementById("delete-btn");
+if (deleteBtn) {
+    deleteBtn.addEventListener("click", async () => {
+        const id = document.getElementById("m-id").value.trim();
+        
+        if (!id) {
+            return Swal.fire('تنبيه', 'يرجى إدخال رقم الجلوس أو البحث عن الطالب أولاً', 'warning');
+        }
+
+        // رسالة تأكيد قبل الحذف لمنع الحذف بالخطأ
+        const result = await Swal.fire({
+            title: 'هل أنت متأكد؟',
+            text: `هل تريد فعلاً حذف بيانات الطالب صاحب رقم الجلوس: ${id}؟ لا يمكن التراجع عن هذا الإجراء!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e74c3c',
+            cancelButtonColor: '#95a5a6',
+            confirmButtonText: 'نعم، احذف الطالب',
+            cancelButtonText: 'إلغاء'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                // تنفيذ الحذف من قاعدة البيانات
+                await deleteDoc(doc(db, "students", id));
+                
+                // تفريغ النموذج بعد الحذف
+                document.getElementById("manual-form").reset();
+                updateFormVisibility(); // لإعادة ضبط الواجهة وقفل الخانات لو لزم الأمر
+                
+                Swal.fire(
+                    'تم الحذف!',
+                    'تم مسح بيانات الطالب من النظام نهائياً.',
+                    'success'
+                );
+            } catch (error) {
+                console.error("Delete Error:", error);
+                Swal.fire('خطأ', 'حدث خطأ أثناء الحذف، يرجى المحاولة مرة أخرى', 'error');
+            }
         }
     });
 }
