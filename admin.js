@@ -121,6 +121,8 @@ document.getElementById("fetch-btn").addEventListener("click", async () => {
             const el = document.getElementById(`m-${f}`);
             if (el) el.value = d[f] ?? 0;
         });
+        // تحديث شكل الواجهة بناءً على بيانات الطالب المستدعاة
+        updateFormVisibility();
         alert("تم استرجاع البيانات بنجاح");
     }
 });
@@ -149,3 +151,38 @@ document.getElementById("manual-form").addEventListener("submit", async (e) => {
     await setDoc(doc(db, "students", id), data);
     alert("✅ تم حفظ البيانات بنجاح");
 });
+
+// --- 5. ذكاء واجهة الإدخال اليدوي (Smart Form) ---
+const religionSelect = document.getElementById("m-religion-type");
+const religionInput = document.getElementById("m-religion");
+const systemSelect = document.getElementById("m-system");
+const highLevelInput = document.getElementById("m-highlevel");
+
+function updateFormVisibility() {
+    // التربية الدينية
+    if (religionSelect.value === "مسيحي") {
+        religionInput.value = ""; // تفريغ الخانة
+        religionInput.disabled = true; // قفل الخانة
+        religionInput.parentElement.style.opacity = "0.4"; // بهتان اللون
+    } else {
+        religionInput.disabled = false;
+        religionInput.parentElement.style.opacity = "1";
+    }
+
+    // المستوى الرفيع
+    if (systemSelect.value === "عربي") {
+        highLevelInput.value = "";
+        highLevelInput.disabled = true;
+        highLevelInput.parentElement.style.opacity = "0.4";
+    } else {
+        highLevelInput.disabled = false;
+        highLevelInput.parentElement.style.opacity = "1";
+    }
+}
+
+// الاستماع لتغيير القوائم من المستخدم
+if(religionSelect) religionSelect.addEventListener("change", updateFormVisibility);
+if(systemSelect) systemSelect.addEventListener("change", updateFormVisibility);
+
+// تشغيل الدالة أول ما الصفحة تفتح لضبط الحالة الافتراضية
+updateFormVisibility();
