@@ -48,12 +48,47 @@ body {
 .input-group label { display: block; margin-bottom: 8px; font-weight: 600; }
 .input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
 
+/* شبكة الدرجات وتنسيق الحقول */
 .grades-grid {
-    grid-column: span 2; display: grid;
-    grid-template-columns: repeat(4, 1fr); gap: 10px;
-    background: #f9f9f9; padding: 20px; border-radius: 10px;
+    grid-column: span 2; 
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 20px; /* تزويد المسافة بين الأعمدة عشان ميفوتوش في بعض */
+    background: #f9f9f9; 
+    padding: 25px; 
+    border-radius: 10px;
 }
-.grade-input input { width: 100%; padding: 8px; text-align: center; border-radius: 5px; border: 1px solid #ccc; }
+
+.grade-input {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* توسيط العنوان مع الخانة */
+}
+
+.grade-input label {
+    margin-bottom: 10px;
+    font-size: 15px;
+    color: var(--primary);
+}
+
+.grade-input input { 
+    width: 60%; /* تصغير عرض الخانة لنسبة مريحة */
+    min-width: 70px; /* أقل عرض مسموح */
+    max-width: 90px; /* منع الخانة إنها تمط بشكل مبالغ فيه */
+    padding: 10px; 
+    text-align: center; 
+    border-radius: 6px; 
+    border: 1px solid #ccc; 
+    font-weight: bold;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+.grade-input input:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 5px rgba(26, 117, 187, 0.3);
+}
 
 .main-btn {
     grid-column: span 2; background: var(--accent); color: #fff;
