@@ -178,7 +178,7 @@ document.getElementById("manual-form").addEventListener("submit", async (e) => {
     // 1. تحديد إعدادات الدرجات النهائية (يجب أن تتطابق مع ملف student.js)
     const maxGradesConfig = {
         "الرابع": { arabic: 20, math: 15, english: 20, science: 20, religion: 20, social: 20, tech: 15, high: 20 },
-        "الخامس": { arabic: 30, math: 20, english: 30, science: 30, religion: 30, social: 30, tech: 20, high: 30 },
+        "الخامس": { arabic: 20, math: 20, english: 20, science: 20, religion: 20, social: 20, tech: 20, high: 20 },
         "السادس": { arabic: 100, math: 100, english: 100, science: 100, religion: 100, social: 100, tech: 100, high: 100 }
     };
 
