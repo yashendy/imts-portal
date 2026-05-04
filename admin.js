@@ -171,68 +171,74 @@ document.getElementById("fetch-btn").addEventListener("click", async () => {
     }
 });
 
-// --- 4. الحفظ اليدوي المطور (حماية ديناميكية حسب الصف) ---
+// --- 4. الحفظ اليدوي المطور (حماية ديناميكية ورسائل خطأ دقيقة) ---
 document.getElementById("manual-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     
-    // 1. تحديد إعدادات الدرجات النهائية (يجب أن تتطابق مع ملف student.js)
+    // 1. إعدادات الدرجات النهائية
     const maxGradesConfig = {
         "الرابع": { arabic: 20, math: 15, english: 20, science: 20, religion: 20, social: 20, tech: 15, high: 20 },
         "الخامس": { arabic: 20, math: 20, english: 20, science: 20, religion: 20, social: 20, tech: 20, high: 20 },
-        "السادس": { arabic: 100, math: 100, english: 100, science: 100, religion: 100, social: 100, tech: 100, high: 100 }
+        "السادس": { arabic: 20, math: 20, english: 20, science: 20, religion: 20, social: 20, tech: 20, high: 20 }
     };
 
-    // 2. قراءة الصف الدراسي والدرجات المدخلة
+    // 2. قراءة البيانات من النموذج
     const level = document.getElementById("m-level").value.trim();
     const currentMax = maxGradesConfig[level] || maxGradesConfig["الرابع"];
 
-    const arabic = processGrade(document.getElementById("m-arabic").value);
-    const math = processGrade(document.getElementById("m-math").value);
-    const english = processGrade(document.getElementById("m-english").value);
-    const science = processGrade(document.getElementById("m-science").value);
-    const religion = processGrade(document.getElementById("m-religion").value);
-    const social = processGrade(document.getElementById("m-Social").value);
-    const technology = processGrade(document.getElementById("m-technology").value);
-    const highlevel = processGrade(document.getElementById("m-highlevel").value);
+    // تجهيز كائن بالدرجات المدخلة للمقارنة
+    const inputGrades = {
+        "اللغة العربية": { val: processGrade(document.getElementById("m-arabic").value), max: currentMax.arabic },
+        "الرياضيات": { val: processGrade(document.getElementById("m-math").value), max: currentMax.math },
+        "اللغة الإنجليزية": { val: processGrade(document.getElementById("m-english").value), max: currentMax.english },
+        "العلوم": { val: processGrade(document.getElementById("m-science").value), max: currentMax.science },
+        "التربية الدينية": { val: processGrade(document.getElementById("m-religion").value), max: currentMax.religion },
+        "الدراسات الاجتماعية": { val: processGrade(document.getElementById("m-Social").value), max: currentMax.social },
+        "تكنولوجيا المعلومات": { val: processGrade(document.getElementById("m-technology").value), max: currentMax.tech },
+        "المستوى الرفيع": { val: processGrade(document.getElementById("m-highlevel").value), max: currentMax.high }
+    };
 
-    // 3. التحقق الذكي من الدرجات بناءً على الصف المختار
-    if (arabic !== "غ" && arabic > currentMax.arabic) 
-        return Swal.fire('خطأ في الإدخال', `درجة العربي لصف ${level} لا يمكن أن تتجاوز ${currentMax.arabic}`, 'error');
-    
-    if (math !== "غ" && math > currentMax.math) 
-        return Swal.fire('خطأ في الإدخال', `درجة الرياضيات لصف ${level} لا يمكن أن تتجاوز ${currentMax.math}`, 'error');
-    
-    if (english !== "غ" && english > currentMax.english) 
-        return Swal.fire('خطأ في الإدخال', `درجة الإنجليزي لصف ${level} لا يمكن أن تتجاوز ${currentMax.english}`, 'error');
+    // 3. التحقق الذكي والديناميكي من الدرجات
+    for (const [subjectName, data] of Object.entries(inputGrades)) {
+        if (data.val !== "غ" && data.val > data.max) {
+            return Swal.fire({
+                title: 'خطأ في الإدخال',
+                text: `درجة ${subjectName} لصف ${level} لا يمكن أن تتجاوز ${data.max}`,
+                icon: 'error',
+                confirmButtonText: 'حسناً',
+                confirmButtonColor: '#B3393E'
+            });
+        }
+    }
 
-    if (science !== "غ" && science > currentMax.science) 
-        return Swal.fire('خطأ في الإدخال', `درجة العلوم لصف ${level} لا يمكن أن تتجاوز ${currentMax.science}`, 'error');
-
-    // ... يمكنك إضافة باقي المواد بنفس الطريقة ...
-
-    // 4. تنفيذ عملية الحفظ إذا كانت الدرجات سليمة
+    // 4. تنفيذ عملية الحفظ إذا كانت كل الدرجات سليمة
     const id = document.getElementById("m-id").value.trim();
-    const data = {
+    const dataToSave = {
         name: document.getElementById("m-name").value.trim(),
         level: level,
         gender: document.getElementById("m-gender").value,
         rel_type: document.getElementById("m-religion-type").value,
         system: document.getElementById("m-system").value,
         isActive: document.getElementById("m-active").value === "true",
-        arabic: arabic,
-        math: math,
-        english: english,
-        science: science,
-        religion: religion,
-        Social: social,
-        technology: technology,
-        highlevel: highlevel,
+        arabic: inputGrades["اللغة العربية"].val,
+        math: inputGrades["الرياضيات"].val,
+        english: inputGrades["اللغة الإنجليزية"].val,
+        science: inputGrades["العلوم"].val,
+        religion: inputGrades["التربية الدينية"].val,
+        Social: inputGrades["الدراسات الاجتماعية"].val,
+        technology: inputGrades["تكنولوجيا المعلومات"].val,
+        highlevel: inputGrades["المستوى الرفيع"].val,
         lastUpdated: new Date().toISOString()
     };
 
     try {
-        await setDoc(doc(db, "students", id), data);
-        Swal.fire('تم الحفظ!', 'تم تسجيل بيانات الطالب بنجاح', 'success');
+        await setDoc(doc(db, "students", id), dataToSave);
+        Swal.fire({
+            title: 'تم الحفظ!',
+            text: 'تم تسجيل بيانات الطالب بنجاح',
+            icon: 'success',
+            confirmButtonColor: '#1A75BB'
+        });
     } catch (error) {
         Swal.fire('حدث خطأ', 'يرجى المحاولة مرة أخرى', 'error');
     }
