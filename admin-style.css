@@ -1,191 +1,219 @@
+/* =========================================
+    الهوية البصرية والألوان (Root)
+   ========================================= */
 :root {
     --primary: #2c3e50;
     --accent: #1A75BB;
     --success: #27ae60;
+    --danger: #e74c3c;
+    --gold: #d4af37;
     --bg: #f8f9fa;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body {
     background: var(--bg);
     font-family: 'Cairo', sans-serif;
-    margin: 0; padding: 20px; direction: rtl;
-}
-
-.admin-container {
-    max-width: 900px; margin: auto;
-    background: #fff; border-radius: 20px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-    overflow: hidden;
-}
-
-.admin-header {
-    background: var(--primary); color: #fff;
-    padding: 30px; text-align: center;
-}
-
-.tabs { display: flex; background: #eee; }
-.tab-btn {
-    flex: 1; padding: 15px; border: none; cursor: pointer;
-    font-size: 16px; font-weight: bold; transition: 0.3s;
-}
-.tab-btn.active { background: #fff; color: var(--accent); border-bottom: 3px solid var(--accent); }
-
-.tab-content { display: none; padding: 30px; }
-.tab-content.active { display: block; }
-
-/* تصميم منطقة الرفع */
-.upload-box {
-    border: 3px dashed #ccc; border-radius: 15px;
-    padding: 50px; text-align: center; transition: 0.3s;
-    cursor: pointer;
-}
-.upload-box:hover { border-color: var(--accent); background: #f0f7ff; }
-.upload-box .icon { font-size: 50px; margin-bottom: 10px; }
-
-/* شبكة الإدخال اليدوي */
-.grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.full { grid-column: span 2; }
-.input-group label { display: block; margin-bottom: 8px; font-weight: 600; }
-.input-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-
-/* شبكة الدرجات وتنسيق الحقول */
-.grades-grid {
-    grid-column: span 2; 
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); 
-    gap: 20px; /* تزويد المسافة بين الأعمدة عشان ميفوتوش في بعض */
-    background: #f9f9f9; 
-    padding: 25px; 
-    border-radius: 10px;
-}
-
-.grade-input {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* توسيط العنوان مع الخانة */
-}
-
-.grade-input label {
-    margin-bottom: 10px;
-    font-size: 15px;
+    margin: 0;
+    padding: 20px;
+    direction: rtl;
     color: var(--primary);
 }
 
-.grade-input input { 
-    width: 60%; /* تصغير عرض الخانة لنسبة مريحة */
-    min-width: 70px; /* أقل عرض مسموح */
-    max-width: 90px; /* منع الخانة إنها تمط بشكل مبالغ فيه */
-    padding: 10px; 
-    text-align: center; 
-    border-radius: 6px; 
-    border: 1px solid #ccc; 
-    font-weight: bold;
-    font-size: 16px;
-    transition: 0.3s;
+.admin-container {
+    max-width: 1000px; /* زيادة العرض لاستيعاب الخيارات الجديدة */
+    margin: auto;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
 }
-
-.grade-input input:focus {
-    border-color: var(--accent);
-    outline: none;
-    box-shadow: 0 0 5px rgba(26, 117, 187, 0.3);
-}
-
-.main-btn {
-    grid-column: span 2; background: var(--accent); color: #fff;
-    padding: 15px; border: none; border-radius: 10px;
-    font-size: 18px; cursor: pointer; margin-top: 10px;
-    box-shadow: 0 4px 15px rgba(26, 117, 187, 0.3);
-}
-.main-btn:hover { background: #155a8a; }
 
 /* =========================================
-   تحسينات الواجهة (القوائم، البحث، والأزرار)
+    الهيدر والتبويبات
    ========================================= */
+.admin-header {
+    background: var(--primary);
+    color: #fff;
+    padding: 30px;
+    text-align: center;
+}
 
-/* 1. تحسين القوائم المنسدلة (Dropdowns) */
-.input-group select, .status-select {
-    width: 100%;
-    padding: 12px 15px;
+.tabs { display: flex; background: #eee; border-bottom: 1px solid #ddd; }
+.tab-btn {
+    flex: 1; padding: 18px; border: none; cursor: pointer;
+    font-size: 16px; font-weight: bold; transition: var(--transition);
+    font-family: 'Cairo', sans-serif;
+}
+.tab-btn.active { 
+    background: #fff; 
+    color: var(--accent); 
+    border-bottom: 4px solid var(--accent); 
+}
+
+.tab-content { display: none; padding: 35px; }
+.tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* =========================================
+    تنسيقات التصدير الذكي (Smart Export)
+   ========================================= */
+.admin-actions-container {
+    background: #f9f9f9;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+    border: 1px solid #eee;
+}
+
+.export-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.select-label {
+    font-weight: bold;
+    color: var(--primary);
+    font-size: 16px;
+}
+
+.custom-select-wrapper {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+/* القائمة المنسدلة الأنيقة */
+.elegant-select {
+    flex: 1;
+    padding: 12px 18px;
     border: 2px solid #e0e6ed;
-    border-radius: 8px;
-    background-color: #f8f9fa;
+    border-radius: 10px;
     font-family: 'Cairo', sans-serif;
     font-size: 15px;
     color: var(--primary);
     cursor: pointer;
-    transition: all 0.3s ease;
-    outline: none;
-}
-
-.input-group select:focus, .status-select:focus {
-    border-color: var(--accent);
     background-color: #fff;
-    box-shadow: 0 0 8px rgba(26, 117, 187, 0.2);
+    transition: var(--transition);
 }
 
-/* 2. تحسين شريط البحث اليدوي والزر الخاص به */
+.elegant-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(26, 117, 187, 0.1);
+}
+
+/* زر التصدير الاحترافي[cite: 5] */
+.premium-export-btn {
+    background: linear-gradient(135deg, var(--success), #219150);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-family: 'Cairo', sans-serif;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+}
+
+.premium-export-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(39, 174, 96, 0.3);
+}
+
+/* =========================================
+    البحث اليدوي والفورم
+   ========================================= */
 .admin-search-bar {
     display: flex;
     gap: 15px;
     margin-bottom: 30px;
-    background: #fff;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    border: 1px solid #eee;
 }
 
 .admin-search-bar input {
-    flex: 1;
-    padding: 15px 20px;
+    flex: 2;
+    padding: 14px 20px;
     border: 2px solid #e0e6ed;
-    border-radius: 8px;
+    border-radius: 10px;
     font-size: 16px;
     font-family: 'Cairo', sans-serif;
-    transition: 0.3s;
 }
 
-.admin-search-bar input:focus {
-    border-color: var(--accent);
-    outline: none;
-}
-
-.admin-search-bar button {
-    background: linear-gradient(to bottom, var(--accent), #155a8a);
+.secondary-btn {
+    flex: 1;
+    background: var(--primary);
     color: white;
     border: none;
-    padding: 0 30px;
-    border-radius: 8px;
-    font-size: 16px;
+    border-radius: 10px;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.1s ease;
-    box-shadow: 0 4px 0 #0d4266;
     font-family: 'Cairo', sans-serif;
 }
 
-.admin-search-bar button:active {
-    box-shadow: 0 0 0 #0d4266;
-    transform: translateY(4px);
-}
-
-/* 3. تحسين زر تسجيل الخروج في الهيدر */
-.logout-btn {
-    background: rgba(255, 255, 255, 0.15);
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 8px 25px;
-    border-radius: 25px;
-    font-family: 'Cairo', sans-serif;
-    font-size: 15px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
+/* شبكة الدرجات (Grades Grid) */
+.grades-grid {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    background: #fdfdfd;
+    padding: 25px;
+    border: 1px solid #eee;
+    border-radius: 12px;
     margin-top: 15px;
 }
 
-.logout-btn:hover {
-    background: #e74c3c; /* لون أحمر تحذيري شيك عند المرور */
-    border-color: #e74c3c;
-    box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+.grade-input { display: flex; flex-direction: column; align-items: center; }
+.grade-input label { margin-bottom: 8px; font-size: 14px; font-weight: bold; }
+.grade-input input {
+    width: 80px;
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+/* أزرار الحفظ والحذف */
+.premium-save-btn {
+    flex: 2;
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 17px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.delete-action-btn {
+    flex: 1;
+    background: white;
+    color: var(--danger);
+    border: 2px solid var(--danger);
+    padding: 15px;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.delete-action-btn:hover { background: var(--danger); color: white; }
+
+/* =========================================
+    إعدادات الطباعة
+   ========================================= */
+@media print {
+    .no-print, .tabs, .admin-actions-container, .admin-search-bar, .form-actions, .admin-header button {
+        display: none !important;
+    }
 }
