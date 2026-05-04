@@ -93,10 +93,9 @@ button:hover {
 }
 
 .logo-right {
-    width: 120px; /* يمكنك زيادة العرض لو أردتِ الشعار أكبر */
-    margin-right: 10px; /* مسافة بسيطة من الحافة اليمنى */
+    width: 120px; 
+    margin-right: 10px; 
 }
-.logo-right { width: 110px; }
 
 .header-text { text-align: center; flex-grow: 1; }
 .header-text h1 { font-size: 35px; margin: 0; color: var(--dark-text); }
@@ -188,6 +187,6 @@ button:hover {
 @media print {
     @page { size: A4; margin: 0; }
     body { background: #fff; padding: 0; align-items: flex-start; }
-    .search-container, #print-btn { display: none !important; }
+    .search-container, #print-btn, .close-cert-container { display: none !important; }
     .certificate-wrapper { margin: 0; border: none; width: 100%; }
 }
