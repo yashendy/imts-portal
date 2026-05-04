@@ -1,6 +1,6 @@
 import { db, auth } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
-import { doc, getDoc, setDoc, writeBatch } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+import { doc, getDoc, setDoc, writeBatch, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
 onAuthStateChanged(auth, (user) => {
     if (!user) window.location.href = "login.html";
@@ -268,3 +268,71 @@ if(systemSelect) systemSelect.addEventListener("change", updateFormVisibility);
 
 // تشغيل الدالة أول ما الصفحة تفتح لضبط الحالة الافتراضية
 updateFormVisibility();
+
+// --- 6. تصدير البيانات إلى ملف إكسيل (Backup) ---
+const exportBtn = document.getElementById("export-btn");
+if (exportBtn) {
+    exportBtn.addEventListener("click", async () => {
+        try {
+            // إظهار رسالة تحميل
+            Swal.fire({
+                title: 'جاري تجهيز الملف...',
+                text: 'يرجى الانتظار بينما يتم سحب البيانات',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // سحب كل الطلاب من قاعدة البيانات
+            const querySnapshot = await getDocs(collection(db, "students"));
+            const studentsData = [];
+
+            // تجهيز البيانات بنفس ترتيب نموذج الإكسيل
+            querySnapshot.forEach((doc) => {
+                const d = doc.data();
+                studentsData.push({
+                    "رقم الجلوس": doc.id,
+                    "اسم الطالب": d.name || "",
+                    "النوع": d.gender || "",
+                    "الديانة": d.rel_type || "",
+                    "الصف": d.level || "",
+                    "القسم": d.system || "",
+                    "عربي": d.arabic ?? "",
+                    "رياضيات": d.math ?? "",
+                    "إنجليزي": d.english ?? "",
+                    "علوم": d.science ?? "",
+                    "دراسات": d.Social ?? "",
+                    "دين": d.religion ?? "",
+                    "تكنولوجيا": d.technology ?? "",
+                    "مستوى رفيع": d.highlevel ?? "",
+                    "حالة النتيجة": d.isActive !== false ? "true" : "false"
+                });
+            });
+
+            if (studentsData.length === 0) {
+                return Swal.fire('لا توجد بيانات', 'قاعدة البيانات فارغة حالياً', 'info');
+            }
+
+            // تحويل البيانات لملف إكسيل وتحميله
+            const worksheet = XLSX.utils.json_to_sheet(studentsData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "الطلاب");
+            
+            XLSX.writeFile(workbook, "IMTS_Students_Backup.xlsx");
+
+            // رسالة نجاح
+            Swal.fire({
+                title: 'تم التصدير بنجاح!',
+                text: `تم تحميل بيانات ${studentsData.length} طالب`,
+                icon: 'success',
+                confirmButtonText: 'حسناً',
+                confirmButtonColor: '#27ae60'
+            });
+
+        } catch (error) {
+            console.error("Export Error:", error);
+            Swal.fire('خطأ', 'حدث خطأ أثناء تصدير البيانات', 'error');
+        }
+    });
+}
