@@ -38,7 +38,10 @@ document.getElementById("search-btn").addEventListener("click", async () => {
             document.getElementById("certificate-section").style.display = "block";
             document.getElementById("search-section").style.display = "none";
 
-            document.getElementById("cert-name").textContent = d.name;
+            // تعديل مسمى الطالب/الطالبة في الجزء العلوي
+            const genderLabel = (d.gender === "أنثى") ? "اسم الطالبة:" : "اسم الطالب:";
+            document.getElementById("cert-name").parentElement.innerHTML = `<strong>${genderLabel}</strong> <span id="cert-name">${d.name}</span>`;
+            
             document.getElementById("cert-level").textContent = d.level;
             document.getElementById("cert-system").textContent = d.system || "عربي";
             document.getElementById("cert-id").textContent = id;
@@ -58,7 +61,6 @@ document.getElementById("search-btn").addEventListener("click", async () => {
 
             let totalObtained = 0;
             let totalMax = 0;
-
             let headHtml = `<th>المادة / الدرجات</th>`;
             let rowMaxHtml = `<td>الدرجة الكبرى</td>`;
             let rowStudentHtml = `<td>درجة الطالب</td>`;
@@ -67,7 +69,6 @@ document.getElementById("search-btn").addEventListener("click", async () => {
                 let score = (s.v === "غ" || s.v === undefined) ? 0 : Number(s.v);
                 totalObtained += score;
                 totalMax += s.m;
-
                 headHtml += `<th>${s.n}</th>`;
                 rowMaxHtml += `<td>${s.m}</td>`;
                 rowStudentHtml += `<td>${s.v === "غ" ? "غ" : score}</td>`;
@@ -85,8 +86,14 @@ document.getElementById("search-btn").addEventListener("click", async () => {
                 </tbody>
             `;
 
+            // --- تعديل الصيغة حسب النوع (ذكر/أنثى) ---
             const finalEval = getEval(totalObtained, totalMax);
-            document.getElementById("statement").innerHTML = `الطالب/ ${d.name} اجتاز الاختبارات بنجاح وحصل على تقدير عام: ${finalEval}`;
+            const isFemale = (d.gender === "أنثى");
+            const title = isFemale ? "الطالبة" : "الطالب";
+            const verb1 = isFemale ? "اجتازت" : "اجتاز";
+            const verb2 = isFemale ? "وحصلت" : "وحصل";
+
+            document.getElementById("statement").innerHTML = `${title}/ ${d.name} ${verb1} الاختبارات بنجاح ${verb2} على تقدير عام: ${finalEval}`;
 
         } else { alert("رقم الجلوس غير موجود"); }
     } catch (err) { console.error(err); }
