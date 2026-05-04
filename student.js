@@ -11,7 +11,8 @@ function getEval(score, maxForThisSubject) {
 
     if (percentage >= 85) return "ممتاز";
     if (percentage >= 75) return "جيد جداً";
-    return "جيد"; 
+    if (percentage >= 65) return "جيد";
+    return "مقبول"; 
 }
 
 document.getElementById("search-btn").addEventListener("click", async () => {
@@ -28,21 +29,20 @@ document.getElementById("search-btn").addEventListener("click", async () => {
                 return;
             }
 
-            // --- إعدادات الدرجات النهائية لكل صف ---
+            // --- 1. إعدادات الدرجات النهائية الثابتة لكل صف ---
             const maxGradesConfig = {
                 "الرابع": { arabic: 20, math: 15, english: 20, science: 20, religion: 20, social: 20, tech: 15, high: 20 },
                 "الخامس": { arabic: 20, math: 20, english: 20, science: 20, religion: 20, social: 20, tech: 20, high: 20 },
                 "السادس": { arabic: 20, math: 20, english: 20, science: 20, religion: 20, social: 20, tech: 20, high: 20 }
             };
 
-            // اختيار الدرجة النهائية بناءً على صف الطالب (القيمة الافتراضية هي الرابع)
             const currentMax = maxGradesConfig[d.level] || maxGradesConfig["الرابع"];
-
             const isLang = d.system === "لغات";
+
             document.getElementById("certificate-section").style.display = "block";
             document.getElementById("search-section").style.display = "none";
 
-            // تحديث البيانات الأساسية
+            // تحديث البيانات الأساسية للطالب
             const elements = {
                 "cert-name": d.name,
                 "cert-level": d.level,
@@ -55,25 +55,32 @@ document.getElementById("search-btn").addEventListener("click", async () => {
                 if (el) el.textContent = elements[elId];
             }
 
-            // تحديد المواد والدرجات النهائية الديناميكية
+            // --- 2. بناء مصفوفة المواد مع معالجة احتمالات أسماء الحقول ---
             let subjects = [
                 { n: "اللغة العربية", v: d.arabic, m: currentMax.arabic },
                 { n: isLang ? "Math" : "الرياضيات", v: d.math, m: currentMax.math },
                 { n: isLang ? "English (AL)" : "اللغة الإنجليزية", v: d.english, m: currentMax.english },
                 { n: isLang ? "Science" : "العلوم", v: d.science, m: currentMax.science },
                 { n: "التربية الدينية", v: d.religion, m: currentMax.religion },
-                { n: "الدراسات الاجتماعية", v: d.Social, m: currentMax.social },
-                { n: isLang ? "ICT" : "تكنولوجيا المعلومات", v: d.technology, m: currentMax.tech }
+                // معالجة مشكلة Social كبير أو صغير
+                { n: "الدراسات الاجتماعية", v: (d.Social !== undefined ? d.Social : d.social), m: currentMax.social },
+                // معالجة مشكلة technology أو tech
+                { n: isLang ? "ICT" : "تكنولوجيا المعلومات", v: (d.technology !== undefined ? d.technology : d.tech), m: currentMax.tech }
             ];
 
+            // --- 3. الفلترة الذكية (الاستثناءات) ---
+            
+            // استثناء الدين للمسيحي
             if (d.rel_type === "مسيحي") {
                 subjects = subjects.filter(sub => sub.n !== "التربية الدينية");
             }
 
+            // إضافة المستوى الرفيع فقط لو النظام لغات
             if (isLang && d.highlevel !== undefined) {
                 subjects.push({ n: "High Level", v: d.highlevel, m: currentMax.high });
             }
 
+            // --- 4. حساب المجاميع من المواد المتبقية فقط ---
             let totalObtained = 0;
             let totalMax = 0;
             let html = "";
@@ -81,7 +88,9 @@ document.getElementById("search-btn").addEventListener("click", async () => {
             subjects.forEach(s => {
                 let displayValue = s.v;
                 let displayEval = getEval(s.v, s.m);
-                totalMax += s.m;
+                
+                // إضافة الدرجة النهائية للمادة إلى إجمالي المجموع الكلي
+                totalMax += (s.m || 0);
 
                 if (s.v === "غ" || isNaN(s.v) || s.v === null || s.v === "") {
                     displayValue = "غ";
@@ -95,18 +104,23 @@ document.getElementById("search-btn").addEventListener("click", async () => {
 
             document.getElementById("grades-body").innerHTML = html;
             
+            // تحديث خانة المجموع في الجدول
             const totalScoreEl = document.getElementById("total-score");
             if (totalScoreEl) {
+                // سيظهر الآن المجموع 140 لطلاب العربي في الصف الخامس (7 مواد × 20)
                 totalScoreEl.parentElement.innerHTML = `<td><strong>المجموع الكلي</strong></td><td><strong>${totalObtained}</strong> / ${totalMax}</td><td id="total-eval"></td>`;
             }
 
+            // --- 5. التقدير العام والبيان النهائي ---
             const finalPercentage = (totalObtained / totalMax) * 100;
             let finalEval = "جيد"; 
             
             if (finalPercentage >= 85) finalEval = "ممتاز";
             else if (finalPercentage >= 75) finalEval = "جيد جداً";
             
-            if (document.getElementById("total-eval")) document.getElementById("total-eval").textContent = finalEval;
+            if (document.getElementById("total-eval")) {
+                document.getElementById("total-eval").textContent = finalEval;
+            }
             
             if (document.getElementById("statement")) {
                 const prefix = (d.gender === "أنثى") ? "الطالبة/" : "الطالب/";
@@ -120,6 +134,7 @@ document.getElementById("search-btn").addEventListener("click", async () => {
         }
     } catch (err) {
         console.error("Error fetching student data:", err);
+        alert("حدث خطأ أثناء جلب البيانات، يرجى التحقق من الاتصال.");
     }
 });
 
