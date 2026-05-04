@@ -54,6 +54,12 @@ document.getElementById("search-btn").addEventListener("click", async () => {
                 { n: isLang ? "ICT" : "تكنولوجيا المعلومات", v: d.technology, m: 15 } // من 15
             ];
 
+            // إزالة مادة التربية الدينية إذا كان الطالب مسيحياً
+            if (d.rel_type === "مسيحي") {
+                subjects = subjects.filter(sub => sub.n !== "التربية الدينية");
+            }
+
+            // إضافة مادة المستوى الرفيع لطلاب اللغات فقط
             if (isLang && d.highlevel !== undefined) {
                 subjects.push({ n: "High Level", v: d.highlevel, m: 20 });
             }
@@ -92,8 +98,17 @@ document.getElementById("search-btn").addEventListener("click", async () => {
             
             if (document.getElementById("total-eval")) document.getElementById("total-eval").textContent = finalEval;
             
+            // التعديل الجديد: تحديد صياغة الجملة الختامية بناءً على الجنس
             if (document.getElementById("statement")) {
-                document.getElementById("statement").innerHTML = `الطالب/ ${d.name} تم اجتياز الاختبارات بنجاح وحصل على تقدير عام: ${finalEval}`;
+                let statementText = "";
+                
+                if (d.gender === "أنثى") {
+                    statementText = `الطالبة/ ${d.name} اجتازت الاختبارات بنجاح وحصلت على تقدير عام: ${finalEval}`;
+                } else {
+                    statementText = `الطالب/ ${d.name} اجتاز الاختبارات بنجاح وحصل على تقدير عام: ${finalEval}`;
+                }
+                
+                document.getElementById("statement").innerHTML = statementText;
             }
 
         } else {
