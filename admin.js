@@ -284,70 +284,72 @@ if(systemSelect) systemSelect.addEventListener("change", updateFormVisibility);
 // تشغيل الدالة أول ما الصفحة تفتح لضبط الحالة الافتراضية
 updateFormVisibility();
 
-// --- 6. تصدير البيانات إلى ملف إكسيل (Backup) ---
+// --- 6. تصدير البيانات إلى ملف إكسيل (فلترة ذكية حسب الصف) ---
 const exportBtn = document.getElementById("export-btn");
 if (exportBtn) {
     exportBtn.addEventListener("click", async () => {
+        const selectedLevel = document.getElementById("export-level-select").value;
+        
         try {
-            // إظهار رسالة تحميل
             Swal.fire({
-                title: 'جاري تجهيز الملف...',
-                text: 'يرجى الانتظار بينما يتم سحب البيانات',
+                title: 'جاري التحضير...',
+                text: selectedLevel === "الكل" ? "يتم الآن جمع بيانات جميع الطلاب" : `يتم الآن جمع بيانات طلاب الصف ${selectedLevel}`,
                 allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            const querySnapshot = await getDocs(collection(db, "students"));
+            let studentsData = [];
+
+            querySnapshot.forEach((doc) => {
+                const d = doc.data();
+                
+                // التحقق من مطابقة الصف المختار (فلترة ذكية لضمان تخطي المسافات أو الفوارق البسيطة)[cite: 2, 3]
+                const studentLevel = String(d.level || "").trim();
+                if (selectedLevel === "الكل" || studentLevel.includes(selectedLevel)) {
+                    studentsData.push({
+                        "رقم الجلوس": doc.id,
+                        "اسم الطالب": d.name || "",
+                        "النوع": d.gender || "",
+                        "الديانة": d.rel_type || "",
+                        "الصف": d.level || "",
+                        "القسم": d.system || "",
+                        "عربي": d.arabic ?? "",
+                        "رياضيات": d.math ?? "",
+                        "إنجليزي": d.english ?? "",
+                        "علوم": d.science ?? "",
+                        "دراسات": d.Social ?? "",
+                        "دين": d.religion ?? "",
+                        "تكنولوجيا": d.technology ?? "",
+                        "مستوى رفيع": d.highlevel ?? "",
+                        "حالة النتيجة": d.isActive !== false ? "فعال" : "محجوب"
+                    });
                 }
             });
 
-            // سحب كل الطلاب من قاعدة البيانات
-            const querySnapshot = await getDocs(collection(db, "students"));
-            const studentsData = [];
-
-            // تجهيز البيانات بنفس ترتيب نموذج الإكسيل
-            querySnapshot.forEach((doc) => {
-                const d = doc.data();
-                studentsData.push({
-                    "رقم الجلوس": doc.id,
-                    "اسم الطالب": d.name || "",
-                    "النوع": d.gender || "",
-                    "الديانة": d.rel_type || "",
-                    "الصف": d.level || "",
-                    "القسم": d.system || "",
-                    "عربي": d.arabic ?? "",
-                    "رياضيات": d.math ?? "",
-                    "إنجليزي": d.english ?? "",
-                    "علوم": d.science ?? "",
-                    "دراسات": d.Social ?? "",
-                    "دين": d.religion ?? "",
-                    "تكنولوجيا": d.technology ?? "",
-                    "مستوى رفيع": d.highlevel ?? "",
-                    "حالة النتيجة": d.isActive !== false ? "true" : "false"
-                });
-            });
-
             if (studentsData.length === 0) {
-                return Swal.fire('لا توجد بيانات', 'قاعدة البيانات فارغة حالياً', 'info');
+                return Swal.fire('لا توجد بيانات', `لا يوجد طلاب مسجلين في ${selectedLevel}`, 'info');
             }
 
-            // تحويل البيانات لملف إكسيل وتحميله
             const worksheet = XLSX.utils.json_to_sheet(studentsData);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "الطلاب");
             
-            XLSX.writeFile(workbook, "IMTS_Students_Backup.xlsx");
+            const timeStamp = new Date().toLocaleDateString('ar-EG').replace(/\//g, '-');
+            const fileName = selectedLevel === "الكل" ? `Full_Backup_${timeStamp}.xlsx` : `Grade_${selectedLevel}_${timeStamp}.xlsx`;
+            
+            XLSX.writeFile(workbook, fileName);
 
-            // رسالة نجاح
             Swal.fire({
                 title: 'تم التصدير بنجاح!',
-                text: `تم تحميل بيانات ${studentsData.length} طالب`,
+                text: `تم استخراج بيانات ${studentsData.length} طالب بنجاح.`,
                 icon: 'success',
-                confirmButtonText: 'حسناً',
                 confirmButtonColor: '#27ae60'
             });
 
         } catch (error) {
             console.error("Export Error:", error);
-            Swal.fire('خطأ', 'حدث خطأ أثناء تصدير البيانات', 'error');
+            Swal.fire('خطأ', 'حدث خطأ تقني أثناء التصدير', 'error');
         }
     });
 }
