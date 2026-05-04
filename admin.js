@@ -171,22 +171,28 @@ document.getElementById("fetch-btn").addEventListener("click", async () => {
     }
 });
 
-// --- 4. الحفظ اليدوي المطور (حماية ديناميكية ورسائل خطأ دقيقة) ---
+// --- 4. الحفظ اليدوي المطور (حل مشكلة تضارب الصفوف والدرجات) ---
 document.getElementById("manual-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     
-    // 1. إعدادات الدرجات النهائية
+    // 1. إعدادات الدرجات النهائية الصارمة
     const maxGradesConfig = {
         "الرابع": { arabic: 20, math: 15, english: 20, science: 20, religion: 20, social: 20, tech: 15, high: 20 },
         "الخامس": { arabic: 20, math: 20, english: 20, science: 20, religion: 20, social: 20, tech: 20, high: 20 },
-        "السادس": { arabic: 20, math: 20, english: 20, science: 20, religion: 20, social: 20, tech: 20, high: 20 }
+        "السادس": { arabic: 100, math: 100, english: 100, science: 100, religion: 100, social: 100, tech: 100, high: 100 }
     };
 
-    // 2. قراءة البيانات من النموذج
-    const level = document.getElementById("m-level").value.trim();
+    // 2. قراءة الصف الدراسي مع تنظيف النص لضمان المطابقة
+    let level = document.getElementById("m-level").value.trim();
+    
+    // تأكد من مطابقة النص المكتوب في الـ HTML (سواء كان "خامس" أو "الخامس")
+    if (level.includes("خامس")) level = "الخامس";
+    if (level.includes("رابع")) level = "الرابع";
+    if (level.includes("سادس")) level = "السادس";
+
     const currentMax = maxGradesConfig[level] || maxGradesConfig["الرابع"];
 
-    // تجهيز كائن بالدرجات المدخلة للمقارنة
+    // تجهيز كائن بالدرجات المدخلة
     const inputGrades = {
         "اللغة العربية": { val: processGrade(document.getElementById("m-arabic").value), max: currentMax.arabic },
         "الرياضيات": { val: processGrade(document.getElementById("m-math").value), max: currentMax.math },
@@ -198,7 +204,7 @@ document.getElementById("manual-form").addEventListener("submit", async (e) => {
         "المستوى الرفيع": { val: processGrade(document.getElementById("m-highlevel").value), max: currentMax.high }
     };
 
-    // 3. التحقق الذكي والديناميكي من الدرجات
+    // 3. التحقق الديناميكي (سيسمح الآن بـ 20 لصف خامس و 15 لصف رابع)[cite: 3, 5]
     for (const [subjectName, data] of Object.entries(inputGrades)) {
         if (data.val !== "غ" && data.val > data.max) {
             return Swal.fire({
@@ -211,9 +217,9 @@ document.getElementById("manual-form").addEventListener("submit", async (e) => {
         }
     }
 
-    // 4. تنفيذ عملية الحفظ إذا كانت كل الدرجات سليمة
+    // 4. الحفظ في قاعدة البيانات
     const id = document.getElementById("m-id").value.trim();
-    const dataToSave = {
+    const studentData = {
         name: document.getElementById("m-name").value.trim(),
         level: level,
         gender: document.getElementById("m-gender").value,
@@ -232,15 +238,14 @@ document.getElementById("manual-form").addEventListener("submit", async (e) => {
     };
 
     try {
-        await setDoc(doc(db, "students", id), dataToSave);
+        await setDoc(doc(db, "students", id), studentData);
         Swal.fire({
-            title: 'تم الحفظ!',
-            text: 'تم تسجيل بيانات الطالب بنجاح',
+            title: 'تم الحفظ بنجاح!',
             icon: 'success',
             confirmButtonColor: '#1A75BB'
         });
     } catch (error) {
-        Swal.fire('حدث خطأ', 'يرجى المحاولة مرة أخرى', 'error');
+        Swal.fire('حدث خطأ', 'تعذر حفظ البيانات', 'error');
     }
 });
 
