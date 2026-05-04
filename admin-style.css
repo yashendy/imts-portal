@@ -6,214 +6,135 @@
     --accent: #1A75BB;
     --success: #27ae60;
     --danger: #e74c3c;
-    --gold: #d4af37;
-    --bg: #f8f9fa;
-    --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --bg: #f4f7f9;
+    --shadow: 0 10px 25px rgba(0,0,0,0.1);
+    --transition: all 0.3s ease;
 }
 
 body {
-    background: var(--bg);
     font-family: 'Cairo', sans-serif;
-    margin: 0;
-    padding: 20px;
-    direction: rtl;
+    background-color: var(--bg);
+    margin: 0; padding: 20px; direction: rtl;
     color: var(--primary);
 }
 
 .admin-container {
-    max-width: 1000px; /* زيادة العرض لاستيعاب الخيارات الجديدة */
-    margin: auto;
-    background: #fff;
-    border-radius: 20px;
-    box-shadow: var(--shadow);
-    overflow: hidden;
+    max-width: 1000px; margin: auto;
+    background: #fff; border-radius: 15px;
+    box-shadow: var(--shadow); overflow: hidden;
 }
 
 /* =========================================
-    الهيدر والتبويبات
+    الهيدر وزر تسجيل الخروج (المصلح)
    ========================================= */
 .admin-header {
-    background: var(--primary);
-    color: #fff;
-    padding: 30px;
-    text-align: center;
+    background: var(--primary); color: #fff;
+    padding: 40px 20px; text-align: center;
+    position: relative;
 }
 
-.tabs { display: flex; background: #eee; border-bottom: 1px solid #ddd; }
+.admin-header h1 { margin: 0; font-size: 28px; font-family: 'Amiri', serif; }
+.admin-header p { margin: 10px 0 0; opacity: 0.8; }
+
+.logout-btn {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff; border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 25px; border-radius: 25px;
+    cursor: pointer; transition: var(--transition);
+    font-family: 'Cairo', sans-serif; font-weight: bold;
+    margin-top: 20px;
+}
+
+.logout-btn:hover { background: var(--danger); border-color: var(--danger); }
+
+/* =========================================
+    التبويبات (Tabs)
+   ========================================= */
+.tabs { display: flex; background: #f8f9fa; border-bottom: 1px solid #eee; }
 .tab-btn {
-    flex: 1; padding: 18px; border: none; cursor: pointer;
-    font-size: 16px; font-weight: bold; transition: var(--transition);
-    font-family: 'Cairo', sans-serif;
+    flex: 1; padding: 20px; border: none; background: none;
+    font-size: 16px; font-weight: bold; cursor: pointer;
+    transition: var(--transition); font-family: 'Cairo', sans-serif;
 }
-.tab-btn.active { 
-    background: #fff; 
-    color: var(--accent); 
-    border-bottom: 4px solid var(--accent); 
-}
+.tab-btn.active { background: #fff; color: var(--accent); border-bottom: 4px solid var(--accent); }
 
-.tab-content { display: none; padding: 35px; }
-.tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+.tab-content { display: none; padding: 30px; }
+.tab-content.active { display: block; animation: fadeIn 0.3s; }
 
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 /* =========================================
-    تنسيقات التصدير الذكي (Smart Export)
+    كارت رفع الإكسيل (المصلح والاحترافي)
    ========================================= */
-.admin-actions-container {
-    background: #f9f9f9;
-    padding: 25px;
-    border-radius: 15px;
-    margin-bottom: 25px;
-    border: 1px solid #eee;
+.upload-box {
+    border: 3px dashed #cbd5e0; border-radius: 15px;
+    padding: 60px 20px; text-align: center;
+    transition: var(--transition); cursor: pointer;
+    background: #fafafa;
 }
 
-.export-group {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
+.upload-box:hover { border-color: var(--accent); background: #f0f7ff; }
+.upload-box .icon { font-size: 50px; margin-bottom: 15px; display: block; }
+.upload-box p { font-size: 16px; color: #666; margin-bottom: 20px; }
 
-.select-label {
-    font-weight: bold;
-    color: var(--primary);
-    font-size: 16px;
-}
-
-.custom-select-wrapper {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-}
-
-/* القائمة المنسدلة الأنيقة */
-.elegant-select {
-    flex: 1;
-    padding: 12px 18px;
-    border: 2px solid #e0e6ed;
-    border-radius: 10px;
-    font-family: 'Cairo', sans-serif;
-    font-size: 15px;
-    color: var(--primary);
-    cursor: pointer;
-    background-color: #fff;
-    transition: var(--transition);
-}
-
-.elegant-select:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 4px rgba(26, 117, 187, 0.1);
-}
-
-/* زر التصدير الاحترافي[cite: 5] */
-.premium-export-btn {
-    background: linear-gradient(135deg, var(--success), #219150);
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 10px;
-    font-weight: bold;
-    font-family: 'Cairo', sans-serif;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
-}
-
-.premium-export-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(39, 174, 96, 0.3);
+.select-btn {
+    background: var(--accent); color: #fff;
+    border: none; padding: 10px 30px; border-radius: 8px;
+    font-weight: bold; cursor: pointer; transition: var(--transition);
 }
 
 /* =========================================
-    البحث اليدوي والفورم
+    شبكة الإدخال اليدوي (المصلحة)
    ========================================= */
-.admin-search-bar {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 30px;
+.grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.full { grid-column: span 2; }
+
+.input-group { display: flex; flex-direction: column; gap: 8px; }
+.input-group label { font-weight: bold; font-size: 14px; }
+
+/* تنسيق القوائم والمدخلات لتبدو احترافية */
+.input-group input, .status-select, .elegant-select {
+    width: 100%; padding: 12px; border: 1.5px solid #e2e8f0;
+    border-radius: 8px; font-family: 'Cairo', sans-serif;
+    box-sizing: border-box; transition: var(--transition);
 }
 
-.admin-search-bar input {
-    flex: 2;
-    padding: 14px 20px;
-    border: 2px solid #e0e6ed;
-    border-radius: 10px;
-    font-size: 16px;
-    font-family: 'Cairo', sans-serif;
-}
+.input-group input:focus, .status-select:focus { border-color: var(--accent); outline: none; }
 
-.secondary-btn {
-    flex: 1;
-    background: var(--primary);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-weight: bold;
-    cursor: pointer;
-    font-family: 'Cairo', sans-serif;
-}
-
-/* شبكة الدرجات (Grades Grid) */
+/* شبكة الدرجات المنسقة */
 .grades-grid {
-    grid-column: span 2;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    background: #fdfdfd;
-    padding: 25px;
-    border: 1px solid #eee;
-    border-radius: 12px;
-    margin-top: 15px;
+    grid-column: span 2; display: grid;
+    grid-template-columns: repeat(4, 1fr); gap: 15px;
+    background: #f8f9fa; padding: 20px; border-radius: 12px;
 }
 
 .grade-input { display: flex; flex-direction: column; align-items: center; }
-.grade-input label { margin-bottom: 8px; font-size: 14px; font-weight: bold; }
-.grade-input input {
-    width: 80px;
-    padding: 10px;
-    text-align: center;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 16px;
+.grade-input label { font-size: 13px; margin-bottom: 5px; }
+.grade-input input { width: 70px; text-align: center; font-weight: bold; }
+
+/* =========================================
+    أزرار التصدير والعمليات
+   ========================================= */
+.admin-actions-container { background: #fcfcfc; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #eee; }
+.custom-select-wrapper { display: flex; gap: 10px; }
+
+.premium-export-btn {
+    background: var(--success); color: #fff; border: none;
+    padding: 10px 20px; border-radius: 8px; cursor: pointer;
+    font-weight: bold; display: flex; align-items: center; gap: 8px;
 }
 
-/* أزرار الحفظ والحذف */
 .premium-save-btn {
-    flex: 2;
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 15px;
-    border-radius: 12px;
-    font-weight: bold;
-    font-size: 17px;
-    cursor: pointer;
-    transition: var(--transition);
+    background: var(--accent); color: #fff; border: none;
+    padding: 15px; border-radius: 10px; font-weight: bold;
+    cursor: pointer; grid-column: span 1;
 }
 
 .delete-action-btn {
-    flex: 1;
-    background: white;
-    color: var(--danger);
-    border: 2px solid var(--danger);
-    padding: 15px;
-    border-radius: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: var(--transition);
+    background: none; color: var(--danger); border: 2px solid var(--danger);
+    padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer;
 }
 
-.delete-action-btn:hover { background: var(--danger); color: white; }
+.delete-action-btn:hover { background: var(--danger); color: #fff; }
 
-/* =========================================
-    إعدادات الطباعة
-   ========================================= */
-@media print {
-    .no-print, .tabs, .admin-actions-container, .admin-search-bar, .form-actions, .admin-header button {
-        display: none !important;
-    }
-}
+.form-actions { grid-column: span 2; display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-top: 20px; }
