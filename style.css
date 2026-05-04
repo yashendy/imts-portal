@@ -2,203 +2,97 @@
     --primary-blue: #2c3e50;
     --accent-red: #e74c3c;
     --success-green: #27ae60;
-    --gold: #d4af37;
-    --light-bg: #f8f9fa;
     --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body {
     font-family: 'Amiri', serif;
-    background-color: #f0f2f5;
+    background-color: #f8f9fa;
     margin: 0;
     direction: rtl;
     color: var(--primary-blue);
 }
 
-/* --- تصميم الأزرار الاحترافي --- */
-
-/* الزر الأساسي (عرض الشهادة) */
+/* --- الأزرار الاحترافية --- */
 #search-btn {
     background: linear-gradient(135deg, var(--primary-blue), #34495e);
-    color: white;
-    border: none;
-    padding: 14px 28px;
-    font-size: 18px;
-    font-weight: 700;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: var(--transition);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    display: block;
-    width: 100%;
-    letter-spacing: 0.5px;
+    color: white; border: none; padding: 14px 28px; font-size: 18px;
+    font-weight: 700; border-radius: 12px; cursor: pointer;
+    transition: var(--transition); box-shadow: var(--shadow); width: 100%;
 }
 
-#search-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 15px rgba(44, 62, 80, 0.3);
-    filter: brightness(1.1);
-}
+#search-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(44, 62, 80, 0.2); }
 
-/* زر الطباعة (الأخضر الأنيق) */
 .main-btn-print {
     background: linear-gradient(135deg, var(--success-green), #2ecc71);
-    color: white;
-    border: none;
-    padding: 12px 40px;
-    font-size: 18px;
-    font-weight: 700;
-    border-radius: 50px; /* شكل بيضاوي شيك */
-    cursor: pointer;
-    transition: var(--transition);
-    margin: 20px auto;
-    display: block;
+    color: white; border: none; padding: 12px 45px; font-size: 18px;
+    font-weight: 700; border-radius: 50px; cursor: pointer;
+    transition: var(--transition); margin: 20px auto; display: block;
     box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
 }
 
-.main-btn-print:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
-}
+.main-btn-print:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(39, 174, 96, 0.3); }
 
-/* زر الإغلاق (تصميم شفاف وأنيق) */
 .close-btn {
-    background: rgba(231, 76, 60, 0.1);
-    color: var(--accent-red);
-    border: 2px solid var(--accent-red);
-    padding: 8px 20px;
-    font-size: 15px;
-    font-weight: 700;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: var(--transition);
+    background: rgba(231, 76, 60, 0.1); color: var(--accent-red);
+    border: 2px solid var(--accent-red); padding: 8px 20px;
+    font-size: 15px; font-weight: 700; border-radius: 8px;
+    cursor: pointer; transition: var(--transition);
 }
 
-.close-btn:hover {
-    background: var(--accent-red);
-    color: white;
-}
+.close-btn:hover { background: var(--accent-red); color: white; }
 
-/* رابط دخول الإدارة */
 .admin-btn-small {
-    text-decoration: none;
-    color: var(--primary-blue);
-    font-weight: 700;
-    border: 1.5px solid var(--primary-blue);
-    padding: 6px 18px;
-    border-radius: 25px;
-    font-size: 13px;
-    transition: var(--transition);
+    text-decoration: none; color: var(--primary-blue); font-weight: 700;
+    border: 1.5px solid var(--primary-blue); padding: 6px 18px;
+    border-radius: 25px; font-size: 13px; transition: var(--transition);
 }
 
-.admin-btn-small:hover {
-    background: var(--primary-blue);
-    color: white;
-}
+.admin-login-link { position: absolute; top: 15px; left: 15px; }
 
-/* --- تنسيق الشهادة للطباعة العرضية --- */
-
-.certificate-wrapper {
-    background: #fff;
-    width: 290mm;
-    margin: 10px auto;
-    padding: 5px;
-}
-
+/* --- تنسيق الشهادة --- */
+.certificate-wrapper { background: #fff; width: 290mm; margin: 10px auto; padding: 5px; }
 .cert-border {
-    border: 2px solid #000;
-    padding: 15px;
-    min-height: 185mm; /* لضمان صفحة واحدة بالعرض */
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
+    border: 2px solid #000; padding: 15px; min-height: 185mm;
+    display: flex; flex-direction: column; box-sizing: border-box;
 }
 
 .cert-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 2px solid #000;
-    padding-bottom: 8px;
-    margin-bottom: 12px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px;
 }
 
 .main-title { font-size: 28px; margin: 0; font-weight: 700; }
 .sub-title { font-size: 17px; margin: 3px 0; color: var(--accent-red); }
 .logo-img { width: 75px; }
 
-.student-info-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 18px;
-    font-weight: bold;
-    margin: 12px 0;
-}
+.student-info-row { display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; margin: 12px 0; }
 
-.grades-table-horizontal {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 10px 0;
-}
-
-.grades-table-horizontal th, .grades-table-horizontal td {
-    border: 1px solid #000;
-    padding: 8px 4px;
-    text-align: center;
-    font-size: 15px;
-}
-
+.grades-table-horizontal { width: 100%; border-collapse: collapse; margin: 10px 0; }
+.grades-table-horizontal th, .grades-table-horizontal td { border: 1px solid #000; padding: 8px 4px; text-align: center; font-size: 15px; }
 .grades-table-horizontal th { background-color: #f4f4f4; }
-.final-score-row td { font-size: 19px; font-weight: 700; }
 
-.cert-footer {
-    margin-top: auto;
-    padding-bottom: 10px;
-}
-
-.result-statement {
-    font-size: 19px;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 15px;
-}
-
+.cert-footer { margin-top: auto; padding-bottom: 10px; }
+.result-statement { font-size: 19px; font-weight: bold; text-align: center; margin-bottom: 15px; }
 .signature-section { display: flex; justify-content: flex-end; }
 .signature-img { width: 155px; }
 
-/* --- إعدادات البحث --- */
+/* --- البحث --- */
 .search-container {
-    background: #fff;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: var(--shadow);
-    max-width: 450px;
-    margin: 80px auto;
-    text-align: center;
+    background: #fff; padding: 40px; border-radius: 20px;
+    box-shadow: var(--shadow); max-width: 450px; margin: 80px auto; text-align: center;
 }
-
 .search-container input {
-    width: 100%;
-    padding: 15px;
-    margin-bottom: 20px;
-    border: 2px solid #eee;
-    border-radius: 12px;
-    font-size: 18px;
-    text-align: center;
-    transition: border-color 0.3s;
+    width: 100%; padding: 15px; margin-bottom: 20px; border: 2px solid #eee;
+    border-radius: 12px; font-size: 18px; text-align: center;
 }
 
-.search-container input:focus {
-    border-color: var(--primary-blue);
-    outline: none;
-}
-
-/* --- إعدادات الطباعة العرضية --- */
+/* --- إعدادات الطباعة العرضية (Landscape) --- */
 @media print {
     @page { size: A4 landscape; margin: 5mm; }
     body { background: #fff; }
-    .no-print { display: none !important; }
+    .no-print { display: none !important; } /* هنا يختفي زر الإدارة وزر الطباعة والإغلاق */
     .certificate-wrapper { width: 100%; margin: 0; padding: 0; }
     .cert-border { min-height: 190mm; border: 1px solid #000; }
 }
