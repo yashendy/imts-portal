@@ -172,10 +172,34 @@ document.getElementById("fetch-btn").addEventListener("click", async () => {
     }
 });
 
-// --- 4. الحفظ اليدوي ---
+// --- 4. الحفظ اليدوي (مع حماية الدرجات) ---
 document.getElementById("manual-form").addEventListener("submit", async (e) => {
     e.preventDefault();
+    
+    // 1. قراءة الدرجات أولاً لاختبارها
+    const arabic = processGrade(document.getElementById("m-arabic").value);
+    const math = processGrade(document.getElementById("m-math").value);
+    const english = processGrade(document.getElementById("m-english").value);
+    const science = processGrade(document.getElementById("m-science").value);
+    const religion = processGrade(document.getElementById("m-religion").value);
+    const social = processGrade(document.getElementById("m-Social").value);
+    const technology = processGrade(document.getElementById("m-technology").value);
+    const highlevel = processGrade(document.getElementById("m-highlevel").value);
+
+    // 2. التحقق من النهايات العظمى (Validation)
+    if (arabic !== "غ" && arabic > 20) return Swal.fire('خطأ في الإدخال', 'درجة العربي لا يمكن أن تتجاوز 20', 'error');
+    if (math !== "غ" && math > 15) return Swal.fire('خطأ في الإدخال', 'درجة الرياضيات لا يمكن أن تتجاوز 15', 'error');
+    if (english !== "غ" && english > 20) return Swal.fire('خطأ في الإدخال', 'درجة الإنجليزي لا يمكن أن تتجاوز 20', 'error');
+    if (science !== "غ" && science > 20) return Swal.fire('خطأ في الإدخال', 'درجة العلوم لا يمكن أن تتجاوز 20', 'error');
+    if (religion !== "غ" && religion > 20) return Swal.fire('خطأ في الإدخال', 'درجة التربية الدينية لا يمكن أن تتجاوز 20', 'error');
+    if (social !== "غ" && social > 20) return Swal.fire('خطأ في الإدخال', 'درجة الدراسات لا يمكن أن تتجاوز 20', 'error');
+    if (technology !== "غ" && technology > 15) return Swal.fire('خطأ في الإدخال', 'درجة التكنولوجيا لا يمكن أن تتجاوز 15', 'error');
+    if (highlevel !== "غ" && highlevel > 20) return Swal.fire('خطأ في الإدخال', 'درجة المستوى الرفيع لا يمكن أن تتجاوز 20', 'error');
+
+    // 3. لو الدرجات سليمة، يتم تجهيز البيانات للحفظ
     const id = document.getElementById("m-id").value.trim();
+    if (!id) return Swal.fire('تنبيه', 'يرجى إدخال رقم الجلوس أولاً', 'warning');
+
     const data = {
         name: document.getElementById("m-name").value.trim(),
         level: document.getElementById("m-level").value.trim(),
@@ -183,24 +207,31 @@ document.getElementById("manual-form").addEventListener("submit", async (e) => {
         rel_type: document.getElementById("m-religion-type").value,
         system: document.getElementById("m-system").value,
         isActive: document.getElementById("m-active").value === "true",
-        highlevel: processGrade(document.getElementById("m-highlevel").value),
-        arabic: processGrade(document.getElementById("m-arabic").value),
-        math: processGrade(document.getElementById("m-math").value),
-        english: processGrade(document.getElementById("m-english").value),
-        science: processGrade(document.getElementById("m-science").value),
-        religion: processGrade(document.getElementById("m-religion").value),
-        Social: processGrade(document.getElementById("m-Social").value),
-        technology: processGrade(document.getElementById("m-technology").value),
+        arabic: arabic,
+        math: math,
+        english: english,
+        science: science,
+        religion: religion,
+        Social: social,
+        technology: technology,
+        highlevel: highlevel,
         lastUpdated: new Date().toISOString()
     };
-    await setDoc(doc(db, "students", id), data);
-    Swal.fire({
-        title: 'تم الحفظ!',
-        text: 'تم تسجيل بيانات الطالب بنجاح',
-        icon: 'success',
-        confirmButtonText: 'استمرار',
-        confirmButtonColor: '#27ae60'
-    });
+    
+    // 4. الحفظ في فايربيز وإظهار إشعار النجاح
+    try {
+        await setDoc(doc(db, "students", id), data);
+        Swal.fire({
+            title: 'تم الحفظ!',
+            text: 'تم تسجيل بيانات الطالب بنجاح',
+            icon: 'success',
+            confirmButtonText: 'استمرار',
+            confirmButtonColor: '#27ae60'
+        });
+    } catch (error) {
+        console.error("Save Error:", error);
+        Swal.fire('حدث خطأ', 'لم يتم حفظ البيانات، يرجى المحاولة مرة أخرى', 'error');
+    }
 });
 
 // --- 5. ذكاء واجهة الإدخال اليدوي (Smart Form) ---
