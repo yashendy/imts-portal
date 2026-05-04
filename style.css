@@ -1,72 +1,155 @@
 :root {
     --primary-blue: #5C839F;
+    --accent-red: #B3393E;
+    --dark-text: #2c3e50;
 }
 
-body { font-family: 'Amiri', serif; margin: 0; direction: rtl; }
+body {
+    font-family: 'Amiri', serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    direction: rtl;
+}
 
+/* تنسيق حاوية البحث - يختفي عند الطباعة */
+.search-container {
+    background: #fff;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    max-width: 450px;
+    margin: 100px auto;
+    text-align: center;
+}
+
+.search-container input {
+    width: 100%;
+    padding: 12px;
+    margin: 20px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 18px;
+    text-align: center;
+}
+
+/* الشهادة - مهيئة للعرض الأفقي */
 .certificate-wrapper {
     background: #fff;
-    width: 210mm;
-    margin: 10px auto;
+    width: 285mm; /* عرض يناسب ورقة A4 بالعرض */
+    margin: 20px auto;
     padding: 10px;
+    box-sizing: border-box;
 }
 
 .cert-border {
     border: 3px solid #000;
-    padding: 15px;
-    min-height: 275mm; /* تقليل الارتفاع لضمان صفحة واحدة */
+    padding: 20px;
+    min-height: 190mm; /* ارتفاع مدروس ليناسب صفحة واحدة بالعرض */
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
+    position: relative;
 }
 
+/* الرأس */
 .cert-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 2px solid #000;
     padding-bottom: 10px;
+    margin-bottom: 15px;
 }
 
-.main-title { font-size: 28px; margin: 0; }
-.sub-title { font-size: 18px; margin: 5px 0; }
-.logo-img { width: 70px; }
+.main-title { font-size: 30px; margin: 0; color: var(--dark-text); }
+.sub-title { font-size: 18px; margin: 5px 0; color: var(--accent-red); }
+.logo-img { width: 85px; }
+.logo-text { font-size: 32px; font-weight: bold; }
 
+/* بيانات الطالب - موزعة عرضياً */
 .student-info-row {
     display: flex;
     justify-content: space-between;
-    font-size: 18px;
+    font-size: 19px;
     font-weight: bold;
     margin: 15px 0;
 }
 
+/* الجدول الأفقي */
 .grades-table-horizontal {
     width: 100%;
     border-collapse: collapse;
-    margin: 15px 0;
+    margin: 10px 0;
 }
 
 .grades-table-horizontal th, .grades-table-horizontal td {
-    border: 1px solid #000;
-    padding: 8px 4px;
+    border: 2px solid #000;
+    padding: 10px 4px;
     text-align: center;
-    font-size: 15px;
+    font-size: 17px;
     font-weight: bold;
 }
 
-.final-score-row td { font-size: 20px; background-color: #f9f9f9; }
+.grades-table-horizontal th { 
+    background-color: #f2f2f2; 
+}
 
-.cert-footer { margin-top: auto; padding-bottom: 20px; }
-.result-statement { font-size: 18px; font-weight: bold; text-align: center; }
-.signature-section { display: flex; justify-content: flex-end; }
-.signature-img { width: 160px; }
+/* تمييز صف درجة الطالب */
+.final-score-row td {
+    font-size: 22px;
+    background-color: #fcfcfc;
+}
+
+/* تذييل الشهادة */
+.cert-footer {
+    margin-top: auto; /* يدفع التذييل لأسفل الشهادة */
+    padding-top: 15px;
+}
+
+.result-statement {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.signature-section {
+    display: flex;
+    justify-content: flex-end;
+    text-align: center;
+}
+
+.signature-box p { margin: 0; font-weight: bold; font-size: 18px; }
+.signature-img { width: 170px; }
+
+/* أزرار التحكم */
+.admin-login-link { position: absolute; top: 10px; left: 10px; }
+.admin-btn-small { text-decoration: none; border: 1px solid var(--primary-blue); padding: 5px 10px; border-radius: 5px; color: var(--primary-blue); font-size: 14px; }
 
 .no-print { display: block; }
 
-/* إعدادات الطباعة الصارمة لصفحة واحدة */
+/* إعدادات الطباعة العرضية الصارمة (Landscape) */
 @media print {
-    @page { size: A4; margin: 5mm; }
-    body { background: #fff; }
+    @page { 
+        size: A4 landscape; /* إجبار المتصفح على اختيار الوضع الأفقي */
+        margin: 8mm; 
+    }
+    
+    body { background: #fff; margin: 0; }
+    
     .no-print { display: none !important; }
-    .certificate-wrapper { margin: 0; padding: 0; width: 100%; }
-    .cert-border { min-height: 280mm; border: 2px solid #000; }
+    
+    .certificate-wrapper { 
+        margin: 0; 
+        padding: 0; 
+        width: 100%; 
+        border: none;
+        box-shadow: none;
+    }
+
+    .cert-border { 
+        border: 2px solid #000;
+        min-height: 195mm; /* الارتفاع المثالي لورقة A4 عرضية لضمان صفحة واحدة */
+        page-break-inside: avoid;
+    }
 }
