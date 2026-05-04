@@ -11,7 +11,6 @@ body {
     direction: rtl;
 }
 
-/* البحث */
 .search-container {
     background: #fff;
     padding: 40px;
@@ -32,7 +31,6 @@ body {
     text-align: center;
 }
 
-/* الشهادة */
 .certificate-wrapper {
     background: #fff;
     width: 210mm;
@@ -43,7 +41,6 @@ body {
 .cert-border {
     border: 3px solid #000;
     padding: 20px;
-    position: relative;
     min-height: 280mm;
 }
 
@@ -58,66 +55,42 @@ body {
 
 .main-title { font-size: 32px; margin: 0; }
 .sub-title { font-size: 20px; margin: 5px 0; }
-.logo-img { width: 100px; }
+.logo-img { width: 80px; }
 .logo-text { font-size: 35px; font-weight: bold; }
 
 .student-info-row {
     display: flex;
     justify-content: space-between;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: bold;
-    margin-bottom: 20px;
+    margin: 20px 0;
 }
 
-/* الجدول الأفقي */
+/* تنسيق الجدول الأفقي */
 .grades-table-horizontal {
     width: 100%;
     border-collapse: collapse;
-    margin: 20px 0;
+    margin: 30px 0;
 }
 
 .grades-table-horizontal th, .grades-table-horizontal td {
     border: 2px solid #000;
-    padding: 12px 5px;
+    padding: 10px 5px;
     text-align: center;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
 }
 
 .grades-table-horizontal th { background-color: #f2f2f2; }
 
-/* صف درجة الطالب */
-.student-score-row td {
-    font-size: 24px;
-    background-color: #f9f9f9;
-}
+.cert-footer { margin-top: 40px; }
+.result-statement { font-size: 20px; font-weight: bold; text-align: right; margin-bottom: 30px; }
+.signature-section { display: flex; justify-content: flex-end; text-align: center; }
+.signature-img { width: 180px; }
 
-.cert-footer {
-    margin-top: 40px;
-}
-
-.result-statement {
-    font-size: 22px;
-    font-weight: bold;
-    text-align: right;
-    margin-bottom: 30px;
-}
-
-.signature-section {
-    display: flex;
-    justify-content: flex-end;
-    text-align: center;
-}
-
-.signature-img { width: 180px; display: block; }
-
-/* أزرار الإدارة والطباعة */
 .admin-login-link { position: absolute; top: 10px; left: 10px; }
-.admin-btn-small { text-decoration: none; border: 1px solid var(--primary-blue); padding: 5px 10px; border-radius: 5px; }
+.admin-btn-small { text-decoration: none; border: 1px solid var(--primary-blue); padding: 5px 10px; border-radius: 5px; color: var(--primary-blue); }
 
-.no-print { display: block; }
-
-/* إعدادات الطباعة */
 @media print {
     body { background: #fff; }
     .no-print { display: none !important; }
