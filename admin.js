@@ -105,13 +105,25 @@ document.getElementById("upload-all-btn").addEventListener("click", async () => 
             await batch.commit();
         }
 
-        alert(`✅ تم اعتماد ورفع ${totalUploaded} طالب بنجاح!`);
+        Swal.fire({
+            title: 'عملية ناجحة!',
+            text: `تم اعتماد ورفع ${totalUploaded} طالب بنجاح!`,
+            icon: 'success',
+            confirmButtonText: 'حسناً',
+            confirmButtonColor: '#1A75BB'
+        });
         document.getElementById("preview-section").style.display = "none";
         excelData = []; // تفريغ الذاكرة بعد الرفع
         document.getElementById("excel-file").value = ""; // تفريغ حقل الملف
     } catch (error) {
         console.error("Upload Error:", error);
-        alert("❌ فشل الرفع: تأكد من صحة البيانات أو اتصالك بالإنترنت.");
+       Swal.fire({
+            title: 'حدث خطأ!',
+            text: 'فشل الرفع: تأكد من صحة البيانات أو اتصالك بالإنترنت.',
+            icon: 'error',
+            confirmButtonText: 'حسناً',
+            confirmButtonColor: '#B3393E'
+        });
     } finally {
         // إرجاع الزر لحالته الطبيعية سواء نجح الرفع أو فشل
         btn.disabled = false;
@@ -123,7 +135,9 @@ document.getElementById("upload-all-btn").addEventListener("click", async () => 
 document.getElementById("fetch-btn").addEventListener("click", async () => {
     const id = document.getElementById("quick-search").value.trim();
     if(!id) return;
+    
     const docSnap = await getDoc(doc(db, "students", id));
+    
     if (docSnap.exists()) {
         const d = docSnap.data();
         document.getElementById("m-id").value = id;
@@ -140,9 +154,21 @@ document.getElementById("fetch-btn").addEventListener("click", async () => {
             const el = document.getElementById(`m-${f}`);
             if (el) el.value = d[f] ?? 0;
         });
+        
         // تحديث شكل الواجهة بناءً على بيانات الطالب المستدعاة
         updateFormVisibility();
-        alert("تم استرجاع البيانات بنجاح");
+        
+        Swal.fire({
+            title: 'تم الاسترجاع بنجاح',
+            icon: 'success',
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000
+        });
+    } else {
+        // الـ else مكانها الصحيح هنا لو الطالب مش موجود
+        Swal.fire('غير موجود', 'لم يتم العثور على طالب بهذا الرقم', 'warning');
     }
 });
 
@@ -168,7 +194,13 @@ document.getElementById("manual-form").addEventListener("submit", async (e) => {
         lastUpdated: new Date().toISOString()
     };
     await setDoc(doc(db, "students", id), data);
-    alert("✅ تم حفظ البيانات بنجاح");
+    Swal.fire({
+        title: 'تم الحفظ!',
+        text: 'تم تسجيل بيانات الطالب بنجاح',
+        icon: 'success',
+        confirmButtonText: 'استمرار',
+        confirmButtonColor: '#27ae60'
+    });
 });
 
 // --- 5. ذكاء واجهة الإدخال اليدوي (Smart Form) ---
