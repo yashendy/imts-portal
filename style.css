@@ -17,6 +17,28 @@ body {
     direction: rtl;
 }
 
+/* رابط الإدارة أعلى يسار الصفحة */
+.admin-login-link {
+    position: absolute;
+    top: 20px;
+    left: 20px; /* تم التعديل لليسار */
+}
+
+.admin-btn-small {
+    text-decoration: none;
+    color: var(--primary-blue);
+    border: 1px solid var(--primary-blue);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.admin-btn-small:hover {
+    background: var(--primary-blue);
+    color: #fff;
+}
+
 .search-container {
     background: #fff;
     padding: 40px;
@@ -82,12 +104,12 @@ button:active {
 }
 
 .logo-right { width: 120px; }
-.header-text h1 { font-size: 35px; margin: 0; }
+.header-text h1 { font-size: 35px; margin: 0; color: var(--dark-text); }
 .header-text h2 { font-size: 20px; color: var(--accent-red); }
 
 .cert-body { display: flex; gap: 20px; }
 
-/* تنسيق الكارت الجانبي المطور */
+/* تصغير الكارت الجانبي ليعطي مساحة للجملة الختامية */
 .sidebar {
     width: 25%;
     background-color: var(--card-bg);
@@ -120,7 +142,7 @@ button:active {
 .grades-table th { background: var(--primary-blue); color: #fff; padding: 12px; }
 .grades-table td { border: 1px solid #dee2e6; padding: 10px; text-align: center; }
 
-/* تنسيق التذييل بكامل العرض */
+/* تنسيق منطقة الجملة الختامية بكامل العرض */
 .full-width-footer {
     width: 100%;
     margin-top: 20px;
@@ -146,8 +168,10 @@ button:active {
     padding: 15px 50px;
 }
 
+/* إعدادات الطباعة */
 @media print {
     @page { size: A4; margin: 0; }
+    body { background: #fff; padding: 0; align-items: flex-start; }
     .search-container, #print-btn, .close-cert-container, .admin-login-link { display: none !important; }
-    .certificate-wrapper { margin: 0; width: 100%; }
+    .certificate-wrapper { margin: 0; border: none; width: 100%; }
 }
