@@ -97,3 +97,95 @@ body {
     box-shadow: 0 4px 15px rgba(26, 117, 187, 0.3);
 }
 .main-btn:hover { background: #155a8a; }
+
+/* =========================================
+   تحسينات الواجهة (القوائم، البحث، والأزرار)
+   ========================================= */
+
+/* 1. تحسين القوائم المنسدلة (Dropdowns) */
+.input-group select, .status-select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    font-family: 'Cairo', sans-serif;
+    font-size: 15px;
+    color: var(--primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.input-group select:focus, .status-select:focus {
+    border-color: var(--accent);
+    background-color: #fff;
+    box-shadow: 0 0 8px rgba(26, 117, 187, 0.2);
+}
+
+/* 2. تحسين شريط البحث اليدوي والزر الخاص به */
+.admin-search-bar {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+}
+
+.admin-search-bar input {
+    flex: 1;
+    padding: 15px 20px;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: 'Cairo', sans-serif;
+    transition: 0.3s;
+}
+
+.admin-search-bar input:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.admin-search-bar button {
+    background: linear-gradient(to bottom, var(--accent), #155a8a);
+    color: white;
+    border: none;
+    padding: 0 30px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    box-shadow: 0 4px 0 #0d4266;
+    font-family: 'Cairo', sans-serif;
+}
+
+.admin-search-bar button:active {
+    box-shadow: 0 0 0 #0d4266;
+    transform: translateY(4px);
+}
+
+/* 3. تحسين زر تسجيل الخروج في الهيدر */
+.logout-btn {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 25px;
+    border-radius: 25px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+}
+
+.logout-btn:hover {
+    background: #e74c3c; /* لون أحمر تحذيري شيك عند المرور */
+    border-color: #e74c3c;
+    box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+}
