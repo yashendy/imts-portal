@@ -55,48 +55,67 @@ document.getElementById("excel-file").addEventListener("change", function(e) {
     reader.readAsArrayBuffer(file);
 });
 
-// --- 2. اعتماد ورفع البيانات ---
+// --- 2. اعتماد ورفع البيانات (مطور ليدعم الأعداد الكبيرة) ---
 document.getElementById("upload-all-btn").addEventListener("click", async () => {
     if (excelData.length === 0) return;
-    const batch = writeBatch(db);
-    let count = 0;
+
+    // تغيير نص الزر لمنع الضغط المتكرر
+    const btn = document.getElementById("upload-all-btn");
+    btn.disabled = true;
+    btn.innerText = "جاري الرفع، يرجى الانتظار...";
 
     try {
-        excelData.forEach((row) => {
-            const idVal = getCellValue(row, ["id", "جلوس"]);
-            if (!idVal) return;
-            const id = String(idVal).trim();
+        // تقسيم البيانات لدفعات كل دفعة 400 طالب لتجنب حد فايربيز الأقصى (500)
+        const chunkSize = 400;
+        let totalUploaded = 0;
 
-            const studentData = {
-                name: String(getCellValue(row, ["name", "اسم"]) || "").trim(),
-                level: String(getCellValue(row, ["level", "الصف"]) || "").trim(),
-                gender: getCellValue(row, ["gender", "النوع"]) || "ذكر",
-                rel_type: getCellValue(row, ["rel_type", "الديانة"]) || "مسلم",
-                system: getCellValue(row, ["system", "النظام"]) || "عربي",
-                isActive: String(getCellValue(row, ["isActive"]) || "").toLowerCase() !== "false",
-                arabic: processGrade(getCellValue(row, ["arabic", "عربي"])),
-                math: processGrade(getCellValue(row, ["math", "رياضيات"])),
-                english: processGrade(getCellValue(row, ["english", "إنجليزي"])),
-                science: processGrade(getCellValue(row, ["science", "علوم"])),
-                religion: processGrade(getCellValue(row, ["religion", "دين"])),
-                Social: processGrade(getCellValue(row, ["social", "دراسات"])),
-                technology: processGrade(getCellValue(row, ["technology", "تكنولوجيا"])),
-                highlevel: processGrade(getCellValue(row, ["highlevel", "رفيعة", "مستوى"])),
-                lastUpdated: new Date().toISOString()
-            };
+        for (let i = 0; i < excelData.length; i += chunkSize) {
+            const chunk = excelData.slice(i, i + chunkSize);
+            const batch = writeBatch(db);
 
-            const ref = doc(db, "students", id);
-            batch.set(ref, studentData);
-            count++;
-        });
+            chunk.forEach((row) => {
+                const idVal = getCellValue(row, ["id", "جلوس", "رقم"]);
+                if (!idVal) return;
+                const id = String(idVal).trim();
 
-        await batch.commit();
-        alert(`✅ تم اعتماد ورفع ${count} طالب بنجاح!`);
+                const studentData = {
+                    name: String(getCellValue(row, ["name", "اسم"]) || "").trim(),
+                    level: String(getCellValue(row, ["level", "الصف"]) || "").trim(),
+                    gender: getCellValue(row, ["gender", "النوع", "الجنس"]) || "ذكر",
+                    rel_type: getCellValue(row, ["rel_type", "الديانة", "ديانة"]) || "مسلم",
+                    system: getCellValue(row, ["system", "النظام", "القسم"]) || "عربي",
+                    isActive: String(getCellValue(row, ["isActive", "حالة"]) || "").toLowerCase() !== "false",
+                    arabic: processGrade(getCellValue(row, ["arabic", "عربي"])),
+                    math: processGrade(getCellValue(row, ["math", "رياضيات"])),
+                    english: processGrade(getCellValue(row, ["english", "إنجليزي", "انجليزي"])),
+                    science: processGrade(getCellValue(row, ["science", "علوم"])),
+                    religion: processGrade(getCellValue(row, ["religion", "دين", "تربية دينية"])),
+                    Social: processGrade(getCellValue(row, ["social", "دراسات", "اجتماعية"])),
+                    technology: processGrade(getCellValue(row, ["technology", "تكنولوجيا", "حاسب"])),
+                    highlevel: processGrade(getCellValue(row, ["highlevel", "رفيعة", "مستوى"])),
+                    lastUpdated: new Date().toISOString()
+                };
+
+                const ref = doc(db, "students", id);
+                batch.set(ref, studentData);
+                totalUploaded++;
+            });
+
+            // رفع الدفعة الحالية والانتظار حتى تكتمل قبل البدء في الدفعة التالية
+            await batch.commit();
+        }
+
+        alert(`✅ تم اعتماد ورفع ${totalUploaded} طالب بنجاح!`);
         document.getElementById("preview-section").style.display = "none";
-        excelData = [];
+        excelData = []; // تفريغ الذاكرة بعد الرفع
+        document.getElementById("excel-file").value = ""; // تفريغ حقل الملف
     } catch (error) {
         console.error("Upload Error:", error);
-        alert("❌ فشل الرفع: تأكد من صحة البيانات.");
+        alert("❌ فشل الرفع: تأكد من صحة البيانات أو اتصالك بالإنترنت.");
+    } finally {
+        // إرجاع الزر لحالته الطبيعية سواء نجح الرفع أو فشل
+        btn.disabled = false;
+        btn.innerText = "اعتماد ورفع البيانات";
     }
 });
 
