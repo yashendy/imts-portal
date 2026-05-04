@@ -1,81 +1,141 @@
 :root {
-    --primary-blue: #5C839F;
-    --accent-red: #B3393E;
-    --dark-text: #2c3e50;
+    --primary-blue: #2c3e50;
+    --accent-red: #e74c3c;
+    --success-green: #27ae60;
+    --gold: #d4af37;
+    --light-bg: #f8f9fa;
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body {
     font-family: 'Amiri', serif;
-    background-color: #f4f4f4;
+    background-color: #f0f2f5;
     margin: 0;
     direction: rtl;
+    color: var(--primary-blue);
 }
 
-/* تنسيق حاوية البحث - يختفي عند الطباعة */
-.search-container {
-    background: #fff;
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    max-width: 450px;
-    margin: 100px auto;
-    text-align: center;
-}
+/* --- تصميم الأزرار الاحترافي --- */
 
-.search-container input {
-    width: 100%;
-    padding: 12px;
-    margin: 20px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+/* الزر الأساسي (عرض الشهادة) */
+#search-btn {
+    background: linear-gradient(135deg, var(--primary-blue), #34495e);
+    color: white;
+    border: none;
+    padding: 14px 28px;
     font-size: 18px;
-    text-align: center;
+    font-weight: 700;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: block;
+    width: 100%;
+    letter-spacing: 0.5px;
 }
 
-/* الشهادة - مهيئة للعرض الأفقي */
+#search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(44, 62, 80, 0.3);
+    filter: brightness(1.1);
+}
+
+/* زر الطباعة (الأخضر الأنيق) */
+.main-btn-print {
+    background: linear-gradient(135deg, var(--success-green), #2ecc71);
+    color: white;
+    border: none;
+    padding: 12px 40px;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 50px; /* شكل بيضاوي شيك */
+    cursor: pointer;
+    transition: var(--transition);
+    margin: 20px auto;
+    display: block;
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+}
+
+.main-btn-print:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+}
+
+/* زر الإغلاق (تصميم شفاف وأنيق) */
+.close-btn {
+    background: rgba(231, 76, 60, 0.1);
+    color: var(--accent-red);
+    border: 2px solid var(--accent-red);
+    padding: 8px 20px;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.close-btn:hover {
+    background: var(--accent-red);
+    color: white;
+}
+
+/* رابط دخول الإدارة */
+.admin-btn-small {
+    text-decoration: none;
+    color: var(--primary-blue);
+    font-weight: 700;
+    border: 1.5px solid var(--primary-blue);
+    padding: 6px 18px;
+    border-radius: 25px;
+    font-size: 13px;
+    transition: var(--transition);
+}
+
+.admin-btn-small:hover {
+    background: var(--primary-blue);
+    color: white;
+}
+
+/* --- تنسيق الشهادة للطباعة العرضية --- */
+
 .certificate-wrapper {
     background: #fff;
-    width: 285mm; /* عرض يناسب ورقة A4 بالعرض */
-    margin: 20px auto;
-    padding: 10px;
-    box-sizing: border-box;
+    width: 290mm;
+    margin: 10px auto;
+    padding: 5px;
 }
 
 .cert-border {
-    border: 3px solid #000;
-    padding: 20px;
-    min-height: 190mm; /* ارتفاع مدروس ليناسب صفحة واحدة بالعرض */
+    border: 2px solid #000;
+    padding: 15px;
+    min-height: 185mm; /* لضمان صفحة واحدة بالعرض */
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
-    position: relative;
 }
 
-/* الرأس */
 .cert-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 2px solid #000;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
 }
 
-.main-title { font-size: 30px; margin: 0; color: var(--dark-text); }
-.sub-title { font-size: 18px; margin: 5px 0; color: var(--accent-red); }
-.logo-img { width: 85px; }
-.logo-text { font-size: 32px; font-weight: bold; }
+.main-title { font-size: 28px; margin: 0; font-weight: 700; }
+.sub-title { font-size: 17px; margin: 3px 0; color: var(--accent-red); }
+.logo-img { width: 75px; }
 
-/* بيانات الطالب - موزعة عرضياً */
 .student-info-row {
     display: flex;
     justify-content: space-between;
-    font-size: 19px;
+    font-size: 18px;
     font-weight: bold;
-    margin: 15px 0;
+    margin: 12px 0;
 }
 
-/* الجدول الأفقي */
 .grades-table-horizontal {
     width: 100%;
     border-collapse: collapse;
@@ -83,73 +143,62 @@ body {
 }
 
 .grades-table-horizontal th, .grades-table-horizontal td {
-    border: 2px solid #000;
-    padding: 10px 4px;
+    border: 1px solid #000;
+    padding: 8px 4px;
     text-align: center;
-    font-size: 17px;
-    font-weight: bold;
+    font-size: 15px;
 }
 
-.grades-table-horizontal th { 
-    background-color: #f2f2f2; 
-}
+.grades-table-horizontal th { background-color: #f4f4f4; }
+.final-score-row td { font-size: 19px; font-weight: 700; }
 
-/* تمييز صف درجة الطالب */
-.final-score-row td {
-    font-size: 22px;
-    background-color: #fcfcfc;
-}
-
-/* تذييل الشهادة */
 .cert-footer {
-    margin-top: auto; /* يدفع التذييل لأسفل الشهادة */
-    padding-top: 15px;
+    margin-top: auto;
+    padding-bottom: 10px;
 }
 
 .result-statement {
-    font-size: 20px;
+    font-size: 19px;
     font-weight: bold;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
-.signature-section {
-    display: flex;
-    justify-content: flex-end;
+.signature-section { display: flex; justify-content: flex-end; }
+.signature-img { width: 155px; }
+
+/* --- إعدادات البحث --- */
+.search-container {
+    background: #fff;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    max-width: 450px;
+    margin: 80px auto;
     text-align: center;
 }
 
-.signature-box p { margin: 0; font-weight: bold; font-size: 18px; }
-.signature-img { width: 170px; }
+.search-container input {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 2px solid #eee;
+    border-radius: 12px;
+    font-size: 18px;
+    text-align: center;
+    transition: border-color 0.3s;
+}
 
-/* أزرار التحكم */
-.admin-login-link { position: absolute; top: 10px; left: 10px; }
-.admin-btn-small { text-decoration: none; border: 1px solid var(--primary-blue); padding: 5px 10px; border-radius: 5px; color: var(--primary-blue); font-size: 14px; }
+.search-container input:focus {
+    border-color: var(--primary-blue);
+    outline: none;
+}
 
-.no-print { display: block; }
-
-/* إعدادات الطباعة العرضية الصارمة (Landscape) */
+/* --- إعدادات الطباعة العرضية --- */
 @media print {
-    @page { 
-        size: A4 landscape; /* إجبار المتصفح على اختيار الوضع الأفقي */
-        margin: 8mm; 
-    }
-    
-    body { background: #fff; margin: 0; }
-    
+    @page { size: A4 landscape; margin: 5mm; }
+    body { background: #fff; }
     .no-print { display: none !important; }
-    
-    .certificate-wrapper { 
-        margin: 0; 
-        padding: 0; 
-        width: 100%; 
-        border: none;
-        box-shadow: none;
-    }
-
-    .cert-border { 
-        border: 2px solid #000;
-        min-height: 195mm; /* الارتفاع المثالي لورقة A4 عرضية لضمان صفحة واحدة */
-        page-break-inside: avoid;
-    }
+    .certificate-wrapper { width: 100%; margin: 0; padding: 0; }
+    .cert-border { min-height: 190mm; border: 1px solid #000; }
 }
