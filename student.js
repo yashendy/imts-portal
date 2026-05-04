@@ -91,7 +91,6 @@ document.getElementById("search-btn").addEventListener("click", async () => {
             const finalEval = totalObtained >= (totalMax * 0.9) ? "ممتاز" : "جيد جداً";
             
             if (document.getElementById("total-eval")) document.getElementById("total-eval").textContent = finalEval;
-            if (document.getElementById("cert-total-eval")) document.getElementById("cert-total-eval").textContent = finalEval;
             
             if (document.getElementById("statement")) {
                 document.getElementById("statement").innerHTML = `الطالب/ ${d.name} تم اجتياز الاختبارات بنجاح وحصل على تقدير عام: ${finalEval}`;
@@ -103,4 +102,14 @@ document.getElementById("search-btn").addEventListener("click", async () => {
     } catch (err) {
         console.error("Error fetching student data:", err);
     }
+});
+
+// تفعيل زر إغلاق الشهادة والعودة للبحث
+document.getElementById("close-cert-btn").addEventListener("click", () => {
+    document.getElementById("certificate-section").style.display = "none";
+    document.getElementById("search-section").style.display = "block";
+    
+    // تفريغ حقل البحث عشان يكون جاهز لرقم الجلوس الجديد
+    document.getElementById("student-id-input").value = "";
+    document.getElementById("error-msg").innerText = ""; 
 });
