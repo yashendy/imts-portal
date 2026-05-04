@@ -8,19 +8,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- رابط دخول الإدارة -->
     <div class="admin-login-link">
         <a href="login.html" class="admin-btn-small">دخول الإدارة</a>
     </div>
 
-    <!-- قسم البحث -->
     <div id="search-section" class="search-container">
         <h2 class="title-diwani">استعلام نتائج معهد IMTS</h2>
         <input type="text" id="student-id-input" placeholder="أدخل رقم الجلوس">
         <button id="search-btn">عرض الشهادة الرسمية</button>
     </div>
 
-    <!-- قسم الشهادة -->
     <div id="certificate-section" class="certificate-wrapper" style="display: none;">
         <div class="close-cert-container no-print">
             <button id="close-cert-btn" class="close-btn">× إغلاق الشهادة والعودة للبحث</button>
@@ -29,7 +26,7 @@
         <div class="cert-border">
             <div class="cert-header">
                 <div class="header-logo-left">
-                    <img src="logo.png" alt="شعار المعهد" class="logo-img">
+                    <img src="logo.png" alt="شعار" class="logo-img">
                 </div>
                 <div class="header-text-center">
                     <h1 class="main-title">معهد الدراسات الإدارية والفنية</h1>
@@ -41,20 +38,17 @@
             </div>
 
             <div class="student-info-row">
-                <p><strong>اسم الطالب:</strong> <span id="cert-name">........................</span></p>
-                <p><strong>الصف:</strong> <span id="cert-level">................</span></p>
-                <p><strong>الشعبة:</strong> <span id="cert-system">................</span></p>
-                <p><strong>رقم الجلوس:</strong> <span id="cert-id">................</span></p>
+                <p><strong>اسم الطالب:</strong> <span id="cert-name"></span></p>
+                <p><strong>الصف:</strong> <span id="cert-level"></span></p>
+                <p><strong>الشعبة:</strong> <span id="cert-system"></span></p>
+                <p><strong>رقم الجلوس:</strong> <span id="cert-id"></span></p>
             </div>
 
             <div class="main-content">
-                <table class="grades-table-horizontal">
-                    <thead id="table-head">
-                        <!-- يتم توليده عبر JS -->
-                    </thead>
-                    <tbody id="table-body">
-                        <!-- يتم توليده عبر JS -->
-                    </tbody>
+                <!-- هذا هو الجزء الأهم الذي كان ناقصاً -->
+                <table id="grades-table-main" class="grades-table-horizontal">
+                    <thead id="table-head"></thead>
+                    <tbody id="table-body"></tbody>
                 </table>
             </div>
 
@@ -72,7 +66,6 @@
         </div>
     </div>
 
-    <!-- استدعاء ملف الجافاسكريبت مع رقم نسخة لمنع الكاش -->
-    <script type="module" src="student.js?v=1.2"></script>
+    <script type="module" src="student.js?v=1.3"></script>
 </body>
 </html>
