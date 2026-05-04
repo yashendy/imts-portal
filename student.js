@@ -1,10 +1,10 @@
 import { db } from "./firebase-config.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
-// دالة تقييم مرنة تعتمد على النسبة المئوية للدرجة
+// دالة التقييم بناءً على النسبة المئوية
 function getEval(score, maxForThisSubject) {
     if (score === "غ") return "غائب";
-    if (isNaN(score) || score === null || score === "") return "ـ"; 
+    if (isNaN(score) || score === null || score === "" || score === undefined) return "ـ"; 
 
     const s = Number(score);
     const percentage = (s / maxForThisSubject) * 100;
@@ -29,74 +29,69 @@ document.getElementById("search-btn").addEventListener("click", async () => {
                 return;
             }
 
-            // --- 1. إعدادات الدرجات النهائية الثابتة لكل صف ---
+            // --- 1. إعدادات الدرجات النهائية الثابتة ---
             const maxGradesConfig = {
                 "الرابع": { arabic: 20, math: 15, english: 20, science: 20, religion: 20, social: 20, tech: 15, high: 20 },
                 "الخامس": { arabic: 20, math: 20, english: 20, science: 20, religion: 20, social: 20, tech: 20, high: 20 },
                 "السادس": { arabic: 20, math: 20, english: 20, science: 20, religion: 20, social: 20, tech: 20, high: 20 }
             };
 
-            const currentMax = maxGradesConfig[d.level] || maxGradesConfig["الرابع"];
+            // تنظيف نص الصف لضمان المطابقة (مثلاً "خامس" تصبح "الخامس" إذا لزم الأمر)
+            let levelKey = String(d.level || "").trim();
+            if (levelKey === "خامس") levelKey = "الخامس";
+            if (levelKey === "رابع") levelKey = "الرابع";
+            if (levelKey === "سادس") levelKey = "السادس";
+
+            const currentMax = maxGradesConfig[levelKey] || maxGradesConfig["الرابع"];
             const isLang = d.system === "لغات";
 
             document.getElementById("certificate-section").style.display = "block";
             document.getElementById("search-section").style.display = "none";
 
-            // تحديث البيانات الأساسية للطالب
-            const elements = {
-                "cert-name": d.name,
-                "cert-level": d.level,
-                "cert-system": d.system || "عربي",
-                "cert-id": id
-            };
+            // تحديث البيانات الأساسية
+            document.getElementById("cert-name").textContent = d.name;
+            document.getElementById("cert-level").textContent = d.level;
+            document.getElementById("cert-system").textContent = d.system || "عربي";
+            document.getElementById("cert-id").textContent = id;
 
-            for (let elId in elements) {
-                const el = document.getElementById(elId);
-                if (el) el.textContent = elements[elId];
-            }
-
-            // --- 2. بناء مصفوفة المواد مع معالجة احتمالات أسماء الحقول ---
+            // --- 2. بناء مصفوفة المواد مع معالجة الأسماء في Firebase ---
             let subjects = [
                 { n: "اللغة العربية", v: d.arabic, m: currentMax.arabic },
                 { n: isLang ? "Math" : "الرياضيات", v: d.math, m: currentMax.math },
                 { n: isLang ? "English (AL)" : "اللغة الإنجليزية", v: d.english, m: currentMax.english },
                 { n: isLang ? "Science" : "العلوم", v: d.science, m: currentMax.science },
                 { n: "التربية الدينية", v: d.religion, m: currentMax.religion },
-                // معالجة مشكلة Social كبير أو صغير
                 { n: "الدراسات الاجتماعية", v: (d.Social !== undefined ? d.Social : d.social), m: currentMax.social },
-                // معالجة مشكلة technology أو tech
                 { n: isLang ? "ICT" : "تكنولوجيا المعلومات", v: (d.technology !== undefined ? d.technology : d.tech), m: currentMax.tech }
             ];
 
-            // --- 3. الفلترة الذكية (الاستثناءات) ---
-            
             // استثناء الدين للمسيحي
             if (d.rel_type === "مسيحي") {
                 subjects = subjects.filter(sub => sub.n !== "التربية الدينية");
             }
 
-            // إضافة المستوى الرفيع فقط لو النظام لغات
+            // إضافة المستوى الرفيع للغات فقط
             if (isLang && d.highlevel !== undefined) {
                 subjects.push({ n: "High Level", v: d.highlevel, m: currentMax.high });
             }
 
-            // --- 4. حساب المجاميع من المواد المتبقية فقط ---
+            // --- 3. الحسابات النهائية ---
             let totalObtained = 0;
-            let totalMax = 0;
+            let totalMax = 0; 
             let html = "";
 
             subjects.forEach(s => {
-                let displayValue = s.v;
-                let displayEval = getEval(s.v, s.m);
-                
-                // إضافة الدرجة النهائية للمادة إلى إجمالي المجموع الكلي
-                totalMax += (s.m || 0);
+                let val = s.v;
+                // حساب المجموع الكلي من الإعدادات m لضمان الوصول لـ 140
+                totalMax += Number(s.m || 20); 
 
-                if (s.v === "غ" || isNaN(s.v) || s.v === null || s.v === "") {
-                    displayValue = "غ";
-                    displayEval = "ـ";
-                } else {
-                    totalObtained += Number(s.v) || 0;
+                if (val === undefined || val === null || val === "") val = 0;
+
+                let displayValue = (val === "غ") ? "غ" : val;
+                let displayEval = getEval(val, s.m);
+
+                if (val !== "غ") {
+                    totalObtained += Number(val) || 0;
                 }
                 
                 html += `<tr><td>${s.n}</td><td>${displayValue}</td><td>${displayEval}</td></tr>`;
@@ -104,29 +99,23 @@ document.getElementById("search-btn").addEventListener("click", async () => {
 
             document.getElementById("grades-body").innerHTML = html;
             
-            // تحديث خانة المجموع في الجدول
+            // تحديث خانة المجموع
             const totalScoreEl = document.getElementById("total-score");
             if (totalScoreEl) {
-                // سيظهر الآن المجموع 140 لطلاب العربي في الصف الخامس (7 مواد × 20)
                 totalScoreEl.parentElement.innerHTML = `<td><strong>المجموع الكلي</strong></td><td><strong>${totalObtained}</strong> / ${totalMax}</td><td id="total-eval"></td>`;
             }
 
-            // --- 5. التقدير العام والبيان النهائي ---
+            // التقدير العام والبيان
             const finalPercentage = (totalObtained / totalMax) * 100;
             let finalEval = "جيد"; 
-            
             if (finalPercentage >= 85) finalEval = "ممتاز";
             else if (finalPercentage >= 75) finalEval = "جيد جداً";
             
-            if (document.getElementById("total-eval")) {
-                document.getElementById("total-eval").textContent = finalEval;
-            }
+            if (document.getElementById("total-eval")) document.getElementById("total-eval").textContent = finalEval;
             
             if (document.getElementById("statement")) {
                 const prefix = (d.gender === "أنثى") ? "الطالبة/" : "الطالب/";
-                const verb = (d.gender === "أنثى") ? "اجتازت" : "اجتاز";
-                const preposition = (d.gender === "أنثى") ? "وحصلت" : "وحصل";
-                document.getElementById("statement").innerHTML = `${prefix} ${d.name} ${verb} الاختبارات بنجاح ${preposition} على تقدير عام: ${finalEval}`;
+                document.getElementById("statement").innerHTML = `${prefix} ${d.name} اجتاز الاختبارات بنجاح وحصل على تقدير عام: ${finalEval}`;
             }
 
         } else {
@@ -134,21 +123,16 @@ document.getElementById("search-btn").addEventListener("click", async () => {
         }
     } catch (err) {
         console.error("Error fetching student data:", err);
-        alert("حدث خطأ أثناء جلب البيانات، يرجى التحقق من الاتصال.");
     }
 });
 
-// تفعيل زر إغلاق الشهادة
+// أزرار التحكم
 document.getElementById("close-cert-btn").addEventListener("click", () => {
     document.getElementById("certificate-section").style.display = "none";
     document.getElementById("search-section").style.display = "block";
     document.getElementById("student-id-input").value = "";
 });
 
-// تفعيل زر الطباعة
-const printBtn = document.getElementById("print-btn");
-if (printBtn) {
-    printBtn.addEventListener("click", () => {
-        window.print();
-    });
+if (document.getElementById("print-btn")) {
+    document.getElementById("print-btn").addEventListener("click", () => window.print());
 }
