@@ -1,5 +1,5 @@
 /* =========================================
-    الهوية البصرية والألوان (Root)
+    إعدادات الألوان والخطوط (Root)
    ========================================= */
 :root {
     --primary: #2c3e50;
@@ -7,8 +7,9 @@
     --success: #27ae60;
     --danger: #e74c3c;
     --bg: #f4f7f9;
+    --white: #ffffff;
+    --border: #e2e8f0;
     --shadow: 0 10px 25px rgba(0,0,0,0.1);
-    --transition: all 0.3s ease;
 }
 
 body {
@@ -20,29 +21,27 @@ body {
 
 .admin-container {
     max-width: 1000px; margin: auto;
-    background: #fff; border-radius: 15px;
+    background: var(--white); border-radius: 15px;
     box-shadow: var(--shadow); overflow: hidden;
 }
 
 /* =========================================
-    الهيدر وزر تسجيل الخروج (المصلح)
+    الهيدر وزر تسجيل الخروج
    ========================================= */
 .admin-header {
     background: var(--primary); color: #fff;
-    padding: 40px 20px; text-align: center;
-    position: relative;
+    padding: 30px; text-align: center;
+    border-bottom: 5px solid var(--accent);
 }
 
-.admin-header h1 { margin: 0; font-size: 28px; font-family: 'Amiri', serif; }
-.admin-header p { margin: 10px 0 0; opacity: 0.8; }
+.admin-header h1 { margin: 0; font-family: 'Amiri', serif; font-size: 28px; }
 
 .logout-btn {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.1);
     color: #fff; border: 1px solid rgba(255, 255, 255, 0.3);
     padding: 8px 25px; border-radius: 25px;
-    cursor: pointer; transition: var(--transition);
-    font-family: 'Cairo', sans-serif; font-weight: bold;
-    margin-top: 20px;
+    cursor: pointer; transition: 0.3s;
+    font-weight: bold; margin-top: 15px;
 }
 
 .logout-btn:hover { background: var(--danger); border-color: var(--danger); }
@@ -50,91 +49,113 @@ body {
 /* =========================================
     التبويبات (Tabs)
    ========================================= */
-.tabs { display: flex; background: #f8f9fa; border-bottom: 1px solid #eee; }
+.tabs { display: flex; background: #f8f9fa; border-bottom: 1px solid var(--border); }
 .tab-btn {
-    flex: 1; padding: 20px; border: none; background: none;
+    flex: 1; padding: 18px; border: none; background: none;
     font-size: 16px; font-weight: bold; cursor: pointer;
-    transition: var(--transition); font-family: 'Cairo', sans-serif;
+    transition: 0.3s; color: #666;
 }
-.tab-btn.active { background: #fff; color: var(--accent); border-bottom: 4px solid var(--accent); }
+.tab-btn.active { background: var(--white); color: var(--accent); border-bottom: 4px solid var(--accent); }
 
 .tab-content { display: none; padding: 30px; }
 .tab-content.active { display: block; animation: fadeIn 0.3s; }
 
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
 /* =========================================
-    كارت رفع الإكسيل (المصلح والاحترافي)
+    منطقة رفع الإكسيل (Upload Box)
    ========================================= */
 .upload-box {
-    border: 3px dashed #cbd5e0; border-radius: 15px;
-    padding: 60px 20px; text-align: center;
-    transition: var(--transition); cursor: pointer;
-    background: #fafafa;
+    border: 3px dashed var(--border); border-radius: 15px;
+    padding: 50px 20px; text-align: center; background: #fafafa;
 }
 
 .upload-box:hover { border-color: var(--accent); background: #f0f7ff; }
-.upload-box .icon { font-size: 50px; margin-bottom: 15px; display: block; }
-.upload-box p { font-size: 16px; color: #666; margin-bottom: 20px; }
 
 .select-btn {
     background: var(--accent); color: #fff;
-    border: none; padding: 10px 30px; border-radius: 8px;
-    font-weight: bold; cursor: pointer; transition: var(--transition);
+    border: none; padding: 12px 30px; border-radius: 8px;
+    font-weight: bold; cursor: pointer; margin-top: 15px;
 }
 
 /* =========================================
-    شبكة الإدخال اليدوي (المصلحة)
+    بار البحث اليدوي (المصلح)
+   ========================================= */
+.admin-search-bar {
+    display: flex; gap: 10px; margin-bottom: 30px;
+    background: #fff; padding: 15px; border-radius: 10px;
+    border: 1px solid var(--border);
+}
+
+.admin-search-bar input {
+    flex: 1; padding: 12px 20px; border: 1.5px solid var(--border);
+    border-radius: 8px; font-size: 16px; outline: none;
+}
+
+.secondary-btn {
+    background: var(--primary); color: #fff;
+    border: none; padding: 0 25px; border-radius: 8px;
+    font-weight: bold; cursor: pointer; transition: 0.3s;
+}
+
+.secondary-btn:hover { background: var(--accent); }
+
+/* =========================================
+    تنسيق الفورم والمدخلات (Smart Form)
    ========================================= */
 .grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .full { grid-column: span 2; }
 
-.input-group { display: flex; flex-direction: column; gap: 8px; }
-.input-group label { font-weight: bold; font-size: 14px; }
+.input-group label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 14px; }
 
-/* تنسيق القوائم والمدخلات لتبدو احترافية */
 .input-group input, .status-select, .elegant-select {
-    width: 100%; padding: 12px; border: 1.5px solid #e2e8f0;
-    border-radius: 8px; font-family: 'Cairo', sans-serif;
-    box-sizing: border-box; transition: var(--transition);
+    width: 100%; padding: 12px; border: 1.5px solid var(--border);
+    border-radius: 8px; box-sizing: border-box; font-family: 'Cairo', sans-serif;
 }
 
-.input-group input:focus, .status-select:focus { border-color: var(--accent); outline: none; }
-
-/* شبكة الدرجات المنسقة */
+/* شبكة الدرجات (Grades Grid - المصلحة) */
 .grades-grid {
     grid-column: span 2; display: grid;
     grid-template-columns: repeat(4, 1fr); gap: 15px;
-    background: #f8f9fa; padding: 20px; border-radius: 12px;
+    background: #f8f9fa; padding: 25px; border-radius: 12px;
+    border: 1px solid var(--border);
 }
 
 .grade-input { display: flex; flex-direction: column; align-items: center; }
-.grade-input label { font-size: 13px; margin-bottom: 5px; }
-.grade-input input { width: 70px; text-align: center; font-weight: bold; }
+.grade-input label { font-size: 14px; margin-bottom: 8px; color: var(--primary); font-weight: bold; }
+.grade-input input { 
+    width: 80px; padding: 10px; text-align: center; 
+    font-weight: bold; border-radius: 8px; border: 1.5px solid var(--border);
+}
 
 /* =========================================
-    أزرار التصدير والعمليات
+    أزرار التصدير والحفظ والحذف
    ========================================= */
-.admin-actions-container { background: #fcfcfc; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #eee; }
-.custom-select-wrapper { display: flex; gap: 10px; }
+.admin-actions-container {
+    background: #fdfdfd; padding: 20px; border-radius: 12px;
+    margin-bottom: 25px; border: 1px solid var(--border);
+}
+
+.custom-select-wrapper { display: flex; gap: 12px; align-items: center; }
 
 .premium-export-btn {
     background: var(--success); color: #fff; border: none;
-    padding: 10px 20px; border-radius: 8px; cursor: pointer;
-    font-weight: bold; display: flex; align-items: center; gap: 8px;
+    padding: 12px 25px; border-radius: 10px; font-weight: bold;
+    cursor: pointer; display: flex; align-items: center; gap: 8px;
 }
 
+.form-actions { grid-column: span 2; display: flex; gap: 15px; margin-top: 20px; }
+
 .premium-save-btn {
-    background: var(--accent); color: #fff; border: none;
-    padding: 15px; border-radius: 10px; font-weight: bold;
-    cursor: pointer; grid-column: span 1;
+    flex: 2; background: var(--accent); color: #fff;
+    border: none; padding: 15px; border-radius: 10px;
+    font-weight: bold; cursor: pointer; font-size: 16px;
 }
 
 .delete-action-btn {
-    background: none; color: var(--danger); border: 2px solid var(--danger);
-    padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer;
+    flex: 1; background: #fff; color: var(--danger);
+    border: 2px solid var(--danger); padding: 15px;
+    border-radius: 10px; font-weight: bold; cursor: pointer;
 }
 
 .delete-action-btn:hover { background: var(--danger); color: #fff; }
 
-.form-actions { grid-column: span 2; display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-top: 20px; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
