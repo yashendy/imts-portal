@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>لوحة التحكم المطورة - معهد IMTS</title>
     <link rel="stylesheet" href="admin-style.css">
+    <!-- استدعاء التنسيقات الإضافية للقائمة المنسدلة والأزرار الشيك -->
+    <link rel="stylesheet" href="style.css"> 
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Cairo:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -14,10 +16,10 @@
         <header class="admin-header">
             <h1>إدارة النتائج (عربي / لغات)</h1>
             <p>معهد الدراسات الإدارية والفنية</p>
-            <button onclick="logout()" class="logout-btn">تسجيل الخروج</button>
+            <button onclick="logout()" class="logout-btn no-print">تسجيل الخروج</button>
         </header>
 
-        <div class="tabs">
+        <div class="tabs no-print">
             <button class="tab-btn active" onclick="openTab('excel-tab')">رفع أكسيل</button>
             <button class="tab-btn" onclick="openTab('manual-tab')">إدخال وبحث يدوي</button>
         </div>
@@ -36,12 +38,33 @@
             </div>
         </div>
 
-        <!-- تبويب الإدخال اليدوي -->
+        <!-- تبويب الإدخال اليدوي والتصدير -->
         <div id="manual-tab" class="tab-content">
-            <div class="admin-search-bar">
-                <input type="text" id="quick-search" placeholder="ابحث برقم الجلوس...">
-                <button id="fetch-btn">بحث وتعديل</button>
-                <button id="export-btn" style="background: linear-gradient(to bottom, #27ae60, #1e8449); box-shadow: 0 4px 0 #145a32;">تصدير للإكسيل</button>
+            
+            <!-- قسم التصدير الذكي الجديد[cite: 2] -->
+            <div class="admin-actions-container no-print">
+                <div class="export-group">
+                    <label for="export-level-select" class="select-label">تصدير البيانات حسب الصف:</label>
+                    <div class="custom-select-wrapper">
+                        <select id="export-level-select" class="elegant-select">
+                            <option value="الكل">تصدير قاعدة البيانات كاملة</option>
+                            <option value="الرابع">الصف الرابع الابتدائي</option>
+                            <option value="الخامس">الصف الخامس الابتدائي</option>
+                            <option value="السادس">الصف السادس الابتدائي</option>
+                        </select>
+                        <button id="export-btn" class="premium-export-btn">
+                            <span class="icon">📥</span> تصدير للملف
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="separator no-print">
+
+            <!-- بار البحث اليدوي -->
+            <div class="admin-search-bar no-print">
+                <input type="text" id="quick-search" placeholder="ابحث برقم الجلوس لإجراء تعديل...">
+                <button id="fetch-btn" class="secondary-btn">بحث وتعديل</button>
             </div>
 
             <form id="manual-form" class="grid-form">
@@ -59,53 +82,58 @@
                         <option value="لغات">قسم اللغات</option>
                     </select>
                 </div>
-                <!-- أضيفي هذه الخانات داخل manual-form في ملف admin.html -->
-<div class="input-group">
-    <label>الجنس</label>
-    <select id="m-gender" class="status-select">
-        <option value="ذكر">ذكر</option>
-        <option value="أنثى">أنثى</option>
-    </select>
-</div>
+                
+                <div class="input-group">
+                    <label>الجنس</label>
+                    <select id="m-gender" class="status-select">
+                        <option value="ذكر">ذكر</option>
+                        <option value="أنثى">أنثى</option>
+                    </select>
+                </div>
 
-<div class="input-group">
-    <label>الديانة</label>
-    <select id="m-religion-type" class="status-select">
-        <option value="مسلم">مسلم</option>
-        <option value="مسيحي">مسيحي</option>
-    </select>
-</div>
+                <div class="input-group">
+                    <label>الديانة</label>
+                    <select id="m-religion-type" class="status-select">
+                        <option value="مسلم">مسلم</option>
+                        <option value="مسيحي">مسيحي</option>
+                    </select>
+                </div>
+
                 <div class="input-group full">
                     <label>اسم الطالب</label>
-                    <input type="text" id="m-name" required>
+                    <input type="text" id="m-name" required placeholder="أدخل الاسم رباعي">
                 </div>
+
                 <div class="input-group">
                     <label>رقم الجلوس</label>
                     <input type="text" id="m-id" required>
                 </div>
+
                 <div class="input-group">
                     <label>الصف الدراسي</label>
-                    <input type="text" id="m-level">
+                    <input type="text" id="m-level" placeholder="مثال: الخامس">
                 </div>
+
                 <div class="grades-grid">
-    <div class="grade-input"><label>عربي</label><input type="text" id="m-arabic"></div>
-    <div class="grade-input"><label>رياضيات</label><input type="text" id="m-math"></div>
-    <div class="grade-input"><label>إنجليزي</label><input type="text" id="m-english"></div>
-    <div class="grade-input"><label>علوم</label><input type="text" id="m-science"></div>
-    <div class="grade-input"><label>دين</label><input type="text" id="m-religion"></div>
-    <div class="grade-input"><label>دراسات</label><input type="text" id="m-Social"></div>
-    <div class="grade-input"><label>تكنولوجيا</label><input type="text" id="m-technology"></div>
-    <div class="grade-input" style="background:#fff0f0;"><label>مستوى رفيع</label><input type="text" id="m-highlevel"></div>
-</div>
-              <div class="form-actions" style="grid-column: span 2; display: flex; gap: 15px; margin-top: 10px;">
-                    <button type="submit" class="main-btn" style="flex: 2; margin-top: 0;">حفظ البيانات</button>
-                    <button type="button" id="delete-btn" class="main-btn" style="flex: 1; margin-top: 0; background: linear-gradient(to bottom, #e74c3c, #c0392b); box-shadow: 0 4px 0 #922b21;">حذف الطالب</button>
+                    <div class="grade-input"><label>عربي</label><input type="text" id="m-arabic"></div>
+                    <div class="grade-input"><label>رياضيات</label><input type="text" id="m-math"></div>
+                    <div class="grade-input"><label>إنجليزي</label><input type="text" id="m-english"></div>
+                    <div class="grade-input"><label>علوم</label><input type="text" id="m-science"></div>
+                    <div class="grade-input"><label>دين</label><input type="text" id="m-religion"></div>
+                    <div class="grade-input"><label>دراسات</label><input type="text" id="m-Social"></div>
+                    <div class="grade-input"><label>تكنولوجيا</label><input type="text" id="m-technology"></div>
+                    <div class="grade-input h-level"><label>مستوى رفيع</label><input type="text" id="m-highlevel"></div>
+                </div>
+
+                <div class="form-actions no-print">
+                    <button type="submit" id="save-btn" class="premium-save-btn">حفظ وتعديل البيانات</button>
+                    <button type="button" id="delete-btn" class="delete-action-btn">حذف سجل الطالب</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <script type="module" src="admin.js"></script>
+    <script type="module" src="admin.js?v=1.5"></script>
     <script>
         function openTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
