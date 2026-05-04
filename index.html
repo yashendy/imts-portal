@@ -5,85 +5,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بوابة نتائج معهد IMTS</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- رابط دخول الإدارة في أعلى يسار الصفحة -->
+    <!-- رابط دخول الإدارة -->
     <div class="admin-login-link">
         <a href="login.html" class="admin-btn-small">دخول الإدارة</a>
     </div>
 
+    <!-- قسم البحث -->
     <div id="search-section" class="search-container">
         <h2 class="title-diwani">استعلام نتائج معهد IMTS</h2>
         <input type="text" id="student-id-input" placeholder="أدخل رقم الجلوس">
         <button id="search-btn">عرض الشهادة الرسمية</button>
-        <p id="error-msg" class="error"></p>
     </div>
 
+    <!-- قسم الشهادة -->
     <div id="certificate-section" class="certificate-wrapper" style="display: none;">
-        <div class="close-cert-container">
+        <div class="close-cert-container no-print">
             <button id="close-cert-btn" class="close-btn">× إغلاق الشهادة والعودة للبحث</button>
         </div>
 
         <div class="cert-border">
             <div class="cert-header">
-                <div class="header-text">
-                    <h1 class="title-thuluth">معهد الدراسات الإدارية والفنية</h1>
-                    <h2 class="title-diwani">نتيجة التقييم التحصيلي للفصل الدراسي الثاني - 2026</h2>
+                <div class="header-logo-left">
+                    <img src="logo.png" alt="شعار المعهد" class="logo-img">
                 </div>
-                <img src="logo.png" alt="شعار المعهد" class="logo-right">
-            </div>
-
-            <div class="cert-body">
-                <!-- الشريط الجانبي: تم تصغيره ليتناسب مع العرض الجديد -->
-                <div class="sidebar">
-                    <h3 id="cert-name" class="title-diwani">اسم الطالب</h3>
-                    <div class="info-box">
-                        <div class="info-item"><strong>الصف الدراسي:</strong> <span id="cert-level"></span></div>
-                        <div class="info-item"><strong></strong> <span id="cert-system"></span></div>
-                        <div class="info-item"><strong>رقم الجلوس:</strong> <span id="cert-id"></span></div>
-                    </div>
+                <div class="header-text-center">
+                    <h1 class="main-title">معهد الدراسات الإدارية والفنية</h1>
+                    <h2 class="sub-title">شهادة درجات الفصل الدراسي الثاني 2025-2026</h2>
                 </div>
-
-                <div class="main-content">
-                    <table class="grades-table">
-                        <thead>
-                            <tr>
-                                <th>المادة الدراسية</th>
-                                <th>الدرجة</th>
-                                <th>التقدير</th>
-                            </tr>
-                        </thead>
-                        <tbody id="grades-body"></tbody>
-                        <tfoot>
-                            <tr class="total-row">
-                                <td><strong>المجموع الكلي</strong></td>
-                                <td id="total-score"></td>
-                                <td id="total-eval"></td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                <div class="header-logo-right">
+                    <h2 class="logo-text">I.M.T.S</h2>
                 </div>
             </div>
 
-            <!-- الجملة الختامية والختم بكامل عرض الصفحة تحت الجدول -->
-            <div class="full-width-footer">
+            <div class="student-info-row">
+                <p><strong>اسم الطالب:</strong> <span id="cert-name">........................</span></p>
+                <p><strong>الصف:</strong> <span id="cert-level">................</span></p>
+                <p><strong>الشعبة:</strong> <span id="cert-system">................</span></p>
+                <p><strong>رقم الجلوس:</strong> <span id="cert-id">................</span></p>
+            </div>
+
+            <div class="main-content">
+                <table class="grades-table-horizontal">
+                    <thead id="table-head">
+                        <!-- يتم توليده عبر JS -->
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- يتم توليده عبر JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="cert-footer">
                 <div class="result-statement" id="statement"></div>
-                <div class="footer-section">
+                <div class="signature-section">
                     <div class="signature-box">
-                        <p style="margin:0; font-weight:bold;">مديرة المعهد</p>
+                        <p>مديرة المعهد</p>
                         <img src="signature.png" class="signature-img">
                     </div>
                 </div>
             </div>
 
-            <!-- زر الطباعة بدون أمر onclick المباشر ليعمل عبر الجافاسكريبت -->
-            <button id="print-btn" class="main-btn-print">طباعة الشهادة الآن</button>
+            <button id="print-btn" class="main-btn-print no-print">طباعة الشهادة الآن</button>
         </div>
     </div>
 
-    <!-- أضف رقم النسخة بعد اسم الملف لتجبر المتصفح على تحميل الجديد دائماً -->
-<script type="module" src="student.js?v=1.1"></script>
-    <script type="module" src="student.js"></script>
+    <!-- استدعاء ملف الجافاسكريبت مع رقم نسخة لمنع الكاش -->
+    <script type="module" src="student.js?v=1.2"></script>
 </body>
 </html>
