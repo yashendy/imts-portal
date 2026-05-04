@@ -5,8 +5,8 @@ function getEval(score, maxForThisSubject) {
     if (score === "غ" || score === undefined || score === null || score === "") return "غائب";
     const s = Number(score);
     const percentage = (s / maxForThisSubject) * 100;
-    if (percentage >= 85) return "ممتاز";
-    if (percentage >= 75) return "جيد جداً";
+    if (percentage >= 90) return "ممتاز";
+    if (percentage >= 80) return "جيد جداً";
     if (percentage >= 65) return "جيد";
     return "مقبول";
 }
