@@ -2,12 +2,17 @@ import { db } from "./firebase-config.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
 
 // دالة تقييم مرنة تعتمد على القيمة الفعلية والدرجة النهائية للمادة
-function getEval(score, maxForThisSubject) { 
-    if (score === "غ" || isNaN(score) || score === null || score === "") return "ـ"; 
-    
+// دالة تقييم مبدئية (ممتاز، جيد جداً، جيد)
+function getEval(score, maxForThisSubject) {
+    if (score === "غ") return "غائب";
+    if (isNaN(score) || score === null || score === "") return "ـ"; 
+
     const s = Number(score);
-    // ممتاز إذا حصل على 90% أو أكثر من الدرجة النهائية للمادة
-    return s >= (maxForThisSubject * 0.9) ? "ممتاز" : "جيد جداً"; 
+    const percentage = (s / maxForThisSubject) * 100;
+
+    if (percentage >= 85) return "ممتاز";
+    if (percentage >= 75) return "جيد جداً";
+    return "جيد"; 
 }
 
 document.getElementById("search-btn").addEventListener("click", async () => {
@@ -93,8 +98,15 @@ document.getElementById("search-btn").addEventListener("click", async () => {
                 totalScoreEl.parentElement.innerHTML = `<td><strong>المجموع الكلي</strong></td><td><strong>${totalObtained}</strong> / ${totalMax}</td><td id="total-eval"></td>`;
             }
 
-            // التقييم العام بناءً على النسبة من المجموع الكلي الجديد
-            const finalEval = totalObtained >= (totalMax * 0.9) ? "ممتاز" : "جيد جداً";
+            // التقييم العام بناءً على النسبة المئوية للمجموع الكلي
+            const finalPercentage = (totalObtained / totalMax) * 100;
+            let finalEval = "جيد"; // القيمة الافتراضية لأي نسبة أقل من 75%
+            
+            if (finalPercentage >= 85) {
+                finalEval = "ممتاز";
+            } else if (finalPercentage >= 75) {
+                finalEval = "جيد جداً";
+            }
             
             if (document.getElementById("total-eval")) document.getElementById("total-eval").textContent = finalEval;
             
