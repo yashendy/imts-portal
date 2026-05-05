@@ -179,7 +179,7 @@ document.getElementById("manual-form").addEventListener("submit", async (e) => {
     const maxGradesConfig = {
         "الرابع": { arabic: 20, math: 15, english: 20, science: 20, religion: 20, social: 20, tech: 15, high: 20 },
         "الخامس": { arabic: 20, math: 20, english: 20, science: 20, religion: 20, social: 20, tech: 20, high: 20 },
-        "السادس": { arabic: 100, math: 100, english: 100, science: 100, religion: 100, social: 100, tech: 100, high: 100 }
+        "السادس": { arabic: 20, math: 15, english: 20, science: 20, religion: 20, social: 20, tech: 20, high: 20 }
     };
 
     // 2. قراءة الصف الدراسي مع تنظيف النص لضمان المطابقة
