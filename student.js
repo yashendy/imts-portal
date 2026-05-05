@@ -24,7 +24,7 @@ document.getElementById("search-btn").addEventListener("click", async () => {
             const maxGradesConfig = {
                 "الرابع": { arabic: 20, math: 15, english: 20, science: 20, religion: 20, social: 20, tech: 15, high: 20 },
                 "الخامس": { arabic: 20, math: 20, english: 20, science: 20, religion: 20, social: 20, tech: 20, high: 20 },
-                "السادس": { arabic: 20, math: 20, english: 20, science: 20, religion: 20, social: 20, tech: 20, high: 20 }
+                "السادس": { arabic: 20, math: 15, english: 20, science: 20, religion: 20, social: 20, tech: 20, high: 20 }
             };
 
             let levelKey = String(d.level || "").trim();
