@@ -171,28 +171,36 @@ document.getElementById("fetch-btn").addEventListener("click", async () => {
     }
 });
 
-// --- 4. الحفظ اليدوي المطور (حل مشكلة تضارب الصفوف والدرجات) ---
+// --- 4. الحفظ اليدوي المطور (تمايز درجات العربي واللغات) ---
 document.getElementById("manual-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     
-    // 1. إعدادات الدرجات النهائية الصارمة
+    // 1. إعدادات الدرجات النهائية المتمايزة حسب النظام والصف الدراسي
     const maxGradesConfig = {
-        "الرابع": { arabic: 20, math: 15, english: 20, science: 20, religion: 20, social: 20, tech: 15, high: 20 },
-        "الخامس": { arabic: 20, math: 20, english: 20, science: 20, religion: 20, social: 20, tech: 20, high: 20 },
-        "السادس": { arabic: 20, math: 15, english: 20, science: 20, religion: 20, social: 20, tech: 20, high: 20 }
+        "الرابع": {
+            "عربي": { arabic: 20, math: 15, english: 20, science: 20, religion: 20, social: 20, tech: 15, high: 20 },
+            "لغات": { arabic: 20, math: 20, english: 20, science: 20, religion: 20, social: 20, tech: 20, high: 20 }
+        },
+        "الخامس": {
+            "عربي": { arabic: 20, math: 20, english: 20, science: 20, religion: 20, social: 20, tech: 20, high: 20 },
+            "لغات": { arabic: 20, math: 25, english: 25, science: 25, religion: 20, social: 20, tech: 20, high: 20 }
+        },
+        "السادس": {
+            "عربي": { arabic: 20, math: 15, english: 20, science: 20, religion: 20, social: 20, tech: 20, high: 20 },
+            "لغات": { arabic: 20, math: 20, english: 25, science: 20, religion: 20, social: 20, tech: 20, high: 20 }
+        }
     };
 
-    // 2. قراءة الصف الدراسي مع تنظيف النص لضمان المطابقة
     let level = document.getElementById("m-level").value.trim();
-    
-    // تأكد من مطابقة النص المكتوب في الـ HTML (سواء كان "خامس" أو "الخامس")
     if (level.includes("خامس")) level = "الخامس";
     if (level.includes("رابع")) level = "الرابع";
     if (level.includes("سادس")) level = "السادس";
 
-    const currentMax = maxGradesConfig[level] || maxGradesConfig["الرابع"];
+    const system = document.getElementById("m-system").value; // الحصول على النظام الحالي (عربي/لغات)
+    
+    // اختيار مصفوفة الدرجات بناءً على الصف والنظام
+    const currentMax = maxGradesConfig[level] ? maxGradesConfig[level][system] : maxGradesConfig["الرابع"]["عربي"];
 
-    // تجهيز كائن بالدرجات المدخلة
     const inputGrades = {
         "اللغة العربية": { val: processGrade(document.getElementById("m-arabic").value), max: currentMax.arabic },
         "الرياضيات": { val: processGrade(document.getElementById("m-math").value), max: currentMax.math },
@@ -204,18 +212,18 @@ document.getElementById("manual-form").addEventListener("submit", async (e) => {
         "المستوى الرفيع": { val: processGrade(document.getElementById("m-highlevel").value), max: currentMax.high }
     };
 
-    // 3. التحقق الديناميكي (سيسمح الآن بـ 20 لصف خامس و 15 لصف رابع)[cite: 3, 5]
     for (const [subjectName, data] of Object.entries(inputGrades)) {
         if (data.val !== "غ" && data.val > data.max) {
             return Swal.fire({
-                title: 'خطأ في الإدخال',
-                text: `درجة ${subjectName} لصف ${level} لا يمكن أن تتجاوز ${data.max}`,
+                title: 'خطأ في الدرجة',
+                text: `درجة ${subjectName} لنظام ${system} (صف ${level}) لا تتجاوز ${data.max}`,
                 icon: 'error',
-                confirmButtonText: 'حسناً',
                 confirmButtonColor: '#B3393E'
             });
         }
     }
+    // ... بقية كود الحفظ (setDoc) كما هو ...
+});
 
     // 4. الحفظ في قاعدة البيانات
     const id = document.getElementById("m-id").value.trim();
